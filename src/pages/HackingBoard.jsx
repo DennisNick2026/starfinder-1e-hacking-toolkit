@@ -6,14 +6,17 @@ import HackDialog from '@/components/hacking/HackDialog';
 import BottomToolbar from '@/components/hacking/BottomToolbar';
 import BottomLog from '@/components/hacking/BottomLog';
 import ComputerSettings from '@/components/hacking/ComputerSettings';
-import { Cpu, Pencil, Play, SkipForward, RotateCcw, Settings } from 'lucide-react';
+import { Cpu, ShieldCheck, Play, SkipForward, RotateCcw, Settings, Shield, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function HackingBoard() {
   const state = useHackingState();
   const [mode, setMode] = useState('create');
-  // rootMode: all DCs become 10 (granted when root_access node resolved)
-  const rootMode = state.rootAccessGranted;
+  // rootModeOverride: manually toggled on/off; auto-enabled when root_access node is resolved
+  const [rootModeOverride, setRootModeOverride] = useState(false);
+  const rootMode = rootModeOverride || state.rootAccessGranted;
+  // In play mode, only allow toggle if root has been earned
+  const canToggleRoot = mode === 'create' || state.rootAccessGranted;
   const [hackingNode, setHackingNode] = useState(null);
   const [configuringNodeId, setConfiguringNodeId] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -76,7 +79,7 @@ export default function HackingBoard() {
             )}
             onClick={() => handleSwitchMode('create')}
           >
-            <Pencil className="w-3 h-3" /> CREATE
+            <Pencil className="w-3 h-3" /> ADMIN
           </button>
           <button
             className={cn(
@@ -88,10 +91,21 @@ export default function HackingBoard() {
             <Play className="w-3 h-3" /> PLAY
           </button>
         </div>
-        {rootMode && (
-          <span className="font-mono text-[10px] text-chart-3 border border-chart-3/50 bg-chart-3/10 px-2 py-0.5 rounded tracking-widest animate-pulse">
-            ★ ROOT ACCESS — DC 10
-          </span>
+
+        {/* Root Access toggle — always in Admin, only after earned in Play */}
+        {canToggleRoot && (
+          <button
+            onClick={() => setRootModeOverride(v => !v)}
+            className={cn(
+              'flex items-center gap-1.5 px-2.5 py-1 font-mono text-[10px] tracking-widest border rounded transition-colors',
+              rootModeOverride
+                ? 'border-chart-3 bg-chart-3/20 text-chart-3'
+                : 'border-primary/30 text-primary/50 hover:text-primary/80 hover:border-primary/50'
+            )}
+          >
+            <ShieldCheck className="w-3 h-3" />
+            ROOT {rootModeOverride ? 'ON' : 'OFF'}
+          </button>
         )}
 
         <div className="flex-1" />
