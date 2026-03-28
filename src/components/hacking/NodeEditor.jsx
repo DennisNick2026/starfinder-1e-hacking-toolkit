@@ -82,7 +82,7 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
         <div>
           <div className="flex items-center justify-between mb-2">
             <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-              Countermeasures
+              Countermeasures {(node.countermeasures || []).filter(c => c.resolved).length > 0 && `(${(node.countermeasures || []).filter(c => c.resolved).length} resolved)`}
             </Label>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -117,18 +117,26 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
               const Icon = CM_ICONS[cm.icon];
               const colorCls = CM_COLOR[cm.color] || CM_COLOR.red;
               return (
-                <div key={cm.id} className={cn('rounded-lg border p-2.5 space-y-2', colorCls)}>
+                <div key={cm.id} className={cn('rounded-lg border p-2.5 space-y-2', colorCls, cm.resolved && 'opacity-60')}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       {Icon && <Icon className="w-3 h-3" />}
                       <span className="font-mono text-xs font-semibold">{cm.label}</span>
-                      {cm.resolved && <span className="font-mono text-[9px] text-accent ml-1">RESOLVED</span>}
+                      {cm.resolved && <span className="font-mono text-[9px] text-accent ml-1">✓</span>}
                       {cm.triggered && <span className="font-mono text-[9px] text-destructive ml-1">TRIGGERED</span>}
                     </div>
-                    <button onClick={() => onRemoveCm(node.id, cm.id)}
-                      className="opacity-50 hover:opacity-100 transition-opacity">
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+                    <div className="flex gap-1">
+                      {cm.resolved && (
+                        <button onClick={() => onUpdateCm(node.id, cm.id, { resolved: false })}
+                          className="opacity-50 hover:opacity-100 transition-opacity text-accent">
+                          <Lock className="w-3 h-3" />
+                        </button>
+                      )}
+                      <button onClick={() => onRemoveCm(node.id, cm.id)}
+                        className="opacity-50 hover:opacity-100 transition-opacity">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
@@ -172,9 +180,17 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
                           onChange={e => onUpdateCm(node.id, cm.id, { damage_on_trigger: parseInt(e.target.value) || 0 })} />
                       </div>
                     )}
-                  </div>
-
-                  </div>
+                    {cm.type === 'firewall' && !cm.resolved && (
+                      <div className="col-span-2">
+                        <Label className="font-mono text-[9px] uppercase tracking-wider text-current opacity-60">Password (optional)</Label>
+                        <Input className="font-mono text-xs mt-0.5 bg-background/20 border-current/20 h-7"
+                          placeholder="Leave blank for none"
+                          value={cm.password || ''}
+                          onChange={e => onUpdateCm(node.id, cm.id, { password: e.target.value })} />
+                      </div>
+                    )}
+                    </div>
+                    </div>
               );
             })}
           </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Terminal, GitBranch, Database, SquareTerminal,
-  Siren, UserX, Bug, Unlock, Link, Trash2, Settings, Zap,
+  ShieldAlert, Siren, UserX, Bug, Unlock, Link, Trash2, Settings, Zap,
   Sparkles, EyeOff, Lock, LogIn, ShieldCheck, FolderLock, FolderOpen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -37,18 +37,22 @@ export default function NodeCard({
   const Icon = node.type === 'directory'
     ? (node.locked ? FolderLock : FolderOpen)
     : (ICONS[node.icon] || Terminal);
-  const colors = COLOR_MAP[node.color] || COLOR_MAP.cyan;
+  // Check for unresolved firewall
+  const allActiveCms = (node.countermeasures || []).filter(cm => !cm.resolved);
+  const hasUnresolvedFirewall = allActiveCms.some(cm => cm.type === 'firewall');
+  const firewallBlocked = mode === 'play' && hasUnresolvedFirewall;
+
+  const colors = firewallBlocked ? COLOR_MAP.red : (COLOR_MAP[node.color] || COLOR_MAP.cyan);
   const progressPercent = node.successes_required
     ? Math.round((node.successes_current / node.successes_required) * 100)
     : 0;
-
-  const allActiveCms = (node.countermeasures || []).filter(cm => !cm.resolved);
 
   // What to show on the card face
   const activeCms = mode === 'play'
     ? allActiveCms.filter(cm => {
         if (cm.type === 'fake_shell') return false;
         if (cm.type === 'alarm' && !cm.revealed && !cm.triggered) return false;
+        if (hasUnresolvedFirewall && cm.type !== 'firewall') return false;
         return true;
       })
     : allActiveCms;
@@ -69,13 +73,18 @@ export default function NodeCard({
     >
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border/50">
-        <Icon className={cn('w-4 h-4 shrink-0', colors.text)} />
-        <span className="font-mono text-xs font-semibold truncate text-foreground flex-1">
-          {node.name}
-        </span>
-        <span className="font-mono text-[10px] text-muted-foreground shrink-0">
-          DC {node.dc}
-        </span>
+        {firewallBlocked ? (
+          <>
+            <ShieldAlert className="w-4 h-4 shrink-0 text-destructive" />
+            <span className="font-mono text-xs font-semibold text-foreground flex-1">FIREWALL</span>
+          </>
+        ) : (
+          <>
+            <Icon className={cn('w-4 h-4 shrink-0', colors.text)} />
+            <span className="font-mono text-xs font-semibold truncate text-foreground flex-1">{node.name}</span>
+            <span className="font-mono text-[10px] text-muted-foreground shrink-0">DC {node.dc}</span>
+          </>
+        )}
       </div>
 
       {/* Body */}
@@ -129,27 +138,33 @@ export default function NodeCard({
           </div>
         )}
 
-        {/* Embedded countermeasures */}
-        {activeCms.length > 0 && (
-          <div className="flex flex-wrap gap-1 pt-0.5">
-            {activeCms.map(cm => {
-              const CmIcon = CM_ICONS[cm.icon];
-              return (
-                <span key={cm.id} className={cn(
-                  'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border text-[9px] font-mono font-semibold',
-                  CM_BADGE[cm.color] || CM_BADGE.red,
-                  cm.triggered && 'animate-pulse'
-                )}>
-                  {CmIcon && <CmIcon className="w-2.5 h-2.5" />}
-                  {cm.label}
-                  {cm.countdown_current !== undefined && !cm.triggered && (
-                    <span className="ml-0.5 opacity-70">[{cm.countdown_current}]</span>
-                  )}
-                  {cm.triggered && <span className="ml-0.5">!</span>}
-                </span>
-              );
-            })}
-          </div>
+        {firewallBlocked ? (
+          <p className="font-mono text-[9px] text-muted-foreground/60 italic">Contents hidden</p>
+        ) : (
+          <>
+            {/* Embedded countermeasures */}
+            {activeCms.length > 0 && (
+              <div className="flex flex-wrap gap-1 pt-0.5">
+                {activeCms.map(cm => {
+                  const CmIcon = CM_ICONS[cm.icon];
+                  return (
+                    <span key={cm.id} className={cn(
+                      'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border text-[9px] font-mono font-semibold',
+                      CM_BADGE[cm.color] || CM_BADGE.red,
+                      cm.triggered && 'animate-pulse'
+                    )}>
+                      {CmIcon && <CmIcon className="w-2.5 h-2.5" />}
+                      {cm.label}
+                      {cm.countdown_current !== undefined && !cm.triggered && (
+                        <span className="ml-0.5 opacity-70">[{cm.countdown_current}]</span>
+                      )}
+                      {cm.triggered && <span className="ml-0.5">!</span>}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
 

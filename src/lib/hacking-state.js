@@ -34,6 +34,15 @@ export const COUNTERMEASURE_TEMPLATES = {
     note: 'Deals damage to hacker on failure',
   },
 
+  firewall: {
+    type: 'firewall',
+    label: 'Firewall',
+    color: 'red',
+    icon: 'ShieldAlert',
+    dc: 0, // Set dynamically based on computer DC + 2
+    resolved: false,
+    password: '',
+  },
   lockout: {
     type: 'lockout',
     label: 'Lockout',
@@ -352,6 +361,18 @@ export function useHackingState() {
     }));
   }, []);
 
+  const unresolveCountermeasure = useCallback((nodeId, cmId) => {
+    setNodes(prev => prev.map(n => {
+      if (n.id !== nodeId) return n;
+      return {
+        ...n,
+        countermeasures: (n.countermeasures || []).map(cm =>
+          cm.id === cmId ? { ...cm, resolved: false } : cm
+        ),
+      };
+    }));
+  }, []);
+
   const unhackNode = useCallback((nodeId) => {
     setNodes(prev => prev.map(n => {
       if (n.id !== nodeId) return n;
@@ -487,7 +508,7 @@ export function useHackingState() {
     log,
     addNode, updateNode, removeNode, moveNode,
     addConnection, removeConnection,
-    addCountermeasure, updateCountermeasure, removeCountermeasure,
+    addCountermeasure, updateCountermeasure, removeCountermeasure, unresolveCountermeasure,
     submitRoll, advancePhase,
     resetEncounter, addLogEntry, unhackNode,
     rootAccessGranted,

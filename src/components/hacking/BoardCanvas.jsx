@@ -60,14 +60,25 @@ export default function BoardCanvas({
     onDropNode(nodeType, Math.max(0, x), Math.max(0, y));
   };
 
-  // Compute which nodes are hidden inside a locked directory (play mode)
+  // Compute which nodes are hidden (play mode): inside locked directories or behind firewalls
   const hiddenNodeIds = useMemo(() => {
     const hidden = new Set();
+    // Locked directories hide their connected nodes
     const lockedDirs = nodes.filter(n => n.type === 'directory' && n.locked);
     lockedDirs.forEach(dir => {
       connections.forEach(c => {
         if (c.from === dir.id && c.to !== 'entry' && c.to !== 'root_access') hidden.add(c.to);
         if (c.to === dir.id && c.from !== 'entry' && c.from !== 'root_access') hidden.add(c.from);
+      });
+    });
+    // Nodes with unresolved firewalls hide their connected nodes
+    const firewalled = nodes.filter(n => 
+      (n.countermeasures || []).some(cm => cm.type === 'firewall' && !cm.resolved)
+    );
+    firewalled.forEach(node => {
+      connections.forEach(c => {
+        if (c.from === node.id && c.to !== 'entry' && c.to !== 'root_access') hidden.add(c.to);
+        if (c.to === node.id && c.from !== 'entry' && c.from !== 'root_access') hidden.add(c.from);
       });
     });
     return hidden;

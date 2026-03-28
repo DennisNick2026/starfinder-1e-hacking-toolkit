@@ -11,14 +11,15 @@ const CM_COLOR = {
   purple: 'text-chart-3 border-chart-3/50 bg-chart-3/10',
 };
 
-// In play mode: fake_shell always hidden; alarms hidden until revealed
+// In play mode: fake_shell always hidden; alarms hidden until revealed; firewall blocks everything else
 function getVisibleCms(node, mode) {
   const all = (node.countermeasures || []).filter(cm => !cm.resolved);
   if (mode !== 'play') return all;
+  const hasUnresolvedFirewall = all.some(cm => cm.type === 'firewall');
   return all.filter(cm => {
-    if (cm.type === 'fake_shell') return false; // always hidden in play mode
-    // Alarm: show if revealed OR triggered (so player can hack it to turn it off)
-    if (cm.type === 'alarm' && !cm.revealed && !cm.triggered) return false; // hidden until first hack attempt or trigger
+    if (cm.type === 'fake_shell') return false;
+    if (cm.type === 'alarm' && !cm.revealed && !cm.triggered) return false;
+    if (hasUnresolvedFirewall && cm.type !== 'firewall') return false;
     return true;
   });
 }
@@ -34,11 +35,22 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
 
   const isDirectory = node.type === 'directory';
   const activeCms = getVisibleCms(node, mode);
-  const nodeTargetable = canTargetNode(node, mode);
+
+  // In play mode with firewall, must target firewall first
+  const hasUnresolvedFirewall = (node.countermeasures || []).some(cm => cm.type === 'firewall' && !cm.resolved);
+  const firewallCm = (node.countermeasures || []).find(cm => cm.type === 'firewall' && !cm.resolved);
+  const hasFirewallPassword = !!firewallCm?.password;
 
   // If the currently selected target CM no longer exists, reset to null
   const targetStillValid = target === null || activeCms.some(cm => cm.id === target);
-  const effectiveTarget = targetStillValid ? target : null;
+  const resolvedTarget = targetStillValid ? target : null;
+
+  // If blocked by firewall in play mode, auto-target firewall
+  const effectiveTarget = (!hasUnresolvedFirewall && resolvedTarget === null)
+    ? null
+    : (hasUnresolvedFirewall && resolvedTarget === null)
+    ? firewallCm?.id ?? null
+    : resolvedTarget;
 
   const activeTarget = effectiveTarget
     ? (node.countermeasures || []).find(cm => cm.id === effectiveTarget)
@@ -97,8 +109,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
         <div className="space-y-2">
           <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Rolling against:</p>
           <div className="flex flex-wrap gap-2">
-            {nodeTargetable && (
-              <button
+            <button
                 className={cn(
                   'font-mono text-xs px-3 py-1.5 rounded-lg border transition-colors',
                   effectiveTarget === null
@@ -108,9 +119,8 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
                 onClick={() => { setTarget(null); setInput(''); setResult(null); }}
               >
                 {node.name} (DC {node.dc})
-              </button>
-            )}
-            {activeCms.map(cm => {
+                </button>
+                {activeCms.map(cm => {
               const Icon = CM_ICONS[cm.icon];
               return (
                 <button
@@ -155,6 +165,22 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
         </div>
 
 
+
+        {/* Password entry for firewall */}
+        {hasFirewallPassword && hasUnresolvedFirewall && effectiveTarget === firewallCm?.id && (
+          <PasswordEntry
+            key={firewallCm.id}
+            label="Or enter firewall password:"
+            password={firewallCm.password}
+            disabled={closing}
+            onSuccess={() => {
+              setClosing(true);
+              const cmId = firewallCm.id;
+              onSubmit(node.id, 9999, cmId);
+              setTimeout(onClose, 400);
+            }}
+          />
+        )}
 
         {/* Numpad */}
         <div className="grid grid-cols-3 gap-2">
