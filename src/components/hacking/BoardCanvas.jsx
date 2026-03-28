@@ -7,7 +7,7 @@ export default function BoardCanvas({
   nodes, connections, selectedNodeId,
   connectingFrom, setConnectingFrom,
   onSelectNode, onMoveNode, onDeleteNode,
-  onAddConnection, onHack, onConfigure, mode = 'create',
+  onAddConnection, onHack, onConfigure, onDropNode, mode = 'create',
 }) {
   const boardRef = useRef(null);
   const [dragging, setDragging] = useState(null);
@@ -45,6 +45,21 @@ export default function BoardCanvas({
 
   const handleMouseUp = useCallback(() => setDragging(null), []);
 
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const nodeType = e.dataTransfer.getData('nodeType');
+    if (!nodeType || !onDropNode) return;
+    const rect = boardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left - 96; // center the 192px wide card
+    const y = e.clientY - rect.top - 40;
+    onDropNode(nodeType, Math.max(0, x), Math.max(0, y));
+  };
+
   return (
     <div
       ref={boardRef}
@@ -54,6 +69,8 @@ export default function BoardCanvas({
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
     >
       <ConnectionLines nodes={nodes} connections={connections} connectingFrom={connectingFrom} mousePos={mousePos} />
 
