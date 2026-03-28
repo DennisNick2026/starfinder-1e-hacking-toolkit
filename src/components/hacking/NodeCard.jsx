@@ -37,7 +37,9 @@ export default function NodeCard({
   const Icon = node.type === 'directory'
     ? (node.locked ? FolderLock : FolderOpen)
     : (ICONS[node.icon] || Terminal);
-  const colors = COLOR_MAP[node.color] || COLOR_MAP.cyan;
+  // Firewall in play mode makes the whole card appear as red/unknown
+  const firewallActive = mode === 'play' && (node.countermeasures || []).some(cm => cm.type === 'firewall' && !cm.resolved);
+  const colors = firewallActive ? COLOR_MAP.red : (COLOR_MAP[node.color] || COLOR_MAP.cyan);
   const progressPercent = node.successes_required
     ? Math.round((node.successes_current / node.successes_required) * 100)
     : 0;

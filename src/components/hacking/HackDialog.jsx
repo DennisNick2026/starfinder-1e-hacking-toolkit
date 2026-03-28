@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Delete, ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 } from 'lucide-react';
 
@@ -36,8 +37,13 @@ function canTargetNode(node, mode) {
 export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = 'create', rootMode = false }) {
   const [input, setInput] = useState('');
   const [result, setResult] = useState(null);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordResult, setPasswordResult] = useState(null); // 'success' | 'failure' | null
   // null = rolling against node, or a cm.id
   const [target, setTarget] = useState(null);
+
+  const isDirectory = node.type === 'directory';
+  const hasPassword = isDirectory && node.password;
 
   if (!node) return null;
 
@@ -154,6 +160,45 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
             </p>
           )}
         </div>
+
+        {/* Password entry for directories */}
+        {isDirectory && hasPassword && !node.resolved && (
+          <div className="space-y-2 border-t border-border pt-3">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Or enter password:</p>
+            <div className="flex gap-2">
+              <Input
+                className="font-mono text-xs bg-muted border-border flex-1"
+                placeholder="Password..."
+                value={passwordInput}
+                onChange={e => { setPasswordInput(e.target.value); setPasswordResult(null); }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    const match = passwordInput === node.password;
+                    setPasswordResult(match ? 'success' : 'failure');
+                    if (match) onSubmit(node.id, 9999, null);
+                  }
+                  e.stopPropagation();
+                }}
+              />
+              <Button
+                size="sm"
+                className="font-mono text-xs"
+                onClick={() => {
+                  const match = passwordInput === node.password;
+                  setPasswordResult(match ? 'success' : 'failure');
+                  if (match) onSubmit(node.id, 9999, null);
+                }}
+              >
+                Enter
+              </Button>
+            </div>
+            {passwordResult && (
+              <p className={cn('font-mono text-xs font-bold', passwordResult === 'success' ? 'text-accent' : 'text-destructive')}>
+                {passwordResult === 'success' ? '✓ Access Granted' : '✗ Wrong Password'}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Numpad */}
         <div className="grid grid-cols-3 gap-2">
