@@ -54,7 +54,7 @@ export default function BottomToolbar({ onDragStart, mode }) {
   return (
     <div className="shrink-0 border-t border-primary/30 bg-background flex" style={{ height: 100 }}>
       {/* Category buttons column — compact when a category is active */}
-      <div className="flex border-r border-primary/20 transition-all duration-200">
+      <div className="flex border-r border-primary/20 transition-all duration-200 w-1/2">
         {CATEGORIES.map(cat => {
           const Icon = cat.icon;
           const isActive = activeCategory === cat.key;
@@ -63,10 +63,10 @@ export default function BottomToolbar({ onDragStart, mode }) {
               key={cat.key}
               onClick={() => setActiveCategory(isActive ? null : cat.key)}
               className={cn(
-                'flex flex-col items-center justify-center h-full font-mono tracking-widest border-r border-primary/20 transition-all duration-200',
+                'flex flex-col items-center justify-center h-full font-mono tracking-widest border-r border-primary/20 transition-all duration-200 flex-1',
                 activeCat
-                  ? 'gap-1 px-3 text-[9px] min-w-[52px]'
-                  : 'gap-1.5 px-5 text-[10px] min-w-[90px]',
+                  ? 'gap-1 text-[9px]'
+                  : 'gap-1.5 text-[10px]',
                 isActive
                   ? 'text-primary bg-primary/15 border-b-2 border-b-primary'
                   : 'text-primary/50 hover:text-primary hover:bg-primary/5'
