@@ -92,7 +92,7 @@ export default function BottomToolbar({ onDragStart, mode }) {
 
       {/* Items row */}
       {open && (
-        <div className="flex items-center gap-3 px-4 py-3 min-h-[72px]">
+        <div className="flex items-center gap-4 px-4 py-4 min-h-[88px]">
           {activeCat ? (
             activeCat.items.map(item => {
               const Icon = item.icon;
@@ -105,14 +105,14 @@ export default function BottomToolbar({ onDragStart, mode }) {
                     onDragStart && onDragStart(item.key);
                   }}
                   className={cn(
-                    'flex flex-col items-center gap-1.5 px-4 py-2.5 rounded border border-primary/40',
+                    'flex flex-col items-center gap-2 px-5 py-3 rounded border border-primary/40',
                     'bg-primary/5 hover:bg-primary/15 cursor-grab active:cursor-grabbing',
                     'transition-colors text-primary select-none'
                   )}
                   title={`Drag to place: ${item.label}`}
                 >
-                  <Icon className="w-6 h-6" />
-                  <span className="font-mono text-[9px] tracking-widest uppercase">{item.label}</span>
+                  <Icon className="w-7 h-7" />
+                  <span className="font-mono text-[10px] tracking-widest uppercase">{item.label}</span>
                 </div>
               );
             })

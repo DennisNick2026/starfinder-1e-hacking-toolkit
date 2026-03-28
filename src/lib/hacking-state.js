@@ -78,6 +78,18 @@ export const COUNTERMEASURE_TEMPLATES = {
 };
 
 // Only structural/objective nodes are placeable on the board
+// DC modifiers per node type relative to base DC (13 + 4*tier)
+export const NODE_DC_MODIFIERS = {
+  access_point:        0,
+  node:                0,
+  control_complex:    +2,
+  secure_data_average: 0,
+  secure_data_large:  +2,
+  secure_data_specific:+4,
+  spell_chip:          0,
+  vulnerability:      -4,
+};
+
 const NODE_TEMPLATES = {
   access_point: {
     type: 'access_point',
@@ -100,7 +112,7 @@ const NODE_TEMPLATES = {
     icon: 'GitBranch',
     description: 'Branch providing access to other objectives',
     dc: 0,
-    successes_required: 2,
+    successes_required: 1,
     successes_current: 0,
     resolved: false,
     countermeasures: [],
@@ -112,7 +124,7 @@ const NODE_TEMPLATES = {
     icon: 'SquareTerminal',
     description: 'Controls a complex system function',
     dc: 0,
-    successes_required: 3,
+    successes_required: 1,
     successes_current: 0,
     resolved: false,
     countermeasures: [],
@@ -136,7 +148,7 @@ const NODE_TEMPLATES = {
     icon: 'Database',
     description: 'Large volume of secured data',
     dc: 0,
-    successes_required: 2,
+    successes_required: 1,
     successes_current: 0,
     resolved: false,
     countermeasures: [],
@@ -183,12 +195,14 @@ let nextCmId = 1;
 
 function createNode(template, x, y, baseDC) {
   const id = `node_${nextId++}`;
+  const modifier = NODE_DC_MODIFIERS[template.type] ?? 0;
+  const dc = Math.max(1, baseDC + modifier);
   return {
     ...template,
     id,
     x,
     y,
-    dc: template.dc || baseDC,
+    dc,
     name: template.label,
     countermeasures: [],
   };
