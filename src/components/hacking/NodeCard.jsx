@@ -29,7 +29,7 @@ const CM_BADGE = {
 export default function NodeCard({
   node, isSelected, isDragging,
   onSelect, onStartConnect, onDelete, onHack, onConfigure, mode = 'create',
-  hiddenByDirectory = false,
+  hiddenByDirectory = false, onUnresolveCm = null,
 }) {
   // In play mode, nodes hidden inside a locked directory are invisible
   if (hiddenByDirectory && mode === 'play') return null;
@@ -142,7 +142,7 @@ export default function NodeCard({
           <p className="font-mono text-[9px] text-muted-foreground/60 italic">Contents hidden</p>
         ) : (
           <>
-            {/* Embedded countermeasures */}
+            {/* Embedded countermeasures (unresolved) */}
             {activeCms.length > 0 && (
               <div className="flex flex-wrap gap-1 pt-0.5">
                 {activeCms.map(cm => {
@@ -160,6 +160,31 @@ export default function NodeCard({
                       )}
                       {cm.triggered && <span className="ml-0.5">!</span>}
                     </span>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Resolved countermeasures (play mode) */}
+            {mode === 'play' && (node.countermeasures || []).filter(cm => cm.resolved).length > 0 && (
+              <div className="flex flex-wrap gap-1 pt-0.5 border-t border-border/30 mt-1.5 pt-1">
+                {(node.countermeasures || []).filter(cm => cm.resolved).map(cm => {
+                  const CmIcon = CM_ICONS[cm.icon];
+                  return (
+                    <button
+                      key={cm.id}
+                      onClick={(e) => { e.stopPropagation(); onUnresolveCm?.(node.id, cm.id); }}
+                      className={cn(
+                        'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border text-[9px] font-mono font-semibold',
+                        'opacity-60 hover:opacity-100 transition-opacity cursor-pointer',
+                        CM_BADGE[cm.color] || CM_BADGE.red
+                      )}
+                      title="Click to reactivate"
+                    >
+                      {CmIcon && <CmIcon className="w-2.5 h-2.5" />}
+                      {cm.label}
+                      <span className="ml-0.5 text-accent">✓</span>
+                    </button>
                   );
                 })}
               </div>

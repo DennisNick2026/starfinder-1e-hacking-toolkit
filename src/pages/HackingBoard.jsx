@@ -158,6 +158,7 @@ export default function HackingBoard() {
             onConfigure={handleConfigure}
             onDropNode={handleDropNode}
             mode={mode}
+            onUnresolveCm={mode === 'play' ? state.unresolveCountermeasure : null}
           />
 
           <BottomLog log={state.log} selectedNode={selectedNode} />
