@@ -176,15 +176,15 @@ export default function NodeCard({
                       key={cm.id}
                       onClick={(e) => { e.stopPropagation(); onUnresolveCm?.(node.id, cm.id); }}
                       className={cn(
-                        'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border text-[9px] font-mono font-semibold',
+                        'inline-flex items-center gap-1 px-2.5 py-1.5 rounded border text-xs font-mono font-semibold',
                         'opacity-60 hover:opacity-100 transition-opacity cursor-pointer',
                         CM_BADGE[cm.color] || CM_BADGE.red
                       )}
                       title="Click to reactivate"
                     >
-                      {CmIcon && <CmIcon className="w-2.5 h-2.5" />}
+                      {CmIcon && <CmIcon className="w-3 h-3" />}
                       {cm.label}
-                      <span className="ml-0.5 text-accent">✓</span>
+                      <span className="ml-1 text-accent">✓</span>
                     </button>
                   );
                 })}
