@@ -49,7 +49,6 @@ export default function HackingBoard() {
 
   const handleSubmitRoll = (nodeId, total, cmId) => {
     state.submitRoll(nodeId, total, cmId);
-    setHackingNode(state.nodes.find(n => n.id === nodeId) || null);
   };
 
   return (

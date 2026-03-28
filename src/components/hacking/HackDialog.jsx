@@ -198,8 +198,8 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
           )}
         </div>
 
-        {/* Password entry for directories */}
-        {isDirectory && hasPassword && !node.resolved && (
+        {/* Password entry for directories — hidden if firewall is still active */}
+        {isDirectory && hasPassword && !node.resolved && !hasFirewallPassword && (
           <PasswordEntry
             label="Or enter password:"
             password={node.password}
