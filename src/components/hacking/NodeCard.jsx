@@ -2,13 +2,13 @@ import React from 'react';
 import {
   Terminal, GitBranch, Database, SquareTerminal,
   ShieldAlert, Siren, UserX, Bug, Unlock, Link, Trash2, Settings, Zap,
-  Sparkles, EyeOff, Lock
+  Sparkles, EyeOff, Lock, LogIn
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const ICONS = {
   Terminal, GitBranch, Database, SquareTerminal,
-  ShieldAlert, Siren, UserX, Bug, Unlock, Sparkles,
+  ShieldAlert, Siren, UserX, Bug, Unlock, Sparkles, LogIn,
 };
 
 const CM_ICONS = { ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 };
@@ -61,6 +61,7 @@ export default function NodeCard({
         isSelected && colors.glow,
         isDragging && 'opacity-70 scale-105',
         node.resolved && 'opacity-50 border-dashed',
+        node.isEntry && 'border-primary glow-cyan',
       )}
       style={{ left: node.x, top: node.y }}
       onClick={(e) => { e.stopPropagation(); onSelect(node.id); }}
@@ -192,13 +193,15 @@ export default function NodeCard({
             >
               <Link className="w-3 h-3" />
             </button>
-            <button
-              className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center border-l border-border/50"
-              onClick={(e) => { e.stopPropagation(); onDelete(node.id); }}
-              title="Remove node"
-            >
-              <Trash2 className="w-3 h-3" />
-            </button>
+            {!node.isEntry && (
+              <button
+                className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center border-l border-border/50"
+                onClick={(e) => { e.stopPropagation(); onDelete(node.id); }}
+                title="Remove node"
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+            )}
           </>
         )}
       </div>

@@ -3,24 +3,23 @@ import { useHackingState } from '@/lib/hacking-state';
 import BoardCanvas from '@/components/hacking/BoardCanvas';
 import NodeEditor from '@/components/hacking/NodeEditor';
 import HackDialog from '@/components/hacking/HackDialog';
-import Sidebar from '@/components/hacking/Sidebar';
-import AddNodeMenu from '@/components/hacking/AddNodeMenu';
-import PhaseTracker from '@/components/hacking/PhaseTracker';
-import { Cpu, PanelLeftClose, PanelLeftOpen, Pencil, Play } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import BottomToolbar from '@/components/hacking/BottomToolbar';
+import BottomLog from '@/components/hacking/BottomLog';
+import ComputerSettings from '@/components/hacking/ComputerSettings';
+import { Cpu, Pencil, Play, SkipForward, RotateCcw, Settings } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function HackingBoard() {
   const state = useHackingState();
-  const [mode, setMode] = useState('create'); // 'create' | 'play'
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [hackingNode, setHackingNode] = useState(null); // node being hacked
-  const [configuringNodeId, setConfiguringNodeId] = useState(null); // node being configured
+  const [mode, setMode] = useState('create');
+  const [hackingNode, setHackingNode] = useState(null);
+  const [configuringNodeId, setConfiguringNodeId] = useState(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   const configuringNode = state.nodes.find(n => n.id === configuringNodeId) || null;
+  const selectedNode = configuringNode || state.nodes.find(n => n.id === state.selectedNodeId) || null;
 
-  const handleAddNode = (templateKey) => {
-    const x = 200 + Math.random() * 300;
-    const y = 100 + Math.random() * 200;
+  const handleDropNode = (templateKey, x, y) => {
     state.addNode(templateKey, x, y);
   };
 
@@ -40,98 +39,110 @@ export default function HackingBoard() {
     setMode(newMode);
     setConfiguringNodeId(null);
     setHackingNode(null);
+    setShowSettings(false);
   };
 
   const handleSubmitRoll = (nodeId, total, cmId) => {
     state.submitRoll(nodeId, total, cmId);
-    // update hackingNode snapshot so dialog reflects new state
     setHackingNode(state.nodes.find(n => n.id === nodeId) || null);
   };
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Top bar */}
-      <header className="h-12 bg-card border-b border-border flex items-center px-4 gap-4 shrink-0">
-        <div className="flex items-center gap-2">
-          <Cpu className="w-5 h-5 text-primary" />
-          <h1 className="font-mono text-sm font-bold text-foreground tracking-wide">
+      <header className="h-10 bg-background border-b border-primary/30 flex items-center px-4 gap-4 shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <Cpu className="w-4 h-4 text-primary shrink-0" />
+          <span className="font-mono text-xs font-bold text-primary tracking-widest uppercase truncate">
             {state.computerName}
-          </h1>
-          <span className="font-mono text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded">
-            Tier {state.tier}
           </span>
-          <span className="font-mono text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded">
+          <span className="font-mono text-[10px] text-primary/50 border border-primary/30 px-1.5 py-0.5 rounded">
+            T{state.tier}
+          </span>
+          <span className="font-mono text-[10px] text-primary/50 border border-primary/30 px-1.5 py-0.5 rounded">
             DC {state.baseDC}
           </span>
         </div>
 
         <div className="flex-1" />
 
-        {/* Mode toggle */}
-        <div className="flex items-center bg-muted rounded-lg p-0.5 gap-0.5">
+        <div className="flex items-center border border-primary/30 rounded overflow-hidden">
           <button
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-mono text-xs transition-colors ${mode === 'create' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] tracking-widest transition-colors',
+              mode === 'create' ? 'bg-primary text-primary-foreground' : 'text-primary/50 hover:text-primary'
+            )}
             onClick={() => handleSwitchMode('create')}
           >
-            <Pencil className="w-3 h-3" /> Create
+            <Pencil className="w-3 h-3" /> CREATE
           </button>
           <button
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-mono text-xs transition-colors ${mode === 'play' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] tracking-widest transition-colors border-l border-primary/30',
+              mode === 'play' ? 'bg-primary text-primary-foreground' : 'text-primary/50 hover:text-primary'
+            )}
             onClick={() => handleSwitchMode('play')}
           >
-            <Play className="w-3 h-3" /> Play
+            <Play className="w-3 h-3" /> PLAY
           </button>
         </div>
 
-        <div className="w-px h-6 bg-border" />
+        <div className="flex-1" />
 
-        <PhaseTracker
-          phase={state.phase}
-          onAdvance={state.advancePhase}
-          onReset={state.resetEncounter}
-        />
-
-        {mode === 'create' && (
-          <>
-            <div className="w-px h-6 bg-border" />
-            <AddNodeMenu onAdd={handleAddNode} />
-          </>
-        )}
-
-        <Button size="sm" variant="ghost" className="h-7 w-7 p-0"
-          onClick={() => setSidebarOpen(!sidebarOpen)}>
-          {sidebarOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
-        </Button>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[10px] text-primary/50 tracking-widest">PHASE</span>
+          <span className="font-mono text-xs text-primary font-bold w-6 text-center">{state.phase}</span>
+          <button
+            onClick={state.advancePhase}
+            className="flex items-center gap-1 px-2 py-1 text-[10px] font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
+          >
+            <SkipForward className="w-3 h-3" /> NEXT
+          </button>
+          <button
+            onClick={state.resetEncounter}
+            className="flex items-center gap-1 px-2 py-1 text-[10px] font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded"
+          >
+            <RotateCcw className="w-3 h-3" /> RESET
+          </button>
+          <button
+            onClick={() => setShowSettings(s => !s)}
+            className={cn(
+              'flex items-center gap-1 px-2 py-1 text-[10px] font-mono border rounded transition-colors',
+              showSettings
+                ? 'border-primary text-primary bg-primary/10'
+                : 'border-primary/30 text-primary/50 hover:text-primary hover:border-primary'
+            )}
+          >
+            <Settings className="w-3 h-3" />
+          </button>
+        </div>
       </header>
 
       {/* Main area */}
       <div className="flex-1 flex overflow-hidden">
-        {sidebarOpen && (
-          <Sidebar
-            computerName={state.computerName}
-            setComputerName={state.setComputerName}
-            tier={state.tier}
-            setTier={state.setTier}
-            baseDC={state.baseDC}
-            setBaseDC={state.setBaseDC}
-            log={state.log}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <BoardCanvas
+            nodes={state.nodes}
+            connections={state.connections}
+            selectedNodeId={configuringNodeId || state.selectedNodeId}
+            connectingFrom={state.connectingFrom}
+            setConnectingFrom={state.setConnectingFrom}
+            onSelectNode={(id) => {
+              state.setSelectedNodeId(id);
+              if (!id) setConfiguringNodeId(null);
+            }}
+            onMoveNode={state.moveNode}
+            onDeleteNode={mode === 'create' ? state.removeNode : () => {}}
+            onAddConnection={state.addConnection}
+            onHack={handleHack}
+            onConfigure={handleConfigure}
+            onDropNode={handleDropNode}
+            mode={mode}
           />
-        )}
 
-        <BoardCanvas
-          nodes={state.nodes}
-          connections={state.connections}
-          selectedNodeId={configuringNodeId}
-          connectingFrom={state.connectingFrom}
-          setConnectingFrom={state.setConnectingFrom}
-          onSelectNode={() => {}}
-          onMoveNode={state.moveNode}
-          onDeleteNode={mode === 'create' ? state.removeNode : () => {}}
-          onAddConnection={state.addConnection}
-          onHack={handleHack}
-          onConfigure={handleConfigure}
-          mode={mode}
-        />
+          <BottomLog log={state.log} selectedNode={selectedNode} />
+          <BottomToolbar mode={mode} onDragStart={() => {}} />
+        </div>
 
         {mode === 'create' && configuringNode && (
           <NodeEditor
@@ -143,9 +154,21 @@ export default function HackingBoard() {
             onRemoveCm={state.removeCountermeasure}
           />
         )}
+
+        {showSettings && (
+          <div className="w-64 bg-card border-l border-primary/30 shrink-0 overflow-y-auto p-4">
+            <ComputerSettings
+              computerName={state.computerName}
+              setComputerName={state.setComputerName}
+              tier={state.tier}
+              setTier={state.setTier}
+              baseDC={state.baseDC}
+              setBaseDC={state.setBaseDC}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Hack dialog */}
       {hackingNode && (
         <HackDialog
           node={state.nodes.find(n => n.id === hackingNode.id) || hackingNode}

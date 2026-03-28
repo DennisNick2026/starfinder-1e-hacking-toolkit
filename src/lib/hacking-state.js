@@ -194,12 +194,32 @@ function createNode(template, x, y, baseDC) {
   };
 }
 
+const ENTRY_NODE = {
+  id: 'entry',
+  type: 'entry',
+  label: 'Entry',
+  name: 'ENTRY',
+  color: 'cyan',
+  icon: 'LogIn',
+  description: 'Hacking entry point — always present',
+  dc: 0,
+  successes_required: 1,
+  successes_current: 0,
+  failures_current: 0,
+  failures_max: 3,
+  resolved: false,
+  isEntry: true,
+  countermeasures: [],
+  x: 400,
+  y: 200,
+};
+
 export function useHackingState() {
-  const [computerName, setComputerName] = useState('Secure Terminal');
+  const [computerName, setComputerName] = useState('Untitled Encounter');
   const [tier, setTier] = useState(3);
   const [baseDC, setBaseDC] = useState(24);
   const [phase, setPhase] = useState(1);
-  const [nodes, setNodes] = useState([]);
+  const [nodes, setNodes] = useState([{ ...ENTRY_NODE }]);
   const [connections, setConnections] = useState([]);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const [connectingFrom, setConnectingFrom] = useState(null);
@@ -223,6 +243,8 @@ export function useHackingState() {
   }, []);
 
   const removeNode = useCallback((nodeId) => {
+    // Entry node cannot be deleted
+    if (nodeId === 'entry') return;
     setNodes(prev => prev.filter(n => n.id !== nodeId));
     setConnections(prev => prev.filter(c => c.from !== nodeId && c.to !== nodeId));
     if (selectedNodeId === nodeId) setSelectedNodeId(null);
@@ -361,6 +383,7 @@ export function useHackingState() {
         successes_current: 0,
         resolved: false,
         triggered: false,
+        revealed: false,
         countdown_current: cm.countdown,
       })),
     })));
