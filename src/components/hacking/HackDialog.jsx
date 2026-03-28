@@ -69,27 +69,28 @@ function PasswordEntry({ label, password, onSuccess }) {
 export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = 'create', rootMode = false }) {
   const [input, setInput] = useState('');
   const [result, setResult] = useState(null);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [passwordResult, setPasswordResult] = useState(null); // 'success' | 'failure' | null
   // null = rolling against node, or a cm.id
   const [target, setTarget] = useState(null);
 
+  if (!node) return null;
+
   const isDirectory = node.type === 'directory';
-  const hasPassword = isDirectory && node.password;
+  const activeCms = getVisibleCms(node, mode);
+  const nodeTargetable = canTargetNode(node, mode);
 
   // Firewall password: look for a firewall CM that has a password set
   const firewallCm = (node.countermeasures || []).find(cm => cm.type === 'firewall' && !cm.resolved && cm.password);
   const hasFirewallPassword = !!firewallCm;
+  const hasPassword = isDirectory && node.password;
 
-  if (!node) return null;
-
-  const activeCms = getVisibleCms(node, mode);
-  const nodeTargetable = canTargetNode(node, mode);
+  // If the currently selected target CM no longer exists (e.g. firewall just resolved), reset to null
+  const targetStillValid = target === null || activeCms.some(cm => cm.id === target);
+  const resolvedTarget = targetStillValid ? target : null;
 
   // If node is blocked by firewall in play mode, auto-target the firewall
-  const effectiveTarget = (!nodeTargetable && target === null)
+  const effectiveTarget = (!nodeTargetable && resolvedTarget === null)
     ? activeCms.find(cm => cm.type === 'firewall')?.id ?? null
-    : target;
+    : resolvedTarget;
 
   const activeTarget = effectiveTarget
     ? (node.countermeasures || []).find(cm => cm.id === effectiveTarget)

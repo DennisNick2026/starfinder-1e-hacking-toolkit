@@ -81,7 +81,7 @@ export default function NodeCard({
           : <Icon className={cn('w-4 h-4 shrink-0', colors.text)} />
         }
         <span className="font-mono text-xs font-semibold truncate text-foreground flex-1">
-          {firewallBlocked ? '???????????' : node.name}
+          {firewallBlocked ? 'FIREWALL' : node.name}
         </span>
         {!firewallBlocked && (
           <span className="font-mono text-[10px] text-muted-foreground shrink-0">
