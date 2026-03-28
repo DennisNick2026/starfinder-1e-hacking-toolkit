@@ -300,20 +300,34 @@ export function useHackingState() {
 
       // Rolling against the node itself
       if (n.resolved) return n;
-      const success = total >= n.dc;
+      const margin = total - n.dc; // positive = success, negative = failure
+      const success = margin >= 0;
+
+      // Update alarm countermeasures based on roll result
+      const updatedCms = (n.countermeasures || []).map(cm => {
+        if (cm.type !== 'alarm' || cm.resolved || cm.triggered) return cm;
+        if (success || margin >= -4) {
+          // Success or fail by less than 5: alarm is revealed but not triggered
+          return { ...cm, revealed: true };
+        } else {
+          // Fail by 5 or more: alarm triggers
+          return { ...cm, revealed: true, triggered: true };
+        }
+      });
+
       if (!success) {
         if (n.failures_max !== undefined) {
           const newFailures = (n.failures_current || 0) + 1;
-          return { ...n, failures_current: newFailures };
+          return { ...n, failures_current: newFailures, countermeasures: updatedCms };
         }
-        return n;
+        return { ...n, countermeasures: updatedCms };
       }
       if (n.successes_required !== undefined) {
         const newSuccesses = Math.min((n.successes_current || 0) + 1, n.successes_required);
         const resolved = newSuccesses >= n.successes_required;
-        return { ...n, successes_current: newSuccesses, resolved };
+        return { ...n, successes_current: newSuccesses, resolved, countermeasures: updatedCms };
       }
-      return { ...n, resolved: true };
+      return { ...n, resolved: true, countermeasures: updatedCms };
     }));
   }, []);
 

@@ -37,16 +37,20 @@ export default function NodeCard({
     : 0;
 
   const allActiveCms = (node.countermeasures || []).filter(cm => !cm.resolved);
+  const hasActiveFirewall = allActiveCms.some(cm => cm.type === 'firewall');
+
+  // What to show on the card face
   const activeCms = mode === 'play'
-    ? (() => {
-        const hasFirewall = allActiveCms.some(cm => cm.type === 'firewall' && !cm.resolved);
-        return allActiveCms.filter(cm => {
-          if (cm.type === 'fake_shell') return false;
-          if (hasFirewall && cm.type !== 'firewall') return false;
-          return true;
-        });
-      })()
+    ? allActiveCms.filter(cm => {
+        if (cm.type === 'fake_shell') return false;
+        if (cm.type === 'alarm' && !cm.revealed && !cm.triggered) return false;
+        if (hasActiveFirewall && cm.type !== 'firewall') return false;
+        return true;
+      })
     : allActiveCms;
+
+  // In play mode with a firewall, hide node progress/details
+  const firewallBlocked = mode === 'play' && hasActiveFirewall;
 
   return (
     <div
@@ -78,42 +82,8 @@ export default function NodeCard({
           <span className="font-mono text-[10px] text-accent font-bold">✓ RESOLVED</span>
         )}
 
-        {/* Progress bar */}
-        {node.successes_required > 0 && !node.resolved && (
-          <div className="space-y-0.5">
-            <div className="flex justify-between">
-              <span className="font-mono text-[10px] text-muted-foreground">
-                {node.successes_current}/{node.successes_required} successes
-              </span>
-            </div>
-            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary rounded-full transition-all duration-300"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Failure dots */}
-        {node.failures_max > 0 && (
-          <div className="flex items-center gap-1">
-            <span className="font-mono text-[10px] text-muted-foreground">Fails:</span>
-            <div className="flex gap-0.5">
-              {Array.from({ length: node.failures_max }).map((_, i) => (
-                <div key={i} className={cn(
-                  'w-2 h-2 rounded-full border',
-                  i < (node.failures_current || 0)
-                    ? 'bg-destructive border-destructive'
-                    : 'border-muted-foreground/40'
-                )} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Embedded countermeasures */}
-        {activeCms.length > 0 && (
+        {firewallBlocked ? (
+          /* In play mode: firewall hides everything — show only the firewall badge */
           <div className="flex flex-wrap gap-1 pt-0.5">
             {activeCms.map(cm => {
               const CmIcon = CM_ICONS[cm.icon];
@@ -121,18 +91,73 @@ export default function NodeCard({
                 <span key={cm.id} className={cn(
                   'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border text-[9px] font-mono font-semibold',
                   CM_BADGE[cm.color] || CM_BADGE.red,
-                  cm.triggered && 'animate-pulse'
                 )}>
                   {CmIcon && <CmIcon className="w-2.5 h-2.5" />}
                   {cm.label}
-                  {cm.countdown_current !== undefined && !cm.triggered && (
-                    <span className="ml-0.5 opacity-70">[{cm.countdown_current}]</span>
-                  )}
-                  {cm.triggered && <span className="ml-0.5">!</span>}
                 </span>
               );
             })}
+            <p className="font-mono text-[9px] text-muted-foreground/60 w-full pt-0.5 italic">
+              Contents hidden
+            </p>
           </div>
+        ) : (
+          <>
+            {/* Progress bar */}
+            {node.successes_required > 0 && !node.resolved && (
+              <div className="space-y-0.5">
+                <span className="font-mono text-[10px] text-muted-foreground">
+                  {node.successes_current}/{node.successes_required} successes
+                </span>
+                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary rounded-full transition-all duration-300"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Failure dots */}
+            {node.failures_max > 0 && (
+              <div className="flex items-center gap-1">
+                <span className="font-mono text-[10px] text-muted-foreground">Fails:</span>
+                <div className="flex gap-0.5">
+                  {Array.from({ length: node.failures_max }).map((_, i) => (
+                    <div key={i} className={cn(
+                      'w-2 h-2 rounded-full border',
+                      i < (node.failures_current || 0)
+                        ? 'bg-destructive border-destructive'
+                        : 'border-muted-foreground/40'
+                    )} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Embedded countermeasures */}
+            {activeCms.length > 0 && (
+              <div className="flex flex-wrap gap-1 pt-0.5">
+                {activeCms.map(cm => {
+                  const CmIcon = CM_ICONS[cm.icon];
+                  return (
+                    <span key={cm.id} className={cn(
+                      'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border text-[9px] font-mono font-semibold',
+                      CM_BADGE[cm.color] || CM_BADGE.red,
+                      cm.triggered && 'animate-pulse'
+                    )}>
+                      {CmIcon && <CmIcon className="w-2.5 h-2.5" />}
+                      {cm.label}
+                      {cm.countdown_current !== undefined && !cm.triggered && (
+                        <span className="ml-0.5 opacity-70">[{cm.countdown_current}]</span>
+                      )}
+                      {cm.triggered && <span className="ml-0.5">!</span>}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
 

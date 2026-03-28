@@ -10,16 +10,27 @@ const CM_COLOR = {
   purple: 'text-chart-3 border-chart-3/50 bg-chart-3/10',
 };
 
-// In play mode: fake_shell is always hidden; other CMs are hidden behind an unresolved firewall
+// In play mode: fake_shell always hidden; alarms hidden until revealed; firewall hides everything else
 function getVisibleCms(node, mode) {
-  const all = (node.countermeasures || []).filter(cm => !cm.resolved && !cm.triggered);
-  if (mode !== 'play') return all;
-  const hasUnresolvedFirewall = all.some(cm => cm.type === 'firewall');
+  const all = (node.countermeasures || []).filter(cm => !cm.resolved);
+  if (mode !== 'play') return all.filter(cm => !cm.triggered);
+  const hasUnresolvedFirewall = all.some(cm => cm.type === 'firewall' && !cm.resolved);
   return all.filter(cm => {
+    if (cm.triggered) return false; // triggered CMs handled separately
     if (cm.type === 'fake_shell') return false; // always hidden in play mode
+    if (cm.type === 'alarm' && !cm.revealed) return false; // hidden until first hack attempt
     if (hasUnresolvedFirewall && cm.type !== 'firewall') return false; // hidden behind firewall
     return true;
   });
+}
+
+// In play mode with an unresolved firewall, the node itself cannot be targeted directly
+function canTargetNode(node, mode) {
+  if (mode !== 'play') return true;
+  const hasUnresolvedFirewall = (node.countermeasures || []).some(
+    cm => cm.type === 'firewall' && !cm.resolved
+  );
+  return !hasUnresolvedFirewall;
 }
 
 export default function HackDialog({ node, onSubmit, onClose, mode = 'create' }) {
@@ -30,8 +41,16 @@ export default function HackDialog({ node, onSubmit, onClose, mode = 'create' })
 
   if (!node) return null;
 
-  const activeTarget = target
-    ? (node.countermeasures || []).find(cm => cm.id === target)
+  const activeCms = getVisibleCms(node, mode);
+  const nodeTargetable = canTargetNode(node, mode);
+
+  // If node is blocked by firewall in play mode, auto-target the firewall
+  const effectiveTarget = (!nodeTargetable && target === null)
+    ? activeCms.find(cm => cm.type === 'firewall')?.id ?? null
+    : target;
+
+  const activeTarget = effectiveTarget
+    ? (node.countermeasures || []).find(cm => cm.id === effectiveTarget)
     : null;
 
   const targetDC = activeTarget ? activeTarget.dc : node.dc;
@@ -53,7 +72,7 @@ export default function HackDialog({ node, onSubmit, onClose, mode = 'create' })
     if (isNaN(total)) return;
     const success = total >= targetDC;
     setResult(success ? 'success' : 'failure');
-    onSubmit(node.id, total, target || null);
+    onSubmit(node.id, total, effectiveTarget || null);
   };
 
   const handleKeyDown = (e) => {
@@ -62,8 +81,6 @@ export default function HackDialog({ node, onSubmit, onClose, mode = 'create' })
     if (e.key === 'Enter') handleSubmit();
     if (e.key === 'Escape') onClose();
   };
-
-  const activeCms = getVisibleCms(node, mode);
 
   return (
     <div
@@ -80,17 +97,19 @@ export default function HackDialog({ node, onSubmit, onClose, mode = 'create' })
         <div className="space-y-2">
           <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Rolling against:</p>
           <div className="flex flex-wrap gap-2">
-            <button
-              className={cn(
-                'font-mono text-xs px-3 py-1.5 rounded-lg border transition-colors',
-                !target
-                  ? 'border-primary bg-primary/20 text-primary'
-                  : 'border-border text-muted-foreground hover:border-primary/50'
-              )}
-              onClick={() => { setTarget(null); setInput(''); setResult(null); }}
-            >
-              {node.name} (DC {node.dc})
-            </button>
+            {nodeTargetable && (
+              <button
+                className={cn(
+                  'font-mono text-xs px-3 py-1.5 rounded-lg border transition-colors',
+                  effectiveTarget === null
+                    ? 'border-primary bg-primary/20 text-primary'
+                    : 'border-border text-muted-foreground hover:border-primary/50'
+                )}
+                onClick={() => { setTarget(null); setInput(''); setResult(null); }}
+              >
+                {node.name} (DC {node.dc})
+              </button>
+            )}
             {activeCms.map(cm => {
               const Icon = CM_ICONS[cm.icon];
               return (
@@ -98,7 +117,7 @@ export default function HackDialog({ node, onSubmit, onClose, mode = 'create' })
                   key={cm.id}
                   className={cn(
                     'font-mono text-xs px-3 py-1.5 rounded-lg border transition-colors flex items-center gap-1.5',
-                    target === cm.id
+                    effectiveTarget === cm.id
                       ? CM_COLOR[cm.color] + ' border-opacity-100'
                       : 'border-border text-muted-foreground hover:border-destructive/50'
                   )}
