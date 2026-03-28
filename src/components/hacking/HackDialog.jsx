@@ -123,6 +123,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
     const submittedTarget = effectiveTarget;
     onSubmit(node.id, total, submittedTarget || null);
     if (success) {
+      setInput('');
       setClosing(true);
       setTimeout(onClose, 400);
     }
@@ -237,7 +238,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
         )}
 
         {/* Numpad */}
-        <div className="grid grid-cols-3 gap-2 pointer-events-none" style={{ opacity: closing ? 0.5 : 1 }}>
+        <div className="grid grid-cols-3 gap-2">
           {[7,8,9,4,5,6,1,2,3].map(d => (
             <button
               key={d}
