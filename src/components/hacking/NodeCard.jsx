@@ -28,7 +28,7 @@ const CM_BADGE = {
 
 export default function NodeCard({
   node, isSelected, isDragging,
-  onSelect, onStartConnect, onDelete, onHack, onConfigure
+  onSelect, onStartConnect, onDelete, onHack, onConfigure, mode = 'create'
 }) {
   const Icon = ICONS[node.icon] || Terminal;
   const colors = COLOR_MAP[node.color] || COLOR_MAP.cyan;
@@ -36,7 +36,17 @@ export default function NodeCard({
     ? Math.round((node.successes_current / node.successes_required) * 100)
     : 0;
 
-  const activeCms = (node.countermeasures || []).filter(cm => !cm.resolved);
+  const allActiveCms = (node.countermeasures || []).filter(cm => !cm.resolved);
+  const activeCms = mode === 'play'
+    ? (() => {
+        const hasFirewall = allActiveCms.some(cm => cm.type === 'firewall' && !cm.resolved);
+        return allActiveCms.filter(cm => {
+          if (cm.type === 'fake_shell') return false;
+          if (hasFirewall && cm.type !== 'firewall') return false;
+          return true;
+        });
+      })()
+    : allActiveCms;
 
   return (
     <div
@@ -136,27 +146,31 @@ export default function NodeCard({
           <Zap className="w-3 h-3" />
           <span>Hack</span>
         </button>
-        <button
-          className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center justify-center border-l border-border/50"
-          onClick={(e) => { e.stopPropagation(); onConfigure(node.id); }}
-          title="Configure node"
-        >
-          <Settings className="w-3 h-3" />
-        </button>
-        <button
-          className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex items-center justify-center border-l border-border/50"
-          onClick={(e) => { e.stopPropagation(); onStartConnect(node.id); }}
-          title="Connect to another node"
-        >
-          <Link className="w-3 h-3" />
-        </button>
-        <button
-          className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center border-l border-border/50"
-          onClick={(e) => { e.stopPropagation(); onDelete(node.id); }}
-          title="Remove node"
-        >
-          <Trash2 className="w-3 h-3" />
-        </button>
+        {mode === 'create' && (
+          <>
+            <button
+              className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center justify-center border-l border-border/50"
+              onClick={(e) => { e.stopPropagation(); onConfigure(node.id); }}
+              title="Configure node"
+            >
+              <Settings className="w-3 h-3" />
+            </button>
+            <button
+              className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex items-center justify-center border-l border-border/50"
+              onClick={(e) => { e.stopPropagation(); onStartConnect(node.id); }}
+              title="Connect to another node"
+            >
+              <Link className="w-3 h-3" />
+            </button>
+            <button
+              className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center border-l border-border/50"
+              onClick={(e) => { e.stopPropagation(); onDelete(node.id); }}
+              title="Remove node"
+            >
+              <Trash2 className="w-3 h-3" />
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

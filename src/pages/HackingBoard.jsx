@@ -6,11 +6,12 @@ import HackDialog from '@/components/hacking/HackDialog';
 import Sidebar from '@/components/hacking/Sidebar';
 import AddNodeMenu from '@/components/hacking/AddNodeMenu';
 import PhaseTracker from '@/components/hacking/PhaseTracker';
-import { Cpu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Cpu, PanelLeftClose, PanelLeftOpen, Pencil, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function HackingBoard() {
   const state = useHackingState();
+  const [mode, setMode] = useState('create'); // 'create' | 'play'
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [hackingNode, setHackingNode] = useState(null); // node being hacked
   const [configuringNodeId, setConfiguringNodeId] = useState(null); // node being configured
@@ -29,9 +30,16 @@ export default function HackingBoard() {
   };
 
   const handleConfigure = (nodeId) => {
+    if (mode === 'play') return;
     setHackingNode(null);
     setConfiguringNodeId(nodeId);
     state.setSelectedNodeId(nodeId);
+  };
+
+  const handleSwitchMode = (newMode) => {
+    setMode(newMode);
+    setConfiguringNodeId(null);
+    setHackingNode(null);
   };
 
   const handleSubmitRoll = (nodeId, total, cmId) => {
@@ -59,15 +67,36 @@ export default function HackingBoard() {
 
         <div className="flex-1" />
 
+        {/* Mode toggle */}
+        <div className="flex items-center bg-muted rounded-lg p-0.5 gap-0.5">
+          <button
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-mono text-xs transition-colors ${mode === 'create' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+            onClick={() => handleSwitchMode('create')}
+          >
+            <Pencil className="w-3 h-3" /> Create
+          </button>
+          <button
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md font-mono text-xs transition-colors ${mode === 'play' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+            onClick={() => handleSwitchMode('play')}
+          >
+            <Play className="w-3 h-3" /> Play
+          </button>
+        </div>
+
+        <div className="w-px h-6 bg-border" />
+
         <PhaseTracker
           phase={state.phase}
           onAdvance={state.advancePhase}
           onReset={state.resetEncounter}
         />
 
-        <div className="w-px h-6 bg-border" />
-
-        <AddNodeMenu onAdd={handleAddNode} />
+        {mode === 'create' && (
+          <>
+            <div className="w-px h-6 bg-border" />
+            <AddNodeMenu onAdd={handleAddNode} />
+          </>
+        )}
 
         <Button size="sm" variant="ghost" className="h-7 w-7 p-0"
           onClick={() => setSidebarOpen(!sidebarOpen)}>
@@ -97,13 +126,14 @@ export default function HackingBoard() {
           setConnectingFrom={state.setConnectingFrom}
           onSelectNode={() => {}}
           onMoveNode={state.moveNode}
-          onDeleteNode={state.removeNode}
+          onDeleteNode={mode === 'create' ? state.removeNode : () => {}}
           onAddConnection={state.addConnection}
           onHack={handleHack}
           onConfigure={handleConfigure}
+          mode={mode}
         />
 
-        {configuringNode && (
+        {mode === 'create' && configuringNode && (
           <NodeEditor
             node={configuringNode}
             onUpdate={state.updateNode}
@@ -121,6 +151,7 @@ export default function HackingBoard() {
           node={state.nodes.find(n => n.id === hackingNode.id) || hackingNode}
           onSubmit={handleSubmitRoll}
           onClose={() => setHackingNode(null)}
+          mode={mode}
         />
       )}
     </div>

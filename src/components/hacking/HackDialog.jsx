@@ -10,7 +10,19 @@ const CM_COLOR = {
   purple: 'text-chart-3 border-chart-3/50 bg-chart-3/10',
 };
 
-export default function HackDialog({ node, onSubmit, onClose }) {
+// In play mode: fake_shell is always hidden; other CMs are hidden behind an unresolved firewall
+function getVisibleCms(node, mode) {
+  const all = (node.countermeasures || []).filter(cm => !cm.resolved && !cm.triggered);
+  if (mode !== 'play') return all;
+  const hasUnresolvedFirewall = all.some(cm => cm.type === 'firewall');
+  return all.filter(cm => {
+    if (cm.type === 'fake_shell') return false; // always hidden in play mode
+    if (hasUnresolvedFirewall && cm.type !== 'firewall') return false; // hidden behind firewall
+    return true;
+  });
+}
+
+export default function HackDialog({ node, onSubmit, onClose, mode = 'create' }) {
   const [input, setInput] = useState('');
   const [result, setResult] = useState(null);
   // null = rolling against node, or a cm.id
@@ -51,7 +63,7 @@ export default function HackDialog({ node, onSubmit, onClose }) {
     if (e.key === 'Escape') onClose();
   };
 
-  const activeCms = (node.countermeasures || []).filter(cm => !cm.resolved && !cm.triggered);
+  const activeCms = getVisibleCms(node, mode);
 
   return (
     <div
