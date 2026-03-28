@@ -212,10 +212,12 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
         {/* Password entry for firewalls */}
         {hasFirewallPassword && (
           <PasswordEntry
+            key={firewallCm.id}
             label="Or enter firewall password:"
             password={firewallCm.password}
             disabled={closing}
             onSuccess={() => {
+              setInput('');
               setClosing(true);
               const cmId = firewallCm.id;
               onSubmit(node.id, 9999, cmId);
