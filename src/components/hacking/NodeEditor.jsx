@@ -173,15 +173,7 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
                       </div>
                     )}
                   </div>
-                  {cm.type === 'firewall' && (
-                    <div>
-                      <Label className="font-mono text-[9px] uppercase tracking-wider text-current opacity-60">Password (optional)</Label>
-                      <Input className="font-mono text-xs mt-0.5 bg-background/20 border-current/20 h-7"
-                        placeholder="Leave blank for none"
-                        value={cm.password || ''}
-                        onChange={e => onUpdateCm(node.id, cm.id, { password: e.target.value })} />
-                    </div>
-                  )}
+
                   </div>
               );
             })}

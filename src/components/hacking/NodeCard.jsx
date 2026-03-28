@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Terminal, GitBranch, Database, SquareTerminal,
-  ShieldAlert, Siren, UserX, Bug, Unlock, Link, Trash2, Settings, Zap,
+  Siren, UserX, Bug, Unlock, Link, Trash2, Settings, Zap,
   Sparkles, EyeOff, Lock, LogIn, ShieldCheck, FolderLock, FolderOpen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -37,28 +37,21 @@ export default function NodeCard({
   const Icon = node.type === 'directory'
     ? (node.locked ? FolderLock : FolderOpen)
     : (ICONS[node.icon] || Terminal);
-  // Firewall in play mode makes the whole card appear as red/unknown
-  const firewallActive = mode === 'play' && (node.countermeasures || []).some(cm => cm.type === 'firewall' && !cm.resolved);
-  const colors = firewallActive ? COLOR_MAP.red : (COLOR_MAP[node.color] || COLOR_MAP.cyan);
+  const colors = COLOR_MAP[node.color] || COLOR_MAP.cyan;
   const progressPercent = node.successes_required
     ? Math.round((node.successes_current / node.successes_required) * 100)
     : 0;
 
   const allActiveCms = (node.countermeasures || []).filter(cm => !cm.resolved);
-  const hasActiveFirewall = allActiveCms.some(cm => cm.type === 'firewall');
 
   // What to show on the card face
   const activeCms = mode === 'play'
     ? allActiveCms.filter(cm => {
         if (cm.type === 'fake_shell') return false;
         if (cm.type === 'alarm' && !cm.revealed && !cm.triggered) return false;
-        if (hasActiveFirewall && cm.type !== 'firewall') return false;
         return true;
       })
     : allActiveCms;
-
-  // In play mode with a firewall, hide node progress/details
-  const firewallBlocked = mode === 'play' && hasActiveFirewall;
 
   return (
     <div
@@ -76,18 +69,13 @@ export default function NodeCard({
     >
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border/50">
-        {firewallBlocked
-          ? <ShieldAlert className="w-4 h-4 shrink-0 text-destructive" />
-          : <Icon className={cn('w-4 h-4 shrink-0', colors.text)} />
-        }
+        <Icon className={cn('w-4 h-4 shrink-0', colors.text)} />
         <span className="font-mono text-xs font-semibold truncate text-foreground flex-1">
-          {firewallBlocked ? 'FIREWALL' : node.name}
+          {node.name}
         </span>
-        {!firewallBlocked && (
-          <span className="font-mono text-[10px] text-muted-foreground shrink-0">
-            DC {node.dc}
-          </span>
-        )}
+        <span className="font-mono text-[10px] text-muted-foreground shrink-0">
+          DC {node.dc}
+        </span>
       </div>
 
       {/* Body */}
@@ -109,8 +97,40 @@ export default function NodeCard({
           </div>
         )}
 
-        {firewallBlocked ? (
-          /* In play mode: firewall hides everything — show only the firewall badge */
+        {/* Progress bar */}
+        {node.successes_required > 0 && !node.resolved && (
+          <div className="space-y-0.5">
+            <span className="font-mono text-[10px] text-muted-foreground">
+              {node.successes_current}/{node.successes_required} successes
+            </span>
+            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full transition-all duration-300"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Failure dots */}
+        {node.failures_max > 0 && !node.noHack && (
+          <div className="flex items-center gap-1">
+            <span className="font-mono text-[10px] text-muted-foreground">Fails:</span>
+            <div className="flex gap-0.5">
+              {Array.from({ length: node.failures_max }).map((_, i) => (
+                <div key={i} className={cn(
+                  'w-2 h-2 rounded-full border',
+                  i < (node.failures_current || 0)
+                    ? 'bg-destructive border-destructive'
+                    : 'border-muted-foreground/40'
+                )} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Embedded countermeasures */}
+        {activeCms.length > 0 && (
           <div className="flex flex-wrap gap-1 pt-0.5">
             {activeCms.map(cm => {
               const CmIcon = CM_ICONS[cm.icon];
@@ -118,73 +138,18 @@ export default function NodeCard({
                 <span key={cm.id} className={cn(
                   'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border text-[9px] font-mono font-semibold',
                   CM_BADGE[cm.color] || CM_BADGE.red,
+                  cm.triggered && 'animate-pulse'
                 )}>
                   {CmIcon && <CmIcon className="w-2.5 h-2.5" />}
                   {cm.label}
+                  {cm.countdown_current !== undefined && !cm.triggered && (
+                    <span className="ml-0.5 opacity-70">[{cm.countdown_current}]</span>
+                  )}
+                  {cm.triggered && <span className="ml-0.5">!</span>}
                 </span>
               );
             })}
-            <p className="font-mono text-[9px] text-muted-foreground/60 w-full pt-0.5 italic">
-              Contents hidden
-            </p>
           </div>
-        ) : (
-          <>
-            {/* Progress bar */}
-            {node.successes_required > 0 && !node.resolved && (
-              <div className="space-y-0.5">
-                <span className="font-mono text-[10px] text-muted-foreground">
-                  {node.successes_current}/{node.successes_required} successes
-                </span>
-                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary rounded-full transition-all duration-300"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Failure dots */}
-            {node.failures_max > 0 && !node.noHack && (
-              <div className="flex items-center gap-1">
-                <span className="font-mono text-[10px] text-muted-foreground">Fails:</span>
-                <div className="flex gap-0.5">
-                  {Array.from({ length: node.failures_max }).map((_, i) => (
-                    <div key={i} className={cn(
-                      'w-2 h-2 rounded-full border',
-                      i < (node.failures_current || 0)
-                        ? 'bg-destructive border-destructive'
-                        : 'border-muted-foreground/40'
-                    )} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Embedded countermeasures */}
-            {activeCms.length > 0 && (
-              <div className="flex flex-wrap gap-1 pt-0.5">
-                {activeCms.map(cm => {
-                  const CmIcon = CM_ICONS[cm.icon];
-                  return (
-                    <span key={cm.id} className={cn(
-                      'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border text-[9px] font-mono font-semibold',
-                      CM_BADGE[cm.color] || CM_BADGE.red,
-                      cm.triggered && 'animate-pulse'
-                    )}>
-                      {CmIcon && <CmIcon className="w-2.5 h-2.5" />}
-                      {cm.label}
-                      {cm.countdown_current !== undefined && !cm.triggered && (
-                        <span className="ml-0.5 opacity-70">[{cm.countdown_current}]</span>
-                      )}
-                      {cm.triggered && <span className="ml-0.5">!</span>}
-                    </span>
-                  );
-                })}
-              </div>
-            )}
-          </>
         )}
       </div>
 

@@ -33,17 +33,7 @@ export const COUNTERMEASURE_TEMPLATES = {
     resolved: false,
     note: 'Deals damage to hacker on failure',
   },
-  firewall: {
-    type: 'firewall',
-    label: 'Firewall',
-    color: 'red',
-    icon: 'ShieldAlert',
-    dc: 0,
-    successes_required: 2,
-    successes_current: 0,
-    resolved: false,
-    password: '',
-  },
+
   lockout: {
     type: 'lockout',
     label: 'Lockout',
