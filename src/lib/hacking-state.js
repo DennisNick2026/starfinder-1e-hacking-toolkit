@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 // Countermeasure templates that can be embedded into modules
 export const COUNTERMEASURE_TEMPLATES = {
@@ -216,7 +216,7 @@ const ENTRY_NODE = {
   color: 'cyan',
   icon: 'LogIn',
   description: 'Hacking entry point — always present',
-  dc: 0,
+  dc: 24, // updated dynamically with baseDC
   successes_required: 1,
   successes_current: 0,
   failures_current: 0,
@@ -232,6 +232,11 @@ export function useHackingState() {
   const [computerName, setComputerName] = useState('Untitled Encounter');
   const [tier, setTier] = useState(3);
   const [baseDC, setBaseDC] = useState(24);
+
+  // Keep entry node DC in sync with baseDC
+  useEffect(() => {
+    setNodes(prev => prev.map(n => n.id === 'entry' ? { ...n, dc: baseDC } : n));
+  }, [baseDC]);
   const [phase, setPhase] = useState(1);
   const [nodes, setNodes] = useState([{ ...ENTRY_NODE }]);
   const [connections, setConnections] = useState([]);

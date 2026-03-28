@@ -63,16 +63,13 @@ export default function BottomToolbar({ onDragStart, mode }) {
               key={cat.key}
               onClick={() => setActiveCategory(isActive ? null : cat.key)}
               className={cn(
-                'flex flex-col items-center justify-center h-full font-mono tracking-widest border-r border-primary/20 transition-all duration-200 flex-1',
-                activeCat
-                  ? 'gap-1 text-[9px]'
-                  : 'gap-1.5 text-[10px]',
+                'flex flex-col items-center justify-center gap-2 h-full font-mono text-[11px] tracking-widest border-r border-primary/20 transition-colors flex-1',
                 isActive
                   ? 'text-primary bg-primary/15 border-b-2 border-b-primary'
                   : 'text-primary/50 hover:text-primary hover:bg-primary/5'
               )}
             >
-              <Icon className={cn('transition-all duration-200', activeCat ? 'w-4 h-4' : 'w-6 h-6')} />
+              <Icon className="w-8 h-8" />
               {cat.label}
             </button>
           );
