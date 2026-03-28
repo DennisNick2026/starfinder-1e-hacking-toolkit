@@ -2,13 +2,13 @@ import React from 'react';
 import {
   Terminal, GitBranch, Database, SquareTerminal,
   ShieldAlert, Siren, UserX, Bug, Unlock, Link, Trash2, Settings, Zap,
-  Sparkles, EyeOff, Lock, LogIn
+  Sparkles, EyeOff, Lock, LogIn, ShieldCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const ICONS = {
   Terminal, GitBranch, Database, SquareTerminal,
-  ShieldAlert, Siren, UserX, Bug, Unlock, Sparkles, LogIn,
+  ShieldAlert, Siren, UserX, Bug, Unlock, Sparkles, LogIn, ShieldCheck,
 };
 
 const CM_ICONS = { ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 };
@@ -125,7 +125,7 @@ export default function NodeCard({
             )}
 
             {/* Failure dots */}
-            {node.failures_max > 0 && (
+            {node.failures_max > 0 && !node.noHack && (
               <div className="flex items-center gap-1">
                 <span className="font-mono text-[10px] text-muted-foreground">Fails:</span>
                 <div className="flex gap-0.5">
@@ -169,18 +169,20 @@ export default function NodeCard({
 
       {/* Action buttons */}
       <div className="flex border-t border-border/50">
-        <button
-          className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex items-center justify-center gap-1"
-          onClick={(e) => { e.stopPropagation(); onHack(node); }}
-          title="Hack this node"
-        >
-          <Zap className="w-3 h-3" />
-          <span>Hack</span>
-        </button>
+        {!node.noHack && (
+          <button
+            className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex items-center justify-center gap-1"
+            onClick={(e) => { e.stopPropagation(); onHack(node); }}
+            title="Hack this node"
+          >
+            <Zap className="w-3 h-3" />
+            <span>Hack</span>
+          </button>
+        )}
         {mode === 'create' && (
           <>
             <button
-              className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center justify-center border-l border-border/50"
+              className={`flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center justify-center ${!node.noHack ? 'border-l border-border/50' : ''}`}
               onClick={(e) => { e.stopPropagation(); onConfigure(node.id); }}
               title="Configure node"
             >
@@ -193,7 +195,7 @@ export default function NodeCard({
             >
               <Link className="w-3 h-3" />
             </button>
-            {!node.isEntry && (
+            {!node.isEntry && !node.isRootAccess && (
               <button
                 className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center border-l border-border/50"
                 onClick={(e) => { e.stopPropagation(); onDelete(node.id); }}

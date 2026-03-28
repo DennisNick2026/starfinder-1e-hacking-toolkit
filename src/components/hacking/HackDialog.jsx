@@ -33,7 +33,7 @@ function canTargetNode(node, mode) {
   return !hasUnresolvedFirewall;
 }
 
-export default function HackDialog({ node, onSubmit, onClose, mode = 'create' }) {
+export default function HackDialog({ node, onSubmit, onClose, mode = 'create', rootMode = false }) {
   const [input, setInput] = useState('');
   const [result, setResult] = useState(null);
   // null = rolling against node, or a cm.id
@@ -53,7 +53,8 @@ export default function HackDialog({ node, onSubmit, onClose, mode = 'create' })
     ? (node.countermeasures || []).find(cm => cm.id === effectiveTarget)
     : null;
 
-  const targetDC = activeTarget ? activeTarget.dc : node.dc;
+  const rawTargetDC = activeTarget ? activeTarget.dc : node.dc;
+  const targetDC = rootMode ? 10 : rawTargetDC;
   const targetLabel = activeTarget ? activeTarget.label : node.name;
 
   const handleDigit = (d) => {

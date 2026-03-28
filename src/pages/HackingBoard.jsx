@@ -12,6 +12,8 @@ import { cn } from '@/lib/utils';
 export default function HackingBoard() {
   const state = useHackingState();
   const [mode, setMode] = useState('create');
+  // rootMode: all DCs become 10 (granted when root_access node resolved)
+  const rootMode = state.rootAccessGranted;
   const [hackingNode, setHackingNode] = useState(null);
   const [configuringNodeId, setConfiguringNodeId] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -86,6 +88,11 @@ export default function HackingBoard() {
             <Play className="w-3 h-3" /> PLAY
           </button>
         </div>
+        {rootMode && (
+          <span className="font-mono text-[10px] text-chart-3 border border-chart-3/50 bg-chart-3/10 px-2 py-0.5 rounded tracking-widest animate-pulse">
+            ★ ROOT ACCESS — DC 10
+          </span>
+        )}
 
         <div className="flex-1" />
 
@@ -141,7 +148,7 @@ export default function HackingBoard() {
           />
 
           <BottomLog log={state.log} selectedNode={selectedNode} />
-          <BottomToolbar mode={mode} onDragStart={() => {}} />
+          <BottomToolbar mode={mode} onDragStart={() => {}} rootMode={rootMode} />
         </div>
 
         {mode === 'create' && configuringNode && (
@@ -175,6 +182,7 @@ export default function HackingBoard() {
           onSubmit={handleSubmitRoll}
           onClose={() => setHackingNode(null)}
           mode={mode}
+          rootMode={rootMode}
         />
       )}
     </div>

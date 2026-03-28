@@ -44,10 +44,10 @@ const CATEGORIES = [
   },
 ];
 
-export default function BottomToolbar({ onDragStart, mode }) {
+export default function BottomToolbar({ onDragStart, mode, rootMode = false }) {
   const [activeCategory, setActiveCategory] = useState(null);
 
-  if (mode === 'play') return null;
+  if (mode === 'play' && !rootMode) return null;
 
   const activeCat = CATEGORIES.find(c => c.key === activeCategory);
 

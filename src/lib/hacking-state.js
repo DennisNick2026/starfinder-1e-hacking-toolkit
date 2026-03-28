@@ -216,30 +216,64 @@ const ENTRY_NODE = {
   color: 'cyan',
   icon: 'LogIn',
   description: 'Hacking entry point — always present',
-  dc: 24, // updated dynamically with baseDC
-  successes_required: 1,
+  dc: 24,
+  successes_required: 0,
   successes_current: 0,
-  failures_current: 0,
-  failures_max: 3,
   resolved: false,
   isEntry: true,
+  noHack: true,
   countermeasures: [],
   x: 400,
-  y: 200,
+  y: 160,
+};
+
+const ROOT_ACCESS_NODE = {
+  id: 'root_access',
+  type: 'root_access',
+  label: 'Root Access',
+  name: 'ROOT ACCESS',
+  color: 'purple',
+  icon: 'ShieldCheck',
+  description: 'Full system control — all DCs become 10',
+  dc: 44, // baseDC + 20, updated dynamically
+  successes_required: 1,
+  successes_current: 0,
+  resolved: false,
+  isRootAccess: true,
+  countermeasures: [],
+  x: 400,
+  y: 300,
 };
 
 export function useHackingState() {
+  const baseDCInit = 24;
   const [computerName, setComputerName] = useState('Untitled Encounter');
   const [tier, setTier] = useState(3);
-  const [baseDC, setBaseDC] = useState(24);
-
-  // Keep entry node DC in sync with baseDC
-  useEffect(() => {
-    setNodes(prev => prev.map(n => n.id === 'entry' ? { ...n, dc: baseDC } : n));
-  }, [baseDC]);
+  const [baseDC, setBaseDC] = useState(baseDCInit);
   const [phase, setPhase] = useState(1);
-  const [nodes, setNodes] = useState([{ ...ENTRY_NODE }]);
-  const [connections, setConnections] = useState([]);
+
+  const getCenteredNodes = (dc) => {
+    const cx = Math.max(200, window.innerWidth / 2 - 96);
+    const cy = Math.max(80, window.innerHeight / 2 - 160);
+    return [
+      { ...ENTRY_NODE, dc, x: cx, y: cy },
+      { ...ROOT_ACCESS_NODE, dc: dc + 20, x: cx, y: cy + 160 },
+    ];
+  };
+
+  const [nodes, setNodes] = useState(() => getCenteredNodes(baseDCInit));
+  const [connections, setConnections] = useState([
+    { from: 'entry', to: 'root_access', id: 'conn_root' },
+  ]);
+
+  // Keep entry node and root access DC in sync with baseDC
+  useEffect(() => {
+    setNodes(prev => prev.map(n => {
+      if (n.id === 'entry') return { ...n, dc: baseDC };
+      if (n.id === 'root_access') return { ...n, dc: baseDC + 20 };
+      return n;
+    }));
+  }, [baseDC]);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const [connectingFrom, setConnectingFrom] = useState(null);
   const [log, setLog] = useState([]);
@@ -262,8 +296,8 @@ export function useHackingState() {
   }, []);
 
   const removeNode = useCallback((nodeId) => {
-    // Entry node cannot be deleted
-    if (nodeId === 'entry') return;
+    // Entry and root access nodes cannot be deleted
+    if (nodeId === 'entry' || nodeId === 'root_access') return;
     setNodes(prev => prev.filter(n => n.id !== nodeId));
     setConnections(prev => prev.filter(c => c.from !== nodeId && c.to !== nodeId));
     if (selectedNodeId === nodeId) setSelectedNodeId(null);
@@ -410,6 +444,9 @@ export function useHackingState() {
     addLogEntry('Encounter reset', 'system');
   }, [addLogEntry]);
 
+  // Whether root access has been granted
+  const rootAccessGranted = nodes.find(n => n.id === 'root_access')?.resolved ?? false;
+
   const selectedNode = nodes.find(n => n.id === selectedNodeId);
 
   return {
@@ -427,6 +464,7 @@ export function useHackingState() {
     addCountermeasure, updateCountermeasure, removeCountermeasure,
     submitRoll, advancePhase,
     resetEncounter, addLogEntry,
+    rootAccessGranted,
     NODE_TEMPLATES,
   };
 }
