@@ -83,7 +83,6 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
   // Firewall password: look for a firewall CM that has a password set
   const firewallCm = (node.countermeasures || []).find(cm => cm.type === 'firewall' && !cm.resolved && cm.password);
   const hasFirewallPassword = !!firewallCm;
-  const hasPassword = isDirectory && node.password;
 
   // If the currently selected target CM no longer exists (e.g. firewall just resolved), reset to null
   const targetStillValid = target === null || activeCms.some(cm => cm.id === target);
@@ -208,19 +207,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
           )}
         </div>
 
-        {/* Password entry for directories — hidden if firewall is still active */}
-        {isDirectory && hasPassword && !node.resolved && !hasFirewallPassword && (
-          <PasswordEntry
-            label="Or enter password:"
-            password={node.password}
-            disabled={closing}
-            onSuccess={() => { 
-              setClosing(true);
-              onSubmit(node.id, 9999, null); 
-              setTimeout(onClose, 400); 
-            }}
-          />
-        )}
+
 
         {/* Password entry for firewalls */}
         {hasFirewallPassword && (

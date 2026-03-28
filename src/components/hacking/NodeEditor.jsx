@@ -75,16 +75,7 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
                 onChange={e => set('dc_reduction', parseInt(e.target.value) || 0)} />
             </div>
           )}
-          {node.type === 'directory' && (
-            <div>
-              <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Password (optional)</Label>
-              <Input className="font-mono text-xs mt-1 bg-muted border-border"
-                placeholder="Leave blank for none"
-                value={node.password || ''}
-                onChange={e => set('password', e.target.value)} />
-              <p className="font-mono text-[9px] text-muted-foreground/60 mt-1">Visible to admin only. Nodes connected to this directory are hidden in Play mode until unlocked.</p>
-            </div>
-          )}
+
         </div>
 
         {/* Countermeasures section */}
