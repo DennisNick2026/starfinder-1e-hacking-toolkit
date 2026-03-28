@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Terminal, GitBranch, Database, SquareTerminal, Unlock, Sparkles,
+  Terminal, FolderLock, Database, SquareTerminal, Unlock, Sparkles,
   FolderOpen, Box, Hand, Triangle, Cpu,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,7 @@ const CATEGORIES = [
     label: 'ARCH',
     icon: FolderOpen,
     items: [
-      { key: 'node', label: 'Node', icon: GitBranch },
+      { key: 'directory', label: 'Directory', icon: FolderLock },
       { key: 'access_point', label: 'Access Point', icon: Terminal },
     ],
   },

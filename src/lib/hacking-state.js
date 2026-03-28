@@ -81,7 +81,7 @@ export const COUNTERMEASURE_TEMPLATES = {
 // DC modifiers per node type relative to base DC (13 + 4*tier)
 export const NODE_DC_MODIFIERS = {
   access_point:        0,
-  node:                0,
+  directory:           0,
   control_complex:    +2,
   secure_data_average: 0,
   secure_data_large:  +2,
@@ -105,16 +105,18 @@ const NODE_TEMPLATES = {
     resolved: false,
     countermeasures: [],
   },
-  node: {
-    type: 'node',
-    label: 'Node',
-    color: 'cyan',
-    icon: 'GitBranch',
-    description: 'Branch providing access to other objectives',
+  directory: {
+    type: 'directory',
+    label: 'Directory',
+    color: 'yellow',
+    icon: 'FolderLock',
+    description: 'Locked folder — nodes inside are hidden until opened',
     dc: 0,
     successes_required: 1,
     successes_current: 0,
     resolved: false,
+    locked: true,
+    password: '',
     countermeasures: [],
   },
   control_complex: {
@@ -286,8 +288,18 @@ export function useHackingState() {
     const template = NODE_TEMPLATES[templateKey];
     if (!template) return;
     const node = createNode(template, x, y, baseDC);
-    setNodes(prev => [...prev, node]);
-    addLogEntry(`Added ${node.label}: "${node.name}"`, 'system');
+    // Auto-number directories: DIR-01, DIR-02, etc.
+    if (templateKey === 'directory') {
+      setNodes(prev => {
+        const dirCount = prev.filter(n => n.type === 'directory').length + 1;
+        const numbered = { ...node, name: `DIR-${String(dirCount).padStart(2, '0')}`, locked: true };
+        addLogEntry(`Added Directory: "${numbered.name}"`, 'system');
+        return [...prev, numbered];
+      });
+    } else {
+      setNodes(prev => [...prev, node]);
+      addLogEntry(`Added ${node.label}: "${node.name}"`, 'system');
+    }
     return node.id;
   }, [baseDC, addLogEntry]);
 
@@ -400,9 +412,11 @@ export function useHackingState() {
       if (n.successes_required !== undefined) {
         const newSuccesses = Math.min((n.successes_current || 0) + 1, n.successes_required);
         const resolved = newSuccesses >= n.successes_required;
-        return { ...n, successes_current: newSuccesses, resolved, countermeasures: updatedCms };
+        const unlocked = resolved && n.type === 'directory' ? { locked: false } : {};
+        return { ...n, successes_current: newSuccesses, resolved, ...unlocked, countermeasures: updatedCms };
       }
-      return { ...n, resolved: true, countermeasures: updatedCms };
+      const unlocked = n.type === 'directory' ? { locked: false } : {};
+      return { ...n, resolved: true, ...unlocked, countermeasures: updatedCms };
     }));
   }, []);
 
@@ -431,6 +445,7 @@ export function useHackingState() {
       failures_current: 0,
       resolved: false,
       triggered: false,
+      ...(n.type === 'directory' ? { locked: true } : {}),
       countermeasures: (n.countermeasures || []).map(cm => ({
         ...cm,
         successes_current: 0,

@@ -2,13 +2,13 @@ import React from 'react';
 import {
   Terminal, GitBranch, Database, SquareTerminal,
   ShieldAlert, Siren, UserX, Bug, Unlock, Link, Trash2, Settings, Zap,
-  Sparkles, EyeOff, Lock, LogIn, ShieldCheck
+  Sparkles, EyeOff, Lock, LogIn, ShieldCheck, FolderLock, FolderOpen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const ICONS = {
   Terminal, GitBranch, Database, SquareTerminal,
-  ShieldAlert, Siren, UserX, Bug, Unlock, Sparkles, LogIn, ShieldCheck,
+  ShieldAlert, Siren, UserX, Bug, Unlock, Sparkles, LogIn, ShieldCheck, FolderLock, FolderOpen,
 };
 
 const CM_ICONS = { ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 };
@@ -28,9 +28,15 @@ const CM_BADGE = {
 
 export default function NodeCard({
   node, isSelected, isDragging,
-  onSelect, onStartConnect, onDelete, onHack, onConfigure, mode = 'create'
+  onSelect, onStartConnect, onDelete, onHack, onConfigure, mode = 'create',
+  hiddenByDirectory = false,
 }) {
-  const Icon = ICONS[node.icon] || Terminal;
+  // In play mode, nodes hidden inside a locked directory are invisible
+  if (hiddenByDirectory && mode === 'play') return null;
+
+  const Icon = node.type === 'directory'
+    ? (node.locked ? FolderLock : FolderOpen)
+    : (ICONS[node.icon] || Terminal);
   const colors = COLOR_MAP[node.color] || COLOR_MAP.cyan;
   const progressPercent = node.successes_required
     ? Math.round((node.successes_current / node.successes_required) * 100)
@@ -85,7 +91,20 @@ export default function NodeCard({
       {/* Body */}
       <div className="px-3 py-2 space-y-1.5">
         {node.resolved && (
-          <span className="font-mono text-[10px] text-accent font-bold">✓ RESOLVED</span>
+          <span className="font-mono text-[10px] text-accent font-bold">
+            {node.type === 'directory' ? '✓ UNLOCKED' : '✓ RESOLVED'}
+          </span>
+        )}
+
+        {/* Directory lock status */}
+        {node.type === 'directory' && !node.resolved && (
+          <div className="flex items-center gap-1">
+            <Lock className="w-2.5 h-2.5 text-chart-4" />
+            <span className="font-mono text-[10px] text-chart-4">LOCKED</span>
+            {node.password && mode !== 'play' && (
+              <span className="font-mono text-[9px] text-muted-foreground ml-1">pw: {node.password}</span>
+            )}
+          </div>
         )}
 
         {firewallBlocked ? (

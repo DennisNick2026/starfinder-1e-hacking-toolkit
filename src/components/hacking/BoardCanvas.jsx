@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useMemo } from 'react';
 import NodeCard from './NodeCard';
 import ConnectionLines from './ConnectionLines';
 import { cn } from '@/lib/utils';
@@ -60,6 +60,25 @@ export default function BoardCanvas({
     onDropNode(nodeType, Math.max(0, x), Math.max(0, y));
   };
 
+  // Compute which nodes are hidden inside a locked directory (play mode)
+  const hiddenNodeIds = useMemo(() => {
+    const hidden = new Set();
+    const lockedDirs = nodes.filter(n => n.type === 'directory' && n.locked);
+    lockedDirs.forEach(dir => {
+      connections.forEach(c => {
+        if (c.from === dir.id && c.to !== 'entry' && c.to !== 'root_access') hidden.add(c.to);
+        if (c.to === dir.id && c.from !== 'entry' && c.from !== 'root_access') hidden.add(c.from);
+      });
+    });
+    return hidden;
+  }, [nodes, connections]);
+
+  // Also hide connections to/from hidden nodes in play mode
+  const visibleConnections = useMemo(() => {
+    if (mode !== 'play') return connections;
+    return connections.filter(c => !hiddenNodeIds.has(c.from) && !hiddenNodeIds.has(c.to));
+  }, [connections, hiddenNodeIds, mode]);
+
   return (
     <div
       ref={boardRef}
@@ -72,7 +91,7 @@ export default function BoardCanvas({
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      <ConnectionLines nodes={nodes} connections={connections} connectingFrom={connectingFrom} mousePos={mousePos} />
+      <ConnectionLines nodes={nodes} connections={visibleConnections} connectingFrom={connectingFrom} mousePos={mousePos} />
 
       {nodes.map(node => (
         <div
@@ -90,6 +109,7 @@ export default function BoardCanvas({
             onHack={onHack}
             onConfigure={onConfigure}
             mode={mode}
+            hiddenByDirectory={hiddenNodeIds.has(node.id)}
           />
         </div>
       ))}
