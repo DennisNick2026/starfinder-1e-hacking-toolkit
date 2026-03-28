@@ -38,7 +38,8 @@ export default function NodeCard({
     ? (node.locked ? FolderLock : FolderOpen)
     : (ICONS[node.icon] || Terminal);
   // Check for unresolved firewall
-  const allActiveCms = (node.countermeasures || []).filter(cm => !cm.resolved);
+  const allCms = (node.countermeasures || []);
+  const allActiveCms = allCms.filter(cm => !cm.resolved);
   const hasUnresolvedFirewall = allActiveCms.some(cm => cm.type === 'firewall');
   const firewallBlocked = mode === 'play' && hasUnresolvedFirewall;
 
@@ -166,9 +167,9 @@ export default function NodeCard({
             )}
 
             {/* Resolved countermeasures (play mode) */}
-            {mode === 'play' && (node.countermeasures || []).filter(cm => cm.resolved).length > 0 && (
+            {mode === 'play' && allCms.filter(cm => cm.resolved).length > 0 && (
               <div className="flex flex-wrap gap-1 pt-0.5 border-t border-border/30 mt-1.5 pt-1">
-                {(node.countermeasures || []).filter(cm => cm.resolved).map(cm => {
+                {allCms.filter(cm => cm.resolved).map(cm => {
                   const CmIcon = CM_ICONS[cm.icon];
                   return (
                     <button
