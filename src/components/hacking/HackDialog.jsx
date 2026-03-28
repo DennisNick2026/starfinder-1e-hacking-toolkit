@@ -24,6 +24,43 @@ function getVisibleCms(node, mode) {
   });
 }
 
+function PasswordEntry({ label, password, onSuccess, disabled = false }) {
+  const [value, setValue] = useState('');
+  const [result, setResult] = useState(null);
+
+  const attempt = () => {
+    if (disabled) return;
+    const match = value === password;
+    setResult(match ? 'success' : 'failure');
+    if (match) {
+      setValue('');
+      onSuccess();
+    }
+  };
+
+  return (
+    <div className="space-y-2 border-t border-border pt-3">
+      <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+      <div className="flex gap-2">
+        <Input
+          className="font-mono text-xs bg-muted border-border flex-1"
+          placeholder="Password..."
+          value={value}
+          onChange={e => { setValue(e.target.value); setResult(null); }}
+          onKeyDown={e => { if (e.key === 'Enter') attempt(); e.stopPropagation(); }}
+          disabled={disabled}
+        />
+        <Button size="sm" className="font-mono text-xs" onClick={attempt} disabled={disabled}>Enter</Button>
+      </div>
+      {result && (
+        <p className={cn('font-mono text-xs font-bold', result === 'success' ? 'text-accent' : 'text-destructive')}>
+          {result === 'success' ? '✓ Firewall Breached' : '✗ Wrong Password'}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = 'create', rootMode = false }) {
   const [input, setInput] = useState('');
   const [result, setResult] = useState(null);
