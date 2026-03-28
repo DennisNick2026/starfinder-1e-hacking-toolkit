@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useHackingState } from '@/lib/hacking-state';
 import BoardCanvas from '@/components/hacking/BoardCanvas';
 import NodeEditor from '@/components/hacking/NodeEditor';
+import HackDialog from '@/components/hacking/HackDialog';
 import Sidebar from '@/components/hacking/Sidebar';
 import AddNodeMenu from '@/components/hacking/AddNodeMenu';
 import PhaseTracker from '@/components/hacking/PhaseTracker';
@@ -11,12 +12,32 @@ import { Button } from '@/components/ui/button';
 export default function HackingBoard() {
   const state = useHackingState();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [hackingNode, setHackingNode] = useState(null); // node being hacked
+  const [configuringNodeId, setConfiguringNodeId] = useState(null); // node being configured
+
+  const configuringNode = state.nodes.find(n => n.id === configuringNodeId) || null;
 
   const handleAddNode = (templateKey) => {
-    // Place new node near center of visible area with slight randomization
     const x = 200 + Math.random() * 300;
     const y = 100 + Math.random() * 200;
     state.addNode(templateKey, x, y);
+  };
+
+  const handleHack = (node) => {
+    setConfiguringNodeId(null);
+    setHackingNode(node);
+  };
+
+  const handleConfigure = (nodeId) => {
+    setHackingNode(null);
+    setConfiguringNodeId(nodeId);
+    state.setSelectedNodeId(nodeId);
+  };
+
+  const handleSubmitRoll = (nodeId, total, cmId) => {
+    state.submitRoll(nodeId, total, cmId);
+    // update hackingNode snapshot so dialog reflects new state
+    setHackingNode(state.nodes.find(n => n.id === nodeId) || null);
   };
 
   return (
@@ -48,12 +69,8 @@ export default function HackingBoard() {
 
         <AddNodeMenu onAdd={handleAddNode} />
 
-        <Button
-          size="sm"
-          variant="ghost"
-          className="h-7 w-7 p-0"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-        >
+        <Button size="sm" variant="ghost" className="h-7 w-7 p-0"
+          onClick={() => setSidebarOpen(!sidebarOpen)}>
           {sidebarOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
         </Button>
       </header>
@@ -68,38 +85,44 @@ export default function HackingBoard() {
             setTier={state.setTier}
             baseDC={state.baseDC}
             setBaseDC={state.setBaseDC}
-            hackers={state.hackers}
-            addHacker={state.addHacker}
-            updateHacker={state.updateHacker}
-            removeHacker={state.removeHacker}
-            nodes={state.nodes}
-            rollCheck={state.rollCheck}
             log={state.log}
           />
         )}
 
-        {/* Board */}
         <BoardCanvas
           nodes={state.nodes}
           connections={state.connections}
-          selectedNodeId={state.selectedNodeId}
+          selectedNodeId={configuringNodeId}
           connectingFrom={state.connectingFrom}
           setConnectingFrom={state.setConnectingFrom}
-          onSelectNode={state.setSelectedNodeId}
+          onSelectNode={() => {}}
           onMoveNode={state.moveNode}
           onDeleteNode={state.removeNode}
           onAddConnection={state.addConnection}
+          onHack={handleHack}
+          onConfigure={handleConfigure}
         />
 
-        {/* Editor panel */}
-        {state.selectedNode && (
+        {configuringNode && (
           <NodeEditor
-            node={state.selectedNode}
+            node={configuringNode}
             onUpdate={state.updateNode}
-            onClose={() => state.setSelectedNodeId(null)}
+            onClose={() => setConfiguringNodeId(null)}
+            onAddCm={state.addCountermeasure}
+            onUpdateCm={state.updateCountermeasure}
+            onRemoveCm={state.removeCountermeasure}
           />
         )}
       </div>
+
+      {/* Hack dialog */}
+      {hackingNode && (
+        <HackDialog
+          node={state.nodes.find(n => n.id === hackingNode.id) || hackingNode}
+          onSubmit={handleSubmitRoll}
+          onClose={() => setHackingNode(null)}
+        />
+      )}
     </div>
   );
 }

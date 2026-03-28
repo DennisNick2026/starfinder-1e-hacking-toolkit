@@ -1,5 +1,54 @@
 import { useState, useCallback } from 'react';
 
+// Countermeasure templates that can be embedded into modules
+export const COUNTERMEASURE_TEMPLATES = {
+  firewall: {
+    type: 'firewall',
+    label: 'Firewall',
+    color: 'red',
+    icon: 'ShieldAlert',
+    dc: 0,
+    successes_required: 2,
+    successes_current: 0,
+    resolved: false,
+  },
+  alarm: {
+    type: 'alarm',
+    label: 'Alarm',
+    color: 'red',
+    icon: 'Siren',
+    dc: 0,
+    countdown: 3,
+    countdown_current: 3,
+    triggered: false,
+    resolved: false,
+  },
+  counterhacker: {
+    type: 'counterhacker',
+    label: 'Counterhacker',
+    color: 'red',
+    icon: 'UserX',
+    dc: 0,
+    successes_required: 3,
+    successes_current: 0,
+    damage_per_phase: 4,
+    resolved: false,
+  },
+  virus: {
+    type: 'virus',
+    label: 'Virus',
+    color: 'purple',
+    icon: 'Bug',
+    dc: 0,
+    countdown: 2,
+    countdown_current: 2,
+    damage_on_trigger: 6,
+    triggered: false,
+    resolved: false,
+  },
+};
+
+// Only structural/objective nodes are placeable on the board
 const NODE_TEMPLATES = {
   access_point: {
     type: 'access_point',
@@ -12,8 +61,8 @@ const NODE_TEMPLATES = {
     successes_current: 0,
     failures_current: 0,
     failures_max: 3,
-    skills: ['Computers'],
     resolved: false,
+    countermeasures: [],
   },
   node: {
     type: 'node',
@@ -22,10 +71,10 @@ const NODE_TEMPLATES = {
     icon: 'GitBranch',
     description: 'Branch providing access to other objectives',
     dc: 0,
-    resolve_method: 'Hack',
     successes_required: 2,
     successes_current: 0,
     resolved: false,
+    countermeasures: [],
   },
   data_module: {
     type: 'data_module',
@@ -34,10 +83,10 @@ const NODE_TEMPLATES = {
     icon: 'Database',
     description: 'Contains valuable intelligence',
     dc: 0,
-    resolve_method: 'Hack',
     successes_required: 1,
     successes_current: 0,
     resolved: false,
+    countermeasures: [],
   },
   command_module: {
     type: 'command_module',
@@ -46,62 +95,10 @@ const NODE_TEMPLATES = {
     icon: 'SquareTerminal',
     description: 'Controls a system function (doors, turrets, etc.)',
     dc: 0,
-    resolve_method: 'Hack',
     successes_required: 1,
     successes_current: 0,
     resolved: false,
-  },
-  firewall: {
-    type: 'firewall',
-    label: 'Firewall',
-    color: 'red',
-    icon: 'ShieldAlert',
-    description: 'Blocks access until overcome',
-    dc: 0,
-    resolve_method: 'Hack',
-    successes_required: 2,
-    successes_current: 0,
-    resolved: false,
-  },
-  alarm: {
-    type: 'alarm',
-    label: 'Alarm',
-    color: 'red',
-    icon: 'Siren',
-    description: 'Alerts security when triggered',
-    dc: 0,
-    resolve_method: 'Deceive',
-    countdown: 3,
-    countdown_current: 3,
-    triggered: false,
-    resolved: false,
-  },
-  counterhacker: {
-    type: 'counterhacker',
-    label: 'Counterhacker',
-    color: 'red',
-    icon: 'UserX',
-    description: 'Active defense that attacks persona CP',
-    dc: 0,
-    resolve_method: 'Deceive',
-    successes_required: 3,
-    successes_current: 0,
-    damage_per_phase: 4,
-    resolved: false,
-  },
-  virus: {
-    type: 'virus',
-    label: 'Virus',
-    color: 'purple',
-    icon: 'Bug',
-    description: 'Malware that degrades persona on trigger',
-    dc: 0,
-    resolve_method: 'Process',
-    countdown: 2,
-    countdown_current: 2,
-    damage_on_trigger: 6,
-    triggered: false,
-    resolved: false,
+    countermeasures: [],
   },
   vulnerability: {
     type: 'vulnerability',
@@ -110,13 +107,14 @@ const NODE_TEMPLATES = {
     icon: 'Unlock',
     description: 'Exploit to lower an access point DC',
     dc: 0,
-    skill: 'Computers',
     dc_reduction: 2,
     resolved: false,
+    countermeasures: [],
   },
 };
 
 let nextId = 1;
+let nextCmId = 1;
 
 function createNode(template, x, y, baseDC) {
   const id = `node_${nextId++}`;
@@ -127,19 +125,9 @@ function createNode(template, x, y, baseDC) {
     y,
     dc: template.dc || baseDC,
     name: template.label,
+    countermeasures: [],
   };
 }
-
-const DEFAULT_HACKER = {
-  name: 'Hacker',
-  role: 'lead',
-  computers_mod: 10,
-  deceive_mod: 0,
-  hack_mod: 0,
-  process_mod: 0,
-  cp_max: 22,
-  cp_current: 22,
-};
 
 export function useHackingState() {
   const [computerName, setComputerName] = useState('Secure Terminal');
@@ -148,7 +136,6 @@ export function useHackingState() {
   const [phase, setPhase] = useState(1);
   const [nodes, setNodes] = useState([]);
   const [connections, setConnections] = useState([]);
-  const [hackers, setHackers] = useState([{ ...DEFAULT_HACKER, id: 'hacker_1' }]);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const [connectingFrom, setConnectingFrom] = useState(null);
   const [log, setLog] = useState([]);
@@ -194,81 +181,93 @@ export function useHackingState() {
     setConnections(prev => prev.filter(c => c.id !== connId));
   }, []);
 
-  const rollCheck = useCallback((nodeId, hackerId, subskill) => {
-    const node = nodes.find(n => n.id === nodeId);
-    const hacker = hackers.find(h => h.id === hackerId);
-    if (!node || !hacker) return;
+  // Add a countermeasure to a node
+  const addCountermeasure = useCallback((nodeId, cmType) => {
+    const template = COUNTERMEASURE_TEMPLATES[cmType];
+    if (!template) return;
+    const cm = { ...template, id: `cm_${nextCmId++}` };
+    setNodes(prev => prev.map(n =>
+      n.id === nodeId ? { ...n, countermeasures: [...(n.countermeasures || []), cm] } : n
+    ));
+  }, []);
 
-    const roll = Math.floor(Math.random() * 20) + 1;
-    const modKey = `${subskill}_mod`;
-    const totalMod = hacker.computers_mod + (hacker[modKey] || 0);
-    const total = roll + totalMod;
-    const dc = node.dc;
-    const success = total >= dc;
-    const critSuccess = total >= dc + 10 || roll === 20;
-    const critFail = total < dc - 10 || roll === 1;
+  const updateCountermeasure = useCallback((nodeId, cmId, updates) => {
+    setNodes(prev => prev.map(n => {
+      if (n.id !== nodeId) return n;
+      return {
+        ...n,
+        countermeasures: (n.countermeasures || []).map(cm =>
+          cm.id === cmId ? { ...cm, ...updates } : cm
+        ),
+      };
+    }));
+  }, []);
 
-    let resultType = 'failure';
-    if (critSuccess && roll !== 1) resultType = 'crit_success';
-    else if (success && roll !== 1) resultType = 'success';
-    else if (critFail || roll === 1) resultType = 'crit_failure';
+  const removeCountermeasure = useCallback((nodeId, cmId) => {
+    setNodes(prev => prev.map(n => {
+      if (n.id !== nodeId) return n;
+      return { ...n, countermeasures: (n.countermeasures || []).filter(cm => cm.id !== cmId) };
+    }));
+  }, []);
 
-    const resultText = `${hacker.name} rolls ${subskill} on "${node.name}": d20(${roll}) + ${totalMod} = ${total} vs DC ${dc} → ${resultType.replace('_', ' ').toUpperCase()}`;
-    addLogEntry(resultText, resultType === 'crit_success' || resultType === 'success' ? 'success' : 'danger');
+  // Submit a manual roll total against a node or countermeasure DC
+  // target: { nodeId, cmId? } — if cmId present, rolling against a countermeasure
+  const submitRoll = useCallback((nodeId, total, cmId = null) => {
+    setNodes(prev => prev.map(n => {
+      if (n.id !== nodeId) return n;
 
-    if (resultType === 'crit_success' || resultType === 'success') {
-      const gained = resultType === 'crit_success' ? 2 : 1;
-      if (node.successes_required) {
-        const newSuccesses = Math.min((node.successes_current || 0) + gained, node.successes_required);
-        const resolved = newSuccesses >= node.successes_required;
-        updateNode(nodeId, { successes_current: newSuccesses, resolved });
-        if (resolved) addLogEntry(`"${node.name}" resolved!`, 'success');
+      if (cmId) {
+        // Rolling against a countermeasure
+        const cms = (n.countermeasures || []).map(cm => {
+          if (cm.id !== cmId) return cm;
+          if (cm.resolved || cm.triggered) return cm;
+          const success = total >= cm.dc;
+          if (!success) return cm;
+          if (cm.successes_required !== undefined) {
+            const newSuccesses = Math.min((cm.successes_current || 0) + 1, cm.successes_required);
+            const resolved = newSuccesses >= cm.successes_required;
+            return { ...cm, successes_current: newSuccesses, resolved };
+          }
+          return { ...cm, resolved: true };
+        });
+        return { ...n, countermeasures: cms };
       }
-    }
 
-    if (resultType === 'failure' || resultType === 'crit_failure') {
-      if (node.failures_max) {
-        const gained = resultType === 'crit_failure' ? 2 : 1;
-        const newFailures = (node.failures_current || 0) + gained;
-        updateNode(nodeId, { failures_current: newFailures });
-        if (newFailures >= node.failures_max) {
-          addLogEntry(`"${node.name}" countermeasures triggered!`, 'danger');
+      // Rolling against the node itself
+      if (n.resolved) return n;
+      const success = total >= n.dc;
+      if (!success) {
+        if (n.failures_max !== undefined) {
+          const newFailures = (n.failures_current || 0) + 1;
+          return { ...n, failures_current: newFailures };
         }
+        return n;
       }
-    }
-
-    return { roll, totalMod, total, dc, resultType };
-  }, [nodes, hackers, addLogEntry, updateNode]);
+      if (n.successes_required !== undefined) {
+        const newSuccesses = Math.min((n.successes_current || 0) + 1, n.successes_required);
+        const resolved = newSuccesses >= n.successes_required;
+        return { ...n, successes_current: newSuccesses, resolved };
+      }
+      return { ...n, resolved: true };
+    }));
+  }, []);
 
   const advancePhase = useCallback(() => {
     setPhase(p => p + 1);
-    // Tick down countdowns
     setNodes(prev => prev.map(n => {
-      if (n.countdown_current !== undefined && !n.resolved && !n.triggered) {
-        const newCountdown = n.countdown_current - 1;
-        if (newCountdown <= 0) {
-          addLogEntry(`"${n.name}" triggered!`, 'danger');
-          return { ...n, countdown_current: 0, triggered: true };
+      // Tick countermeasure countdowns
+      const updatedCms = (n.countermeasures || []).map(cm => {
+        if (cm.countdown_current !== undefined && !cm.resolved && !cm.triggered) {
+          const newCountdown = cm.countdown_current - 1;
+          if (newCountdown <= 0) return { ...cm, countdown_current: 0, triggered: true };
+          return { ...cm, countdown_current: newCountdown };
         }
-        return { ...n, countdown_current: newCountdown };
-      }
-      return n;
+        return cm;
+      });
+      return { ...n, countermeasures: updatedCms };
     }));
     addLogEntry(`Phase ${phase + 1} begins`, 'system');
   }, [phase, addLogEntry]);
-
-  const addHacker = useCallback(() => {
-    const id = `hacker_${Date.now()}`;
-    setHackers(prev => [...prev, { ...DEFAULT_HACKER, id, name: `Hacker ${prev.length + 1}` }]);
-  }, []);
-
-  const updateHacker = useCallback((hackerId, updates) => {
-    setHackers(prev => prev.map(h => h.id === hackerId ? { ...h, ...updates } : h));
-  }, []);
-
-  const removeHacker = useCallback((hackerId) => {
-    setHackers(prev => prev.filter(h => h.id !== hackerId));
-  }, []);
 
   const resetEncounter = useCallback(() => {
     setPhase(1);
@@ -278,9 +277,14 @@ export function useHackingState() {
       failures_current: 0,
       resolved: false,
       triggered: false,
-      countdown_current: n.countdown,
+      countermeasures: (n.countermeasures || []).map(cm => ({
+        ...cm,
+        successes_current: 0,
+        resolved: false,
+        triggered: false,
+        countdown_current: cm.countdown,
+      })),
     })));
-    setHackers(prev => prev.map(h => ({ ...h, cp_current: h.cp_max })));
     setLog([]);
     addLogEntry('Encounter reset', 'system');
   }, [addLogEntry]);
@@ -293,15 +297,14 @@ export function useHackingState() {
     baseDC, setBaseDC,
     phase, setPhase,
     nodes, connections,
-    hackers,
     selectedNodeId, setSelectedNodeId,
     selectedNode,
     connectingFrom, setConnectingFrom,
     log,
     addNode, updateNode, removeNode, moveNode,
     addConnection, removeConnection,
-    rollCheck, advancePhase,
-    addHacker, updateHacker, removeHacker,
+    addCountermeasure, updateCountermeasure, removeCountermeasure,
+    submitRoll, advancePhase,
     resetEncounter, addLogEntry,
     NODE_TEMPLATES,
   };

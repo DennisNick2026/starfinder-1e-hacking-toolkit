@@ -1,23 +1,13 @@
 import React from 'react';
-import {
-  Terminal, GitBranch, Database, SquareTerminal,
-  ShieldAlert, Siren, UserX, Bug, Unlock, Plus
-} from 'lucide-react';
+import { Terminal, GitBranch, Database, SquareTerminal, Unlock, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuItem,
+  DropdownMenu, DropdownMenuContent, DropdownMenuTrigger,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 
-const ICONS = {
-  Terminal, GitBranch, Database, SquareTerminal,
-  ShieldAlert, Siren, UserX, Bug, Unlock,
-};
+const ICONS = { Terminal, GitBranch, Database, SquareTerminal, Unlock };
 
 const CATEGORIES = [
   {
@@ -32,15 +22,6 @@ const CATEGORIES = [
     items: [
       { key: 'data_module', label: 'Data Module', icon: 'Database', color: 'text-accent' },
       { key: 'command_module', label: 'Command Module', icon: 'SquareTerminal', color: 'text-accent' },
-    ],
-  },
-  {
-    label: 'Countermeasures',
-    items: [
-      { key: 'firewall', label: 'Firewall', icon: 'ShieldAlert', color: 'text-destructive' },
-      { key: 'alarm', label: 'Alarm', icon: 'Siren', color: 'text-destructive' },
-      { key: 'counterhacker', label: 'Counterhacker', icon: 'UserX', color: 'text-destructive' },
-      { key: 'virus', label: 'Virus', icon: 'Bug', color: 'text-chart-3' },
     ],
   },
   {
@@ -70,11 +51,8 @@ export default function AddNodeMenu({ onAdd }) {
             {cat.items.map(item => {
               const Icon = ICONS[item.icon];
               return (
-                <DropdownMenuItem
-                  key={item.key}
-                  className="gap-2 font-mono text-xs cursor-pointer"
-                  onClick={() => onAdd(item.key)}
-                >
+                <DropdownMenuItem key={item.key} className="gap-2 font-mono text-xs cursor-pointer"
+                  onClick={() => onAdd(item.key)}>
                   <Icon className={cn('w-4 h-4', item.color)} />
                   {item.label}
                 </DropdownMenuItem>
