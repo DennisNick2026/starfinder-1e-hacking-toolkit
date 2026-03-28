@@ -116,8 +116,12 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
     if (isNaN(total)) return;
     const success = total >= targetDC;
     setResult(success ? 'success' : 'failure');
-    onSubmit(node.id, total, effectiveTarget || null);
-    if (success) setTimeout(onClose, 600);
+    // Snapshot the current effectiveTarget before state updates ripple through
+    const submittedTarget = effectiveTarget;
+    onSubmit(node.id, total, submittedTarget || null);
+    if (success) {
+      setTimeout(onClose, 400);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -204,7 +208,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
           <PasswordEntry
             label="Or enter password:"
             password={node.password}
-            onSuccess={() => { onSubmit(node.id, 9999, null); setTimeout(onClose, 600); }}
+            onSuccess={() => { onSubmit(node.id, 9999, null); setTimeout(onClose, 400); }}
           />
         )}
 
@@ -213,7 +217,11 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
           <PasswordEntry
             label="Or enter firewall password:"
             password={firewallCm.password}
-            onSuccess={() => { onSubmit(node.id, 9999, firewallCm.id); setTimeout(onClose, 600); }}
+            onSuccess={() => {
+              const cmId = firewallCm.id;
+              onSubmit(node.id, 9999, cmId);
+              setTimeout(onClose, 400);
+            }}
           />
         )}
 
