@@ -34,11 +34,12 @@ function canTargetNode(node, mode) {
   return !hasUnresolvedFirewall;
 }
 
-function PasswordEntry({ label, password, onSuccess }) {
+function PasswordEntry({ label, password, onSuccess, disabled = false }) {
   const [value, setValue] = useState('');
   const [result, setResult] = useState(null);
 
   const attempt = () => {
+    if (disabled) return;
     const match = value === password;
     setResult(match ? 'success' : 'failure');
     if (match) onSuccess();
@@ -71,6 +72,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
   const [result, setResult] = useState(null);
   // null = rolling against node, or a cm.id
   const [target, setTarget] = useState(null);
+  const [closing, setClosing] = useState(false);
 
   if (!node) return null;
 
@@ -112,6 +114,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
   };
 
   const handleSubmit = () => {
+    if (closing) return;
     const total = parseInt(input);
     if (isNaN(total)) return;
     const success = total >= targetDC;
@@ -120,6 +123,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
     const submittedTarget = effectiveTarget;
     onSubmit(node.id, total, submittedTarget || null);
     if (success) {
+      setClosing(true);
       setTimeout(onClose, 400);
     }
   };
@@ -208,7 +212,12 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
           <PasswordEntry
             label="Or enter password:"
             password={node.password}
-            onSuccess={() => { onSubmit(node.id, 9999, null); setTimeout(onClose, 400); }}
+            disabled={closing}
+            onSuccess={() => { 
+              setClosing(true);
+              onSubmit(node.id, 9999, null); 
+              setTimeout(onClose, 400); 
+            }}
           />
         )}
 
@@ -217,7 +226,9 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
           <PasswordEntry
             label="Or enter firewall password:"
             password={firewallCm.password}
+            disabled={closing}
             onSuccess={() => {
+              setClosing(true);
               const cmId = firewallCm.id;
               onSubmit(node.id, 9999, cmId);
               setTimeout(onClose, 400);
@@ -226,24 +237,27 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
         )}
 
         {/* Numpad */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2 pointer-events-none" style={{ opacity: closing ? 0.5 : 1 }}>
           {[7,8,9,4,5,6,1,2,3].map(d => (
             <button
               key={d}
-              className="h-12 rounded-lg bg-secondary hover:bg-secondary/70 font-mono text-lg font-semibold text-foreground transition-colors"
+              disabled={closing}
+              className="h-12 rounded-lg bg-secondary hover:bg-secondary/70 font-mono text-lg font-semibold text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={() => handleDigit(String(d))}
             >
               {d}
             </button>
           ))}
           <button
-            className="h-12 rounded-lg bg-secondary hover:bg-secondary/70 font-mono text-sm text-muted-foreground transition-colors flex items-center justify-center"
+            disabled={closing}
+            className="h-12 rounded-lg bg-secondary hover:bg-secondary/70 font-mono text-sm text-muted-foreground transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => handleDigit('0')}
           >
             0
           </button>
           <button
-            className="h-12 rounded-lg bg-secondary hover:bg-secondary/70 font-mono text-sm text-muted-foreground transition-colors flex items-center justify-center col-span-2"
+            disabled={closing}
+            className="h-12 rounded-lg bg-secondary hover:bg-secondary/70 font-mono text-sm text-muted-foreground transition-colors flex items-center justify-center col-span-2 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleClear}
           >
             <Delete className="w-4 h-4" />
@@ -252,13 +266,14 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
 
         {/* Actions */}
         <div className="flex gap-2">
-          <Button variant="outline" className="flex-1 font-mono text-xs" onClick={onClose}>
+          <Button variant="outline" className="flex-1 font-mono text-xs" onClick={onClose} disabled={closing}>
             Back
           </Button>
           {node.resolved ? (
             <Button
               className="flex-1 font-mono text-xs bg-destructive/80 text-destructive-foreground hover:bg-destructive"
               onClick={() => { onUnhack(node.id); setResult(null); setInput(''); }}
+              disabled={closing}
             >
               Unhack
             </Button>
@@ -266,7 +281,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
             <Button
               className="flex-1 font-mono text-xs bg-primary text-primary-foreground"
               onClick={handleSubmit}
-              disabled={!input}
+              disabled={!input || closing}
             >
               Enter
             </Button>
