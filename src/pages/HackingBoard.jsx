@@ -194,6 +194,7 @@ export default function HackingBoard() {
         <HackDialog
           node={state.nodes.find(n => n.id === hackingNode.id) || hackingNode}
           onSubmit={handleSubmitRoll}
+          onUnhack={(nodeId) => { state.unhackNode(nodeId); }}
           onClose={() => setHackingNode(null)}
           mode={mode}
           rootMode={rootMode}

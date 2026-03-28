@@ -33,7 +33,7 @@ function canTargetNode(node, mode) {
   return !hasUnresolvedFirewall;
 }
 
-export default function HackDialog({ node, onSubmit, onClose, mode = 'create', rootMode = false }) {
+export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = 'create', rootMode = false }) {
   const [input, setInput] = useState('');
   const [result, setResult] = useState(null);
   // null = rolling against node, or a cm.id
@@ -185,13 +185,22 @@ export default function HackDialog({ node, onSubmit, onClose, mode = 'create', r
           <Button variant="outline" className="flex-1 font-mono text-xs" onClick={onClose}>
             Cancel
           </Button>
-          <Button
-            className="flex-1 font-mono text-xs bg-primary text-primary-foreground"
-            onClick={handleSubmit}
-            disabled={!input}
-          >
-            Enter
-          </Button>
+          {node.resolved ? (
+            <Button
+              className="flex-1 font-mono text-xs bg-destructive/80 text-destructive-foreground hover:bg-destructive"
+              onClick={() => { onUnhack(node.id); setResult(null); setInput(''); }}
+            >
+              Unhack
+            </Button>
+          ) : (
+            <Button
+              className="flex-1 font-mono text-xs bg-primary text-primary-foreground"
+              onClick={handleSubmit}
+              disabled={!input}
+            >
+              Enter
+            </Button>
+          )}
         </div>
       </div>
     </div>

@@ -362,6 +362,27 @@ export function useHackingState() {
     }));
   }, []);
 
+  const unhackNode = useCallback((nodeId) => {
+    setNodes(prev => prev.map(n => {
+      if (n.id !== nodeId) return n;
+      return {
+        ...n,
+        successes_current: 0,
+        failures_current: 0,
+        resolved: false,
+        ...(n.type === 'directory' ? { locked: true } : {}),
+        countermeasures: (n.countermeasures || []).map(cm => ({
+          ...cm,
+          successes_current: 0,
+          resolved: false,
+          triggered: false,
+          revealed: false,
+          countdown_current: cm.countdown,
+        })),
+      };
+    }));
+  }, []);
+
   // Submit a manual roll total against a node or countermeasure DC
   // target: { nodeId, cmId? } — if cmId present, rolling against a countermeasure
   const submitRoll = useCallback((nodeId, total, cmId = null) => {
@@ -478,7 +499,7 @@ export function useHackingState() {
     addConnection, removeConnection,
     addCountermeasure, updateCountermeasure, removeCountermeasure,
     submitRoll, advancePhase,
-    resetEncounter, addLogEntry,
+    resetEncounter, addLogEntry, unhackNode,
     rootAccessGranted,
     NODE_TEMPLATES,
   };
