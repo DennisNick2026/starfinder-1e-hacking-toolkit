@@ -13,12 +13,12 @@ const CM_COLOR = {
 // In play mode: fake_shell always hidden; alarms hidden until revealed; firewall hides everything else
 function getVisibleCms(node, mode) {
   const all = (node.countermeasures || []).filter(cm => !cm.resolved);
-  if (mode !== 'play') return all.filter(cm => !cm.triggered);
+  if (mode !== 'play') return all;
   const hasUnresolvedFirewall = all.some(cm => cm.type === 'firewall' && !cm.resolved);
   return all.filter(cm => {
-    if (cm.triggered) return false; // triggered CMs handled separately
     if (cm.type === 'fake_shell') return false; // always hidden in play mode
-    if (cm.type === 'alarm' && !cm.revealed) return false; // hidden until first hack attempt
+    // Alarm: show if revealed OR triggered (so player can hack it to turn it off)
+    if (cm.type === 'alarm' && !cm.revealed && !cm.triggered) return false; // hidden until first hack attempt or trigger
     if (hasUnresolvedFirewall && cm.type !== 'firewall') return false; // hidden behind firewall
     return true;
   });
@@ -189,7 +189,7 @@ export default function HackDialog({ node, onSubmit, onClose, mode = 'create' })
             onClick={handleSubmit}
             disabled={!input}
           >
-            Roll
+            Enter
           </Button>
         </div>
       </div>

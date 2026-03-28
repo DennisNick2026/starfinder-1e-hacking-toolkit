@@ -67,13 +67,18 @@ export default function NodeCard({
     >
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border/50">
-        <Icon className={cn('w-4 h-4 shrink-0', colors.text)} />
+        {firewallBlocked
+          ? <ShieldAlert className="w-4 h-4 shrink-0 text-destructive" />
+          : <Icon className={cn('w-4 h-4 shrink-0', colors.text)} />
+        }
         <span className="font-mono text-xs font-semibold truncate text-foreground flex-1">
-          {node.name}
+          {firewallBlocked ? '???????????' : node.name}
         </span>
-        <span className="font-mono text-[10px] text-muted-foreground shrink-0">
-          DC {node.dc}
-        </span>
+        {!firewallBlocked && (
+          <span className="font-mono text-[10px] text-muted-foreground shrink-0">
+            DC {node.dc}
+          </span>
+        )}
       </div>
 
       {/* Body */}
