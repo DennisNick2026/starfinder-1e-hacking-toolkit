@@ -34,6 +34,38 @@ function canTargetNode(node, mode) {
   return !hasUnresolvedFirewall;
 }
 
+function PasswordEntry({ label, password, onSuccess }) {
+  const [value, setValue] = useState('');
+  const [result, setResult] = useState(null);
+
+  const attempt = () => {
+    const match = value === password;
+    setResult(match ? 'success' : 'failure');
+    if (match) onSuccess();
+  };
+
+  return (
+    <div className="space-y-2 border-t border-border pt-3">
+      <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+      <div className="flex gap-2">
+        <Input
+          className="font-mono text-xs bg-muted border-border flex-1"
+          placeholder="Password..."
+          value={value}
+          onChange={e => { setValue(e.target.value); setResult(null); }}
+          onKeyDown={e => { if (e.key === 'Enter') attempt(); e.stopPropagation(); }}
+        />
+        <Button size="sm" className="font-mono text-xs" onClick={attempt}>Enter</Button>
+      </div>
+      {result && (
+        <p className={cn('font-mono text-xs font-bold', result === 'success' ? 'text-accent' : 'text-destructive')}>
+          {result === 'success' ? '✓ Access Granted' : '✗ Wrong Password'}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = 'create', rootMode = false }) {
   const [input, setInput] = useState('');
   const [result, setResult] = useState(null);
@@ -44,6 +76,10 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
 
   const isDirectory = node.type === 'directory';
   const hasPassword = isDirectory && node.password;
+
+  // Firewall password: look for a firewall CM that has a password set
+  const firewallCm = (node.countermeasures || []).find(cm => cm.type === 'firewall' && !cm.resolved && cm.password);
+  const hasFirewallPassword = !!firewallCm;
 
   if (!node) return null;
 
@@ -80,6 +116,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
     const success = total >= targetDC;
     setResult(success ? 'success' : 'failure');
     onSubmit(node.id, total, effectiveTarget || null);
+    if (success) setTimeout(onClose, 600);
   };
 
   const handleKeyDown = (e) => {
@@ -163,41 +200,20 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
 
         {/* Password entry for directories */}
         {isDirectory && hasPassword && !node.resolved && (
-          <div className="space-y-2 border-t border-border pt-3">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Or enter password:</p>
-            <div className="flex gap-2">
-              <Input
-                className="font-mono text-xs bg-muted border-border flex-1"
-                placeholder="Password..."
-                value={passwordInput}
-                onChange={e => { setPasswordInput(e.target.value); setPasswordResult(null); }}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    const match = passwordInput === node.password;
-                    setPasswordResult(match ? 'success' : 'failure');
-                    if (match) onSubmit(node.id, 9999, null);
-                  }
-                  e.stopPropagation();
-                }}
-              />
-              <Button
-                size="sm"
-                className="font-mono text-xs"
-                onClick={() => {
-                  const match = passwordInput === node.password;
-                  setPasswordResult(match ? 'success' : 'failure');
-                  if (match) onSubmit(node.id, 9999, null);
-                }}
-              >
-                Enter
-              </Button>
-            </div>
-            {passwordResult && (
-              <p className={cn('font-mono text-xs font-bold', passwordResult === 'success' ? 'text-accent' : 'text-destructive')}>
-                {passwordResult === 'success' ? '✓ Access Granted' : '✗ Wrong Password'}
-              </p>
-            )}
-          </div>
+          <PasswordEntry
+            label="Or enter password:"
+            password={node.password}
+            onSuccess={() => { onSubmit(node.id, 9999, null); setTimeout(onClose, 600); }}
+          />
+        )}
+
+        {/* Password entry for firewalls */}
+        {hasFirewallPassword && (
+          <PasswordEntry
+            label="Or enter firewall password:"
+            password={firewallCm.password}
+            onSuccess={() => { onSubmit(node.id, 9999, firewallCm.id); setTimeout(onClose, 600); }}
+          />
         )}
 
         {/* Numpad */}
@@ -228,7 +244,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
         {/* Actions */}
         <div className="flex gap-2">
           <Button variant="outline" className="flex-1 font-mono text-xs" onClick={onClose}>
-            Cancel
+            Back
           </Button>
           {node.resolved ? (
             <Button

@@ -42,6 +42,7 @@ export const COUNTERMEASURE_TEMPLATES = {
     successes_required: 2,
     successes_current: 0,
     resolved: false,
+    password: '',
   },
   lockout: {
     type: 'lockout',

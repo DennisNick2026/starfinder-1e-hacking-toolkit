@@ -98,8 +98,8 @@ export default function NodeCard({
           </span>
         )}
 
-        {/* Directory lock status */}
-        {node.type === 'directory' && !node.resolved && (
+        {/* Directory lock status — hidden in play mode when firewalled (would reveal node type) */}
+        {node.type === 'directory' && !node.resolved && !firewallBlocked && (
           <div className="flex items-center gap-1">
             <Lock className="w-2.5 h-2.5 text-chart-4" />
             <span className="font-mono text-[10px] text-chart-4">LOCKED</span>
