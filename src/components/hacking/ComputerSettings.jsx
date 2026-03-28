@@ -53,13 +53,13 @@ export default function ComputerSettings({
             </div>
           </div>
           <p className="font-mono text-[10px] text-muted-foreground">
-            Formula: 15 + 3 × tier = {15 + 3 * tier} or 15 + 1.5 × CR
+            Formula: 13 + (4 × tier) = {13 + 4 * tier}
           </p>
           <Button
             size="sm"
             variant="outline"
             className="font-mono text-[10px]"
-            onClick={() => setBaseDC(15 + 3 * tier)}
+            onClick={() => setBaseDC(13 + 4 * tier)}
           >
             Auto-calculate DC from Tier
           </Button>

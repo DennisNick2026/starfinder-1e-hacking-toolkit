@@ -1,16 +1,17 @@
 import React from 'react';
 import {
   Terminal, GitBranch, Database, SquareTerminal,
-  ShieldAlert, Siren, UserX, Bug, Unlock, Link, Trash2, Settings, Zap
+  ShieldAlert, Siren, UserX, Bug, Unlock, Link, Trash2, Settings, Zap,
+  Sparkles, EyeOff, Lock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const ICONS = {
   Terminal, GitBranch, Database, SquareTerminal,
-  ShieldAlert, Siren, UserX, Bug, Unlock,
+  ShieldAlert, Siren, UserX, Bug, Unlock, Sparkles,
 };
 
-const CM_ICONS = { ShieldAlert, Siren, UserX, Bug };
+const CM_ICONS = { ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 };
 
 const COLOR_MAP = {
   cyan:   { border: 'border-primary/60',     bg: 'bg-primary/5',     text: 'text-primary',     glow: 'glow-cyan'   },

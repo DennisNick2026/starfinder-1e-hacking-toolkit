@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Delete, ShieldAlert, Siren, UserX, Bug } from 'lucide-react';
+import { Delete, ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 } from 'lucide-react';
 
-const CM_ICONS = { ShieldAlert, Siren, UserX, Bug };
+const CM_ICONS = { ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 };
 
 const CM_COLOR = {
   red: 'text-destructive border-destructive/50 bg-destructive/10',

@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { X, Plus, Trash2, ShieldAlert, Siren, UserX, Bug } from 'lucide-react';
+import { X, Plus, Trash2, ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuTrigger, DropdownMenuLabel,
@@ -11,7 +11,7 @@ import {
 import { COUNTERMEASURE_TEMPLATES } from '@/lib/hacking-state';
 import { cn } from '@/lib/utils';
 
-const CM_ICONS = { ShieldAlert, Siren, UserX, Bug };
+const CM_ICONS = { ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 };
 const CM_COLOR = {
   red: 'border-destructive/40 bg-destructive/5 text-destructive',
   purple: 'border-chart-3/40 bg-chart-3/5 text-chart-3',

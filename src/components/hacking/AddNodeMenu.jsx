@@ -1,5 +1,5 @@
 import React from 'react';
-import { Terminal, GitBranch, Database, SquareTerminal, Unlock, Plus } from 'lucide-react';
+import { Terminal, GitBranch, Database, SquareTerminal, Unlock, Plus, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -7,7 +7,7 @@ import {
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 
-const ICONS = { Terminal, GitBranch, Database, SquareTerminal, Unlock };
+const ICONS = { Terminal, GitBranch, Database, SquareTerminal, Unlock, Sparkles };
 
 const CATEGORIES = [
   {
@@ -20,8 +20,11 @@ const CATEGORIES = [
   {
     label: 'Modules',
     items: [
-      { key: 'data_module', label: 'Data Module', icon: 'Database', color: 'text-accent' },
-      { key: 'command_module', label: 'Command Module', icon: 'SquareTerminal', color: 'text-accent' },
+      { key: 'control_complex', label: 'Control (Complex)', icon: 'SquareTerminal', color: 'text-accent' },
+      { key: 'secure_data_average', label: 'Secure Data (Avg)', icon: 'Database', color: 'text-accent' },
+      { key: 'secure_data_large', label: 'Secure Data (Large)', icon: 'Database', color: 'text-accent' },
+      { key: 'secure_data_specific', label: 'Secure Data (Specific)', icon: 'Database', color: 'text-accent' },
+      { key: 'spell_chip', label: 'Spell Chip', icon: 'Sparkles', color: 'text-chart-3' },
     ],
   },
   {
