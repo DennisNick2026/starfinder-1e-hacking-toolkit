@@ -400,11 +400,13 @@ export function useHackingState() {
         return [...prev, numbered];
       });
     } else {
-      setNodes(prev => [...prev, node]);
-      addLogEntry(`Added ${node.label}: "${node.name}"`, 'system');
+      setNodes(prev => {
+        addLogEntry(`Added ${node.label}: "${node.name}"`, 'system');
+        return [...prev, node];
+      });
     }
     return node.id;
-  }, [baseDC, addLogEntry]);
+  }, [effectiveBaseDC, addLogEntry]);
 
   const updateNode = useCallback((nodeId, updates) => {
     setNodes(prev => prev.map(n => n.id === nodeId ? { ...n, ...updates } : n));
@@ -571,7 +573,7 @@ export function useHackingState() {
   }, [phase, addLogEntry]);
 
   const clearNodes = useCallback(() => {
-    setNodes(prev => prev.filter(n => n.id === 'entry' || n.id === 'root_access'));
+    setNodes(prev => prev.filter(n => n.isEntry || n.isRootAccess));
     setConnections(prev => prev.filter(c =>
       (c.from === 'entry' || c.from === 'root_access') &&
       (c.to === 'entry' || c.to === 'root_access')
