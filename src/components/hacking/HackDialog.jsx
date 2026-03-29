@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { Delete, ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 } from 'lucide-react';
+import { ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 } from 'lucide-react';
 
 const CM_ICONS = { ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 };
 
@@ -62,27 +62,21 @@ function PasswordEntry({ label, password, onSuccess, disabled = false }) {
 }
 
 export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = 'create', rootMode = false }) {
-  const [input, setInput] = useState('');
-  const [result, setResult] = useState(null);
-  // null = rolling against node, or a cm.id
+  const [result, setResult] = useState(null); // 'success' | 'fail_minor' | 'fail_major'
   const [target, setTarget] = useState(null);
   const [closing, setClosing] = useState(false);
 
   if (!node) return null;
 
-  const isDirectory = node.type === 'directory';
   const activeCms = getVisibleCms(node, mode);
 
-  // In play mode with firewall, must target firewall first
   const hasUnresolvedFirewall = (node.countermeasures || []).some(cm => cm.type === 'firewall' && !cm.resolved);
   const firewallCm = (node.countermeasures || []).find(cm => cm.type === 'firewall' && !cm.resolved);
   const hasFirewallPassword = !!firewallCm?.password;
 
-  // If the currently selected target CM no longer exists, reset to null
   const targetStillValid = target === null || activeCms.some(cm => cm.id === target);
   const resolvedTarget = targetStillValid ? target : null;
 
-  // If blocked by firewall in play mode, auto-target firewall
   const effectiveTarget = (!hasUnresolvedFirewall && resolvedTarget === null)
     ? null
     : (hasUnresolvedFirewall && resolvedTarget === null)
@@ -97,111 +91,75 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
   const targetDC = rootMode ? 10 : rawTargetDC;
   const targetLabel = activeTarget ? activeTarget.label : node.name;
 
-  const handleDigit = (d) => {
-    if (closing || input.length >= 3) return;
-    setInput(prev => prev + d);
-    setResult(null);
-  };
-
-  const handleClear = () => {
+  const handleOutcome = (outcome) => {
     if (closing) return;
-    setInput(prev => prev.slice(0, -1));
-    setResult(null);
-  };
-
-  const handleSubmit = () => {
-    if (closing) return;
-    const total = parseInt(input);
-    if (isNaN(total)) return;
-    const success = total >= targetDC;
-    setResult(success ? 'success' : 'failure');
-    const submittedTarget = effectiveTarget;
-    onSubmit(node.id, total, submittedTarget || null);
-    if (success) {
-      setInput('');
+    setResult(outcome);
+    // Map outcome to a total that drives the existing submitRoll logic
+    const total = outcome === 'success' ? targetDC
+      : outcome === 'fail_minor' ? targetDC - 1   // margin = -1 (fail by < 5)
+      : targetDC - 5;                              // margin = -5 (fail by >= 5)
+    onSubmit(node.id, total, effectiveTarget || null);
+    if (outcome === 'success') {
       setClosing(true);
       setTimeout(onClose, 400);
     }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key >= '0' && e.key <= '9') handleDigit(e.key);
-    if (e.key === 'Backspace') handleClear();
-    if (e.key === 'Enter') handleSubmit();
-    if (e.key === 'Escape') onClose();
   };
 
   return (
     <div
       className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
       onClick={onClose}
+      onKeyDown={e => { if (e.key === 'Escape') onClose(); }}
     >
       <div
         className="bg-card border border-border rounded-xl p-6 w-80 space-y-4 shadow-2xl"
         onClick={e => e.stopPropagation()}
-        onKeyDown={handleKeyDown}
         tabIndex={-1}
       >
-        {/* Target selector */}
-        <div className="space-y-2">
-          <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Rolling against:</p>
-          <div className="flex flex-wrap gap-2">
-            <button
+        {/* Header */}
+        <div className="text-center space-y-1">
+          <p className="font-mono text-xs text-muted-foreground uppercase tracking-widest">Hacking</p>
+          <p className="font-mono text-lg font-bold text-foreground">{targetLabel}</p>
+          <p className="font-mono text-sm text-primary">DC {targetDC}</p>
+        </div>
+
+        {/* Target selector (CMs) */}
+        {activeCms.length > 0 && (
+          <div className="space-y-1.5">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Target:</p>
+            <div className="flex flex-wrap gap-1.5">
+              <button
                 className={cn(
-                  'font-mono text-xs px-3 py-1.5 rounded-lg border transition-colors',
+                  'font-mono text-xs px-2.5 py-1 rounded border transition-colors',
                   effectiveTarget === null
                     ? 'border-primary bg-primary/20 text-primary'
                     : 'border-border text-muted-foreground hover:border-primary/50'
                 )}
-                onClick={() => { setTarget(null); setInput(''); setResult(null); }}
+                onClick={() => { setTarget(null); setResult(null); }}
               >
-                {node.name} (DC {node.dc})
-                </button>
-                {activeCms.map(cm => {
-              const Icon = CM_ICONS[cm.icon];
-              return (
-                <button
-                  key={cm.id}
-                  className={cn(
-                    'font-mono text-xs px-3 py-1.5 rounded-lg border transition-colors flex items-center gap-1.5',
-                    effectiveTarget === cm.id
-                      ? CM_COLOR[cm.color] + ' border-opacity-100'
-                      : 'border-border text-muted-foreground hover:border-destructive/50'
-                  )}
-                  onClick={() => { setTarget(cm.id); setInput(''); setResult(null); }}
-                >
-                  {Icon && <Icon className="w-3 h-3" />}
-                  {cm.label} (DC {cm.dc})
-                </button>
-              );
-            })}
+                {node.name} (DC {rootMode ? 10 : node.dc})
+              </button>
+              {activeCms.map(cm => {
+                const Icon = CM_ICONS[cm.icon];
+                return (
+                  <button
+                    key={cm.id}
+                    className={cn(
+                      'font-mono text-xs px-2.5 py-1 rounded border transition-colors flex items-center gap-1',
+                      effectiveTarget === cm.id
+                        ? CM_COLOR[cm.color]
+                        : 'border-border text-muted-foreground hover:border-destructive/50'
+                    )}
+                    onClick={() => { setTarget(cm.id); setResult(null); }}
+                  >
+                    {Icon && <Icon className="w-3 h-3" />}
+                    {cm.label} (DC {rootMode ? 10 : cm.dc})
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-
-        {/* Display */}
-        <div className={cn(
-          'bg-muted rounded-lg px-4 py-3 text-right font-mono',
-          result === 'success' && 'bg-accent/20 border border-accent',
-          result === 'failure' && 'bg-destructive/20 border border-destructive',
-          !result && 'border border-border'
-        )}>
-          <p className="text-[10px] text-muted-foreground mb-1">
-            {targetLabel} — DC {targetDC}
-          </p>
-          <p className="text-3xl font-bold text-foreground tracking-widest">
-            {input || '—'}
-          </p>
-          {result && (
-            <p className={cn(
-              'text-xs font-bold uppercase tracking-widest mt-1',
-              result === 'success' ? 'text-accent' : 'text-destructive'
-            )}>
-              {result === 'success' ? '✓ Success' : '✗ Failure'}
-            </p>
-          )}
-        </div>
-
-
+        )}
 
         {/* Password entry for firewall */}
         {hasFirewallPassword && hasUnresolvedFirewall && effectiveTarget === firewallCm?.id && (
@@ -212,61 +170,72 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
             disabled={closing}
             onSuccess={() => {
               setClosing(true);
-              const cmId = firewallCm.id;
-              onSubmit(node.id, 9999, cmId);
+              onSubmit(node.id, 9999, firewallCm.id);
               setTimeout(onClose, 400);
             }}
           />
         )}
 
-        {/* Numpad */}
-        <div className="grid grid-cols-3 gap-2">
-          {[7,8,9,4,5,6,1,2,3].map(d => (
-            <button
-              key={d}
-              disabled={closing}
-              className="h-12 rounded-lg bg-secondary hover:bg-secondary/70 font-mono text-lg font-semibold text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={() => handleDigit(String(d))}
-            >
-              {d}
-            </button>
-          ))}
-          <button
-            disabled={closing}
-            className="h-12 rounded-lg bg-secondary hover:bg-secondary/70 font-mono text-sm text-muted-foreground transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => handleDigit('0')}
-          >
-            0
-          </button>
-          <button
-            disabled={closing}
-            className="h-12 rounded-lg bg-secondary hover:bg-secondary/70 font-mono text-sm text-muted-foreground transition-colors flex items-center justify-center col-span-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={handleClear}
-          >
-            <Delete className="w-4 h-4" />
-          </button>
-        </div>
+        {/* Outcome buttons */}
+        {!node.resolved && (
+          <div className="space-y-2">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground text-center">Roll outcome:</p>
+            <div className="grid grid-cols-1 gap-2">
+              <button
+                disabled={closing}
+                onClick={() => handleOutcome('success')}
+                className={cn(
+                  'w-full py-3 rounded-lg border-2 font-mono text-sm font-bold transition-all',
+                  result === 'success'
+                    ? 'border-accent bg-accent/20 text-accent'
+                    : 'border-accent/40 bg-accent/5 text-accent/80 hover:border-accent hover:bg-accent/15',
+                  closing && 'opacity-50 cursor-not-allowed'
+                )}
+              >
+                ✓ Success
+              </button>
+              <button
+                disabled={closing}
+                onClick={() => handleOutcome('fail_minor')}
+                className={cn(
+                  'w-full py-3 rounded-lg border-2 font-mono text-sm font-bold transition-all',
+                  result === 'fail_minor'
+                    ? 'border-chart-4 bg-chart-4/20 text-chart-4'
+                    : 'border-chart-4/40 bg-chart-4/5 text-chart-4/80 hover:border-chart-4 hover:bg-chart-4/15',
+                  closing && 'opacity-50 cursor-not-allowed'
+                )}
+              >
+                ~ Fail by less than 5
+              </button>
+              <button
+                disabled={closing}
+                onClick={() => handleOutcome('fail_major')}
+                className={cn(
+                  'w-full py-3 rounded-lg border-2 font-mono text-sm font-bold transition-all',
+                  result === 'fail_major'
+                    ? 'border-destructive bg-destructive/20 text-destructive'
+                    : 'border-destructive/40 bg-destructive/5 text-destructive/80 hover:border-destructive hover:bg-destructive/15',
+                  closing && 'opacity-50 cursor-not-allowed'
+                )}
+              >
+                ✗ Fail by 5 or more
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex gap-2">
           <Button variant="outline" className="flex-1 font-mono text-xs" onClick={onClose} disabled={closing}>
             Back
           </Button>
-          {node.resolved ? (
+          {node.resolved && (
             <Button
               className="flex-1 font-mono text-xs bg-destructive/80 text-destructive-foreground hover:bg-destructive"
-              onClick={() => { onUnhack(node.id); setResult(null); setInput(''); }}
+              onClick={() => { onUnhack(node.id); setResult(null); }}
               disabled={closing}
             >
               Unhack
-            </Button>
-          ) : (
-            <Button
-              className="flex-1 font-mono text-xs bg-primary text-primary-foreground"
-              onClick={handleSubmit}
-              disabled={!input || closing}
-            >
-              Enter
             </Button>
           )}
         </div>
