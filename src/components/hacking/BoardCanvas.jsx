@@ -80,6 +80,8 @@ export default function BoardCanvas({
       setConnectingFrom(null);
       return;
     }
+    // Entry and root access nodes cannot be moved
+    if (nodeId === 'entry' || nodeId === 'root_access') return;
     const node = nodes.find(n => n.id === nodeId);
     if (!node) return;
     const canvas = toCanvas(e.clientX, e.clientY);
