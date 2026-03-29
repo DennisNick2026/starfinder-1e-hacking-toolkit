@@ -391,13 +391,26 @@ export function useHackingState() {
   const effectiveBaseDC = baseDC + securityBonus;
 
   // Keep entry node and root access DC in sync with baseDC + highest security bonus
+  // Also update all other node DCs and security module names
   useEffect(() => {
     const securityBonus = getSecurityDCBonus(nodes);
     const effectiveDC = baseDC + securityBonus;
     setNodes(prev => prev.map(n => {
       if (n.id === 'entry') return { ...n, dc: effectiveDC };
       if (n.id === 'root_access') return { ...n, dc: effectiveDC + 20 };
-      return n;
+      
+      // Update all other nodes' DCs
+      const modifier = NODE_DC_MODIFIERS[n.type] ?? 0;
+      const newDC = Math.max(1, effectiveDC + modifier);
+      
+      // Update security module name to reflect tier
+      if (n.type === 'security_module') {
+        const tierNames = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV' };
+        const tierName = tierNames[n.tier] || 'I';
+        return { ...n, dc: newDC, name: `Security Module ${tierName}` };
+      }
+      
+      return { ...n, dc: newDC };
     }));
   }, [baseDC, nodes]);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
@@ -430,7 +443,19 @@ export function useHackingState() {
   }, [effectiveBaseDC, addLogEntry]);
 
   const updateNode = useCallback((nodeId, updates) => {
-    setNodes(prev => prev.map(n => n.id === nodeId ? { ...n, ...updates } : n));
+    setNodes(prev => prev.map(n => {
+      if (n.id !== nodeId) return n;
+      const updated = { ...n, ...updates };
+      
+      // Auto-update security module name when tier changes
+      if (n.type === 'security_module' && updates.tier !== undefined) {
+        const tierNames = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV' };
+        const tierName = tierNames[updates.tier] || 'I';
+        updated.name = `Security Module ${tierName}`;
+      }
+      
+      return updated;
+    }));
   }, []);
 
   const removeNode = useCallback((nodeId) => {
