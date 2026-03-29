@@ -79,7 +79,12 @@ export default function HackingBoard() {
     setMode('play');
     setShowLoadDialog(false);
     // Fit to screen after DOM updates and layout
-    setTimeout(() => boardCanvasRef.current?.fitAll?.(), 100);
+    setTimeout(() => {
+      console.log('fitAll ref:', boardCanvasRef.current);
+      if (boardCanvasRef.current && boardCanvasRef.current.fitAll) {
+        boardCanvasRef.current.fitAll();
+      }
+    }, 100);
   };
 
   const handleNewEncounter = () => {
