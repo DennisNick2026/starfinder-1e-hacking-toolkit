@@ -44,8 +44,8 @@ export default function SaveEncounterDialog({ isOpen, onClose, encounterData }) 
     }
   };
 
-  const copyShareCode = () => {
-    navigator.clipboard.writeText(shareCode);
+  const copyShareCode = async () => {
+    await navigator.clipboard.writeText(shareCode);
   };
 
   return (
