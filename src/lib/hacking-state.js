@@ -507,16 +507,16 @@ export function useHackingState() {
         // Rolling against a countermeasure
         const cms = (n.countermeasures || []).map(cm => {
           if (cm.id !== cmId) return cm;
-          if (cm.resolved || cm.triggered) return cm;
+          if (cm.resolved) return cm;
           const effectiveDC = rootMode ? 10 : cm.dc;
           const success = total >= effectiveDC;
           if (!success) return cm;
           if (cm.successes_required !== undefined) {
             const newSuccesses = Math.min((cm.successes_current || 0) + 1, cm.successes_required);
             const resolved = newSuccesses >= cm.successes_required;
-            return { ...cm, successes_current: newSuccesses, resolved };
+            return { ...cm, successes_current: newSuccesses, resolved, triggered: false };
           }
-          return { ...cm, resolved: true };
+          return { ...cm, resolved: true, triggered: false };
         });
         return { ...n, countermeasures: cms };
       }
