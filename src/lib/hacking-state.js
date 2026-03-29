@@ -669,7 +669,6 @@ export function useHackingState() {
     setComputerName(encounterData.computerName);
     setTier(encounterData.tier);
     setBaseDC(encounterData.baseDC);
-    setSecurityModule(encounterData.securityModule || null);
     setUpgrades(encounterData.upgrades || []);
     setNodes(encounterData.nodes || []);
     setConnections(encounterData.connections || []);
