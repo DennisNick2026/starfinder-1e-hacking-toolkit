@@ -381,10 +381,14 @@ export function useHackingState() {
   ]);
 
   // Calculate security DC bonus from highest tier security module on board
-  const getSecurityDCBonus = (nodesList) => {
+  const getSecurityDCBonus = useCallback((nodesList) => {
     const unresolved = nodesList.filter(n => n.type === 'security_module' && !n.resolved && n.tier);
     return unresolved.length > 0 ? Math.max(...unresolved.map(n => n.tier || 0)) : 0;
-  };
+  }, []);
+
+  // Calculate effective base DC with security bonus
+  const securityBonus = getSecurityDCBonus(nodes);
+  const effectiveBaseDC = baseDC + securityBonus;
 
   // Keep entry node and root access DC in sync with baseDC + highest security bonus
   useEffect(() => {
@@ -635,10 +639,6 @@ export function useHackingState() {
   const totalCountermeasures = nodes.reduce((sum, n) =>
     sum + (n.countermeasures || []).filter(cm => !cm.resolved).length, 0
   );
-
-  // Calculate effective base DC with security bonus
-  const securityBonus = getSecurityDCBonus(nodes);
-  const effectiveBaseDC = baseDC + securityBonus;
 
   const loadEncounter = useCallback((encounterData) => {
     setComputerName(encounterData.computerName);
