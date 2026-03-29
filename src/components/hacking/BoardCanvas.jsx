@@ -75,8 +75,6 @@ export default function BoardCanvas({
 
   const handleNodeMouseDown = useCallback((e, nodeId) => {
     e.stopPropagation();
-    // Don't start drag if clicking a button or input inside the card
-    if (e.target.closest('button') || e.target.closest('input')) return;
     if (connectingFrom) {
       onAddConnection(connectingFrom, nodeId);
       setConnectingFrom(null);
@@ -276,7 +274,12 @@ export default function BoardCanvas({
         {nodes.map(node => (
           <div
             key={node.id}
-            onMouseDown={(e) => { handleNodeMouseDown(e, node.id); }}
+            onMouseDown={(e) => { 
+              // Don't start drag if clicking buttons/inputs
+              if (!e.target.closest('button') && !e.target.closest('input')) {
+                handleNodeMouseDown(e, node.id);
+              }
+            }}
             style={{
               position: 'absolute',
               left: node.x,
