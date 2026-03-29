@@ -33,6 +33,7 @@
     --chart-3: 280 100% 50%;
     --chart-4: 50 100% 60%;
     --chart-5: 10 100% 55%;
+    --control-color: 120 100% 45%;
     --radius: 0.3rem;
     --sidebar-background: 220 25% 8%;
     --sidebar-foreground: 160 100% 65%;
@@ -69,6 +70,7 @@
     --chart-3: 280 60% 60%;
     --chart-4: 45 80% 55%;
     --chart-5: 0 70% 55%;
+    --control-color: 120 80% 45%;
     --sidebar-background: 220 18% 10%;
     --sidebar-foreground: 180 10% 90%;
     --sidebar-primary: 175 80% 50%;

@@ -18,6 +18,7 @@ const CM_ICONS = { ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 };
 const COLOR_MAP = {
   cyan:   { border: 'border-primary/60',     bg: 'bg-primary/5',     text: 'text-primary',     glow: 'glow-cyan'   },
   blue:   { border: 'border-chart-2/60',     bg: 'bg-chart-2/5',     text: 'text-chart-2',     glow: 'glow-green'  },
+  green:  { border: 'border-control/60',     bg: 'bg-control/5',     text: 'text-control',     glow: 'glow-cyan'   },
   red:    { border: 'border-destructive/60', bg: 'bg-destructive/5', text: 'text-destructive', glow: 'glow-red'    },
   purple: { border: 'border-chart-3/60',     bg: 'bg-chart-3/5',     text: 'text-chart-3',     glow: 'glow-purple' },
   yellow: { border: 'border-chart-4/60',     bg: 'bg-chart-4/5',     text: 'text-chart-4',     glow: 'glow-yellow' },
