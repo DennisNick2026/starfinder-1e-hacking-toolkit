@@ -61,11 +61,9 @@ function PasswordEntry({ label, password, onSuccess, disabled = false }) {
   );
 }
 
-export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = 'create', rootMode = false }) {
+export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = 'create', rootMode = false, initialTarget = null }) {
   const [result, setResult] = useState(null); // 'success' | 'fail_minor' | 'fail_major'
-  // If node is already resolved, auto-select the first triggered alarm as target
-  const firstTriggeredAlarm = (node?.countermeasures || []).find(cm => cm.type === 'alarm' && cm.triggered && !cm.resolved);
-  const [target, setTarget] = useState(node?.resolved && firstTriggeredAlarm ? firstTriggeredAlarm.id : null);
+  const [target, setTarget] = useState(initialTarget);
   const [closing, setClosing] = useState(false);
 
   if (!node) return null;

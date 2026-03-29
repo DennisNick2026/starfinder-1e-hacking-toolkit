@@ -18,7 +18,8 @@ export default function HackingBoard() {
   const rootMode = rootModeOverride || state.rootAccessGranted;
   // In play mode, only allow toggle if root has been earned
   const canToggleRoot = mode === 'create' || state.rootAccessGranted;
-  const [hackingNode, setHackingNode] = useState(null);
+  const [hackingNode, setHackingNode] = useState(null); // { node, cmId? }
+
   const [configuringNodeId, setConfiguringNodeId] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
@@ -31,9 +32,9 @@ export default function HackingBoard() {
     state.addNode(templateKey, x, y);
   };
 
-  const handleHack = (node) => {
+  const handleHack = (node, cmId = null) => {
     setConfiguringNodeId(null);
-    setHackingNode(node);
+    setHackingNode({ node, cmId });
   };
 
   const handleConfigure = (nodeId) => {
@@ -182,7 +183,7 @@ export default function HackingBoard() {
             onMoveNode={state.moveNode}
             onDeleteNode={mode === 'create' ? state.removeNode : () => {}}
             onAddConnection={state.addConnection}
-            onHack={handleHack}
+            onHack={(node, cmId) => handleHack(node, cmId)}
             onUnhack={state.unhackNode}
             onConfigure={handleConfigure}
             onDropNode={handleDropNode}
@@ -238,13 +239,14 @@ export default function HackingBoard() {
 
       {hackingNode && (
         <HackDialog
-          key={hackingNode.id}
-          node={state.nodes.find(n => n.id === hackingNode.id) || hackingNode}
+          key={hackingNode.node.id + (hackingNode.cmId || '')}
+          node={state.nodes.find(n => n.id === hackingNode.node.id) || hackingNode.node}
           onSubmit={handleSubmitRoll}
           onUnhack={(nodeId) => { state.unhackNode(nodeId); }}
           onClose={() => setHackingNode(null)}
           mode={mode}
           rootMode={rootMode}
+          initialTarget={hackingNode.cmId}
         />
       )}
     </div>

@@ -140,7 +140,7 @@ export default function NodeCard({
                     return (
                       <button
                         key={cm.id}
-                        onClick={(e) => { e.stopPropagation(); onHack?.(node); }}
+                        onClick={(e) => { e.stopPropagation(); onHack?.(node, cm.id); }}
                         className={cn(
                           'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border text-[9px] font-mono font-semibold animate-pulse',
                           'cursor-pointer hover:opacity-80 hover:animate-none transition-opacity',
