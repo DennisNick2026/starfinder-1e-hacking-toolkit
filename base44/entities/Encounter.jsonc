@@ -34,10 +34,16 @@
     },
     "nodes": {
       "type": "array",
+      "items": {
+        "type": "object"
+      },
       "description": "All nodes in the encounter"
     },
     "connections": {
       "type": "array",
+      "items": {
+        "type": "object"
+      },
       "description": "Connections between nodes"
     },
     "isPublic": {
