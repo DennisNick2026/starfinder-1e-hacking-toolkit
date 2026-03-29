@@ -612,6 +612,18 @@ export function useHackingState() {
     sum + (n.countermeasures || []).filter(cm => !cm.resolved).length, 0
   );
 
+  const loadEncounter = useCallback((encounterData) => {
+    setComputerName(encounterData.computerName);
+    setTier(encounterData.tier);
+    setBaseDC(encounterData.baseDC);
+    setSecurityModule(encounterData.securityModule || null);
+    setUpgrades(encounterData.upgrades || []);
+    setNodes(encounterData.nodes || []);
+    setConnections(encounterData.connections || []);
+    setPhase(1);
+    setLog([]);
+  }, []);
+
   return {
     computerName, setComputerName,
     tier, setTier,
@@ -630,7 +642,7 @@ export function useHackingState() {
     addConnection, removeConnection,
     addCountermeasure, updateCountermeasure, removeCountermeasure, unresolveCountermeasure,
     submitRoll, advancePhase,
-    resetEncounter, clearNodes, addLogEntry, unhackNode,
+    resetEncounter, clearNodes, addLogEntry, unhackNode, loadEncounter,
     rootAccessGranted,
     NODE_TEMPLATES,
   };

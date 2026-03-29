@@ -7,23 +7,26 @@ import BottomToolbar from '@/components/hacking/BottomToolbar';
 import BottomLog from '@/components/hacking/BottomLog';
 import ComputerSettings from '@/components/hacking/ComputerSettings';
 import DataFileModal from '@/components/hacking/DataFileModal';
-import { Cpu, ShieldCheck, Play, SkipForward, RotateCcw, Settings, Shield, Pencil, Trash2 } from 'lucide-react';
+import SaveEncounterDialog from '@/components/hacking/SaveEncounterDialog';
+import LoadEncounterDialog from '@/components/hacking/LoadEncounterDialog';
+import { Cpu, ShieldCheck, Play, SkipForward, RotateCcw, Settings, Shield, Pencil, Trash2, Upload, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function HackingBoard() {
   const state = useHackingState();
   const [mode, setMode] = useState('create');
-  // rootModeOverride: manually toggled on/off; auto-enabled when root_access node is resolved
   const [rootModeOverride, setRootModeOverride] = useState(false);
   const rootMode = rootModeOverride || state.rootAccessGranted;
-  // In play mode, only allow toggle if root has been earned
   const canToggleRoot = mode === 'create' || state.rootAccessGranted;
-  const [hackingNode, setHackingNode] = useState(null); // { node, cmId? }
+  const [hackingNode, setHackingNode] = useState(null);
 
   const [configuringNodeId, setConfiguringNodeId] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [fileNode, setFileNode] = useState(null);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showLoadDialog, setShowLoadDialog] = useState(false);
+  const [sharedEncounter, setSharedEncounter] = useState(null);
 
   const configuringNode = state.nodes.find(n => n.id === configuringNodeId) || null;
   const selectedNode = configuringNode || state.nodes.find(n => n.id === state.selectedNodeId) || null;
@@ -68,6 +71,13 @@ export default function HackingBoard() {
     state.submitRoll(nodeId, total, cmId, rootMode);
   };
 
+  const handleLoadEncounter = (encounter) => {
+    state.loadEncounter(encounter);
+    setSharedEncounter(encounter);
+    setMode('play');
+    setShowLoadDialog(false);
+  };
+
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Top bar */}
@@ -100,6 +110,23 @@ export default function HackingBoard() {
 
         <div className="flex-1" />
 
+        {mode === 'create' && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowSaveDialog(true)}
+              className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
+            >
+              <Upload className="w-3.5 h-3.5" /> SAVE
+            </button>
+            <button
+              onClick={() => setShowLoadDialog(true)}
+              className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
+            >
+              <Download className="w-3.5 h-3.5" /> LOAD
+            </button>
+          </div>
+        )}
+
         <div className="flex items-center border border-primary/30 rounded overflow-hidden">
           <button
             className={cn(
@@ -107,6 +134,7 @@ export default function HackingBoard() {
               mode === 'create' ? 'bg-primary text-primary-foreground' : 'text-primary/50 hover:text-primary'
             )}
             onClick={() => handleSwitchMode('create')}
+            disabled={sharedEncounter}
           >
             <Pencil className="w-3.5 h-3.5" /> ADMIN
           </button>
@@ -256,6 +284,27 @@ export default function HackingBoard() {
           initialTarget={hackingNode.cmId}
         />
       )}
+
+      <SaveEncounterDialog
+        isOpen={showSaveDialog}
+        onClose={() => setShowSaveDialog(false)}
+        encounterData={{
+          computerName: state.computerName,
+          tier: state.tier,
+          baseDC: state.baseDC,
+          securityModule: state.securityModule,
+          upgrades: state.upgrades,
+          nodes: state.nodes,
+          connections: state.connections,
+        }}
+        onSaved={() => setShowSaveDialog(false)}
+      />
+
+      <LoadEncounterDialog
+        isOpen={showLoadDialog}
+        onClose={() => setShowLoadDialog(false)}
+        onLoad={handleLoadEncounter}
+      />
     </div>
   );
 }

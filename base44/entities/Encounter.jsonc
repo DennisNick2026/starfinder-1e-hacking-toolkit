@@ -1,0 +1,61 @@
+{
+  "name": "Encounter",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Name of the encounter"
+    },
+    "computerName": {
+      "type": "string",
+      "description": "Computer/system name"
+    },
+    "tier": {
+      "type": "integer",
+      "description": "Tier difficulty"
+    },
+    "baseDC": {
+      "type": "integer",
+      "description": "Base difficulty class"
+    },
+    "securityModule": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Security module level"
+    },
+    "upgrades": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of upgrades"
+    },
+    "nodes": {
+      "type": "array",
+      "description": "All nodes in the encounter"
+    },
+    "connections": {
+      "type": "array",
+      "description": "Connections between nodes"
+    },
+    "isPublic": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this encounter can be accessed by others"
+    },
+    "shareCode": {
+      "type": "string",
+      "description": "Unique code for sharing"
+    }
+  },
+  "required": [
+    "title",
+    "computerName",
+    "tier",
+    "baseDC",
+    "nodes",
+    "connections"
+  ]
+}
