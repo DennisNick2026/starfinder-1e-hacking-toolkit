@@ -95,6 +95,13 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
     center: handleCenter,
   }), [handleFitAll, handleCenter]);
 
+  useEffect(() => {
+    const el = outerRef.current;
+    if (!el) return;
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, [handleWheel]);
+
   const handleBoardMouseDown = (e) => {
     if (draggingNode) return;
     if (connectingFrom) {
