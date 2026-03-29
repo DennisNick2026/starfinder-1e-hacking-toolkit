@@ -88,6 +88,20 @@ export const NODE_DC_MODIFIERS = {
   secure_data_specific:+4,
   spell_chip:          0,
   vulnerability:      -4,
+  ctrl_door:           0,
+  ctrl_camera:         0,
+  ctrl_turret:        +2,
+  ctrl_vent:           0,
+  ctrl_detonate:      +2,
+  ctrl_laser:         +2,
+  ctrl_gravity:       +2,
+  ctrl_robot:         +2,
+  ctrl_shield:        +2,
+  ctrl_engine:        +2,
+  ctrl_weapon:        +2,
+  ctrl_life_support:  +4,
+  ctrl_sensor:         0,
+  ctrl_power_core:    +4,
 };
 
 const NODE_TEMPLATES = {
@@ -188,6 +202,76 @@ const NODE_TEMPLATES = {
     dc_reduction: 2,
     resolved: false,
     countermeasures: [],
+  },
+  ctrl_door: {
+    type: 'ctrl_door', label: 'Door', color: 'green', icon: 'SquareTerminal',
+    description: 'Control a door — lock, unlock, or open/close remotely',
+    dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
+  },
+  ctrl_camera: {
+    type: 'ctrl_camera', label: 'Camera', color: 'green', icon: 'SquareTerminal',
+    description: 'Access or disable a security camera',
+    dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
+  },
+  ctrl_turret: {
+    type: 'ctrl_turret', label: 'Turret', color: 'green', icon: 'SquareTerminal',
+    description: 'Disable, redirect, or take control of a turret',
+    dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
+  },
+  ctrl_vent: {
+    type: 'ctrl_vent', label: 'Vent', color: 'green', icon: 'SquareTerminal',
+    description: 'Open, close, or reroute ventilation systems',
+    dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
+  },
+  ctrl_detonate: {
+    type: 'ctrl_detonate', label: 'Detonate', color: 'red', icon: 'SquareTerminal',
+    description: 'Trigger an explosive or destructive device remotely',
+    dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
+  },
+  ctrl_laser: {
+    type: 'ctrl_laser', label: 'Laser', color: 'green', icon: 'SquareTerminal',
+    description: 'Redirect or disable a laser system',
+    dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
+  },
+  ctrl_gravity: {
+    type: 'ctrl_gravity', label: 'Gravity', color: 'purple', icon: 'SquareTerminal',
+    description: 'Alter gravity plating settings in an area',
+    dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
+  },
+  ctrl_robot: {
+    type: 'ctrl_robot', label: 'Robot', color: 'green', icon: 'SquareTerminal',
+    description: 'Hack and override a robot or drone',
+    dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
+  },
+  ctrl_shield: {
+    type: 'ctrl_shield', label: 'Shield', color: 'cyan', icon: 'SquareTerminal',
+    description: 'Lower or disable a shield generator',
+    dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
+  },
+  ctrl_engine: {
+    type: 'ctrl_engine', label: 'Engine', color: 'yellow', icon: 'SquareTerminal',
+    description: 'Sabotage or control an engine or thruster',
+    dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
+  },
+  ctrl_weapon: {
+    type: 'ctrl_weapon', label: 'Weapon', color: 'red', icon: 'SquareTerminal',
+    description: 'Override or disable a weapons system',
+    dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
+  },
+  ctrl_life_support: {
+    type: 'ctrl_life_support', label: 'Life Support', color: 'red', icon: 'SquareTerminal',
+    description: 'Tamper with life support systems',
+    dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
+  },
+  ctrl_sensor: {
+    type: 'ctrl_sensor', label: 'Sensor', color: 'green', icon: 'SquareTerminal',
+    description: 'Blind, loop, or spoof sensor arrays',
+    dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
+  },
+  ctrl_power_core: {
+    type: 'ctrl_power_core', label: 'Power Core', color: 'yellow', icon: 'SquareTerminal',
+    description: 'Access and manipulate the main power core',
+    dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
 };
 

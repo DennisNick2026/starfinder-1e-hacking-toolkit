@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import {
   Terminal, FolderLock, Database, SquareTerminal, Unlock, Sparkles,
   FolderOpen, Box, Hand, Triangle, Cpu,
+  DoorOpen, Camera, Crosshair, Wind, Bomb, Zap, Gauge, Bot,
+  Shield, Rocket, Sword, Heart, Radio, Power,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -31,7 +33,21 @@ const CATEGORIES = [
     label: 'CONTROL',
     icon: Hand,
     items: [
-      { key: 'control_complex', label: 'Control (Complex)', icon: SquareTerminal },
+      { key: 'control_complex', label: 'Control', icon: SquareTerminal },
+      { key: 'ctrl_door',         label: 'Door',         icon: DoorOpen },
+      { key: 'ctrl_camera',       label: 'Camera',       icon: Camera },
+      { key: 'ctrl_turret',       label: 'Turret',       icon: Crosshair },
+      { key: 'ctrl_vent',         label: 'Vent',         icon: Wind },
+      { key: 'ctrl_detonate',     label: 'Detonate',     icon: Bomb },
+      { key: 'ctrl_laser',        label: 'Laser',        icon: Zap },
+      { key: 'ctrl_gravity',      label: 'Gravity',      icon: Gauge },
+      { key: 'ctrl_robot',        label: 'Robot',        icon: Bot },
+      { key: 'ctrl_shield',       label: 'Shield',       icon: Shield },
+      { key: 'ctrl_engine',       label: 'Engine',       icon: Rocket },
+      { key: 'ctrl_weapon',       label: 'Weapon',       icon: Sword },
+      { key: 'ctrl_life_support', label: 'Life Support', icon: Heart },
+      { key: 'ctrl_sensor',       label: 'Sensor',       icon: Radio },
+      { key: 'ctrl_power_core',   label: 'Power Core',   icon: Power },
     ],
   },
   {
