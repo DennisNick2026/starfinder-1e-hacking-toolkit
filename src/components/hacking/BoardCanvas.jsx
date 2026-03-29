@@ -175,9 +175,11 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
     if (!entry) return;
     const rect = outerRef.current?.getBoundingClientRect();
     if (!rect) return;
+    const w = COMPACT_NODE_W / 2;
+    const h = COMPACT_NODE_H / 2;
     setPan({
-      x: rect.width / 2 - (entry.x + NODE_W / 2) * zoom,
-      y: rect.height / 2 - (entry.y + NODE_H / 2) * zoom,
+      x: rect.width / 2 - (entry.x + w) * zoom,
+      y: rect.height / 2 - (entry.y + h) * zoom,
     });
   }, [nodes, zoom]);
 
