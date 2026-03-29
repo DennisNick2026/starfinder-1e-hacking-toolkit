@@ -64,7 +64,7 @@ export default function NodeCard({
     <div
       className={cn(
         'absolute select-none cursor-grab active:cursor-grabbing',
-        'w-48 rounded-lg border-2 transition-shadow duration-200',
+        'w-56 rounded-lg border-2 transition-shadow duration-200',
         colors.border, colors.bg,
         isSelected && colors.glow,
         isDragging && 'opacity-70 scale-105',
@@ -185,17 +185,22 @@ export default function NodeCard({
       <div className="flex border-t border-border/50">
         {!node.noHack && (
           <button
-            className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex items-center justify-center gap-1"
+            className={cn(
+              'flex-1 py-2 text-[10px] font-mono transition-colors flex items-center justify-center gap-1.5',
+              node.resolved
+                ? 'text-muted-foreground hover:text-destructive hover:bg-destructive/10'
+                : 'text-muted-foreground hover:text-primary hover:bg-primary/10'
+            )}
             onClick={(e) => { e.stopPropagation(); onHack(node); }}
-            title="Hack this node"
+            title={node.resolved ? 'Revert this node' : 'Hack this node'}
           >
             <Zap className="w-3 h-3" />
-            <span>Hack</span>
+            <span>{node.resolved ? 'Revert' : 'Hack'}</span>
           </button>
         )}
         {DATA_NODE_TYPES.includes(node.type) && (mode === 'create' || node.resolved) && (
           <button
-            className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-accent hover:bg-accent/10 transition-colors flex items-center justify-center gap-1 border-l border-border/50"
+            className="flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-accent hover:bg-accent/10 transition-colors flex items-center justify-center gap-1.5 border-l border-border/50"
             onClick={(e) => { e.stopPropagation(); onOpenFile?.(node); }}
             title="Open data file"
           >
@@ -206,26 +211,28 @@ export default function NodeCard({
         {mode === 'create' && (
           <>
             <button
-              className={`flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center justify-center ${!node.noHack ? 'border-l border-border/50' : ''}`}
+              className={cn(
+                'flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center justify-center border-l border-border/50'
+              )}
               onClick={(e) => { e.stopPropagation(); onConfigure(node.id); }}
               title="Configure node"
             >
-              <Settings className="w-3 h-3" />
+              <Settings className="w-3.5 h-3.5" />
             </button>
             <button
-              className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex items-center justify-center border-l border-border/50"
+              className="flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex items-center justify-center border-l border-border/50"
               onClick={(e) => { e.stopPropagation(); onStartConnect(node.id); }}
               title="Connect to another node"
             >
-              <Link className="w-3 h-3" />
+              <Link className="w-3.5 h-3.5" />
             </button>
             {!node.isEntry && !node.isRootAccess && (
               <button
-                className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center border-l border-border/50"
+                className="flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center border-l border-border/50"
                 onClick={(e) => { e.stopPropagation(); onDelete(node.id); }}
                 title="Remove node"
               >
-                <Trash2 className="w-3 h-3" />
+                <Trash2 className="w-3.5 h-3.5" />
               </button>
             )}
           </>

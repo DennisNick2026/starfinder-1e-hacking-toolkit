@@ -55,7 +55,7 @@ export default function BoardCanvas({
     const nodeType = e.dataTransfer.getData('nodeType');
     if (!nodeType || !onDropNode) return;
     const rect = boardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left - 96; // center the 192px wide card
+    const x = e.clientX - rect.left - 112; // center the 224px wide card
     const y = e.clientY - rect.top - 40;
     onDropNode(nodeType, Math.max(0, x), Math.max(0, y));
   };
