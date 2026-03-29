@@ -308,14 +308,11 @@ let nextCmId = 1;
 
 function createNode(template, x, y, baseDC) {
   const id = `node_${nextId++}`;
-  const modifier = NODE_DC_MODIFIERS[template.type] ?? 0;
-  const dc = Math.max(1, baseDC + modifier);
   return {
     ...template,
     id,
     x,
     y,
-    dc,
     name: template.label,
     countermeasures: [],
   };
@@ -390,29 +387,13 @@ export function useHackingState() {
   const securityBonus = getSecurityDCBonus(nodes);
   const effectiveBaseDC = baseDC + securityBonus;
 
-  // Keep entry node and root access DC in sync with baseDC + highest security bonus
-  // Also update all other node DCs and security module names
-  useEffect(() => {
-    const securityBonus = getSecurityDCBonus(nodes);
-    const effectiveDC = baseDC + securityBonus;
-    setNodes(prev => prev.map(n => {
-      if (n.id === 'entry') return { ...n, dc: effectiveDC };
-      if (n.id === 'root_access') return { ...n, dc: effectiveDC + 20 };
-      
-      // Update all other nodes' DCs
-      const modifier = NODE_DC_MODIFIERS[n.type] ?? 0;
-      const newDC = Math.max(1, effectiveDC + modifier);
-      
-      // Update security module name to reflect tier
-      if (n.type === 'security_module') {
-        const tierNames = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV' };
-        const tierName = tierNames[n.tier] || 'I';
-        return { ...n, dc: newDC, name: `Security Module ${tierName}` };
-      }
-      
-      return { ...n, dc: newDC };
-    }));
-  }, [baseDC, nodes]);
+  // Helper to calculate a node's DC based on effectiveBaseDC
+  const getNodeDC = useCallback((node, effectiveDC) => {
+    if (node.id === 'entry') return effectiveDC;
+    if (node.id === 'root_access') return effectiveDC + 20;
+    const modifier = NODE_DC_MODIFIERS[node.type] ?? 0;
+    return Math.max(1, effectiveDC + modifier);
+  }, []);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const [connectingFrom, setConnectingFrom] = useState(null);
   const [log, setLog] = useState([]);
@@ -695,6 +676,7 @@ export function useHackingState() {
     submitRoll, advancePhase,
     resetEncounter, clearNodes, addLogEntry, unhackNode, loadEncounter, toggleDirectoryLocked,
     rootAccessGranted,
+    getNodeDC,
     NODE_TEMPLATES,
   };
 }

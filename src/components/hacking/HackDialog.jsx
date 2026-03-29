@@ -61,12 +61,19 @@ function PasswordEntry({ label, password, onSuccess, disabled = false }) {
   );
 }
 
-export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = 'create', rootMode = false, initialTarget = null }) {
+export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = 'create', rootMode = false, initialTarget = null, effectiveBaseDC = 25, getNodeDC = null }) {
   const [result, setResult] = useState(null); // 'success' | 'fail_minor' | 'fail_major'
   const [target, setTarget] = useState(initialTarget);
   const [closing, setClosing] = useState(false);
 
   if (!node) return null;
+  
+  // Calculate DC dynamically
+  const calculateDC = (n) => {
+    if (!getNodeDC) return n.dc ?? 25;
+    return getNodeDC(n, effectiveBaseDC);
+  };
+  const nodeDC = calculateDC(node);
 
   const activeCms = getVisibleCms(node, mode);
 
@@ -87,17 +94,18 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
     ? (node.countermeasures || []).find(cm => cm.id === effectiveTarget)
     : null;
 
-  const rawTargetDC = activeTarget ? activeTarget.dc : node.dc;
-  const targetDC = rootMode ? 10 : rawTargetDC;
+  const rawTargetDC = activeTarget ? activeTarget.dc : nodeDC;
+  const targetDC = rawTargetDC;
   const targetLabel = activeTarget ? activeTarget.label : node.name;
+  const effectiveTargetDC = rootMode ? 10 : targetDC;
 
   const handleOutcome = (outcome) => {
     if (closing) return;
     setResult(outcome);
     // Map outcome to a total that drives the existing submitRoll logic
-    const total = outcome === 'success' ? targetDC
-      : outcome === 'fail_minor' ? targetDC - 1   // margin = -1 (fail by < 5)
-      : targetDC - 5;                              // margin = -5 (fail by >= 5)
+    const total = outcome === 'success' ? effectiveTargetDC
+      : outcome === 'fail_minor' ? effectiveTargetDC - 1   // margin = -1 (fail by < 5)
+      : effectiveTargetDC - 5;                              // margin = -5 (fail by >= 5)
     onSubmit(node.id, total, effectiveTarget || null);
     if (outcome === 'success') {
       setClosing(true);

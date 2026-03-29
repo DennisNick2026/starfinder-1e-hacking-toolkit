@@ -33,9 +33,20 @@ export default function NodeCard({
   node, isSelected, isDragging,
   onSelect, onStartConnect, onDelete, onHack, onUnhack, onConfigure, onOpenFile, mode = 'create',
   hiddenByDirectory = false, onUnresolveCm = null, onResolveCm = null, onToggleDirectoryLocked = null,
+  effectiveBaseDC = 25, getNodeDC = null,
 }) {
   // In play mode, nodes hidden inside a locked directory are invisible
   if (hiddenByDirectory && mode === 'play') return null;
+  
+  // Calculate DC dynamically
+  const calculateDC = (n) => {
+    if (!getNodeDC) {
+      // Fallback to stored DC if helper not provided
+      return n.dc ?? 25;
+    }
+    return getNodeDC(n, effectiveBaseDC);
+  };
+  const nodeDC = calculateDC(node);
 
   // Special compact rendering for entry and root access nodes
   if (node.isEntry || node.isRootAccess) {
@@ -120,7 +131,7 @@ export default function NodeCard({
           <>
             <Icon className={cn('w-4 h-4 shrink-0', colors.text)} />
             <span className="font-mono text-xs font-semibold text-foreground flex-1 break-words">{node.name}</span>
-            <span className="font-mono text-[10px] text-muted-foreground shrink-0">DC {node.dc}</span>
+            <span className="font-mono text-[10px] text-muted-foreground shrink-0">DC {nodeDC}</span>
           </>
         )}
       </div>

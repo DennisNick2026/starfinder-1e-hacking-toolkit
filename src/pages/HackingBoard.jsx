@@ -282,6 +282,8 @@ export default function HackingBoard() {
             onResolveCm={mode === 'play' ? (nodeId, cmId) => state.updateCountermeasure(nodeId, cmId, { resolved: true }) : null}
             onOpenFile={setFileNode}
             onToggleDirectoryLocked={state.toggleDirectoryLocked}
+            effectiveBaseDC={state.effectiveBaseDC}
+            getNodeDC={state.getNodeDC}
           />
 
           <BottomLog log={state.log} selectedNode={selectedNode} activeCategory={activeCategory} onDragStart={() => {}} />
@@ -321,6 +323,8 @@ export default function HackingBoard() {
           mode={mode}
           rootMode={rootMode}
           initialTarget={hackingNode.cmId}
+          effectiveBaseDC={state.effectiveBaseDC}
+          getNodeDC={state.getNodeDC}
         />
       )}
 
