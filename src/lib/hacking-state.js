@@ -171,7 +171,7 @@ const NODE_TEMPLATES = {
   secure_data_large: {
     type: 'secure_data_large',
     label: 'Secure Data (Large)',
-    color: 'cyan',
+    color: 'purple',
     icon: 'Database',
     description: 'Large volume of secured data',
     dc: 0,
@@ -184,7 +184,7 @@ const NODE_TEMPLATES = {
   secure_data_specific: {
     type: 'secure_data_specific',
     label: 'Secure Data (Specific)',
-    color: 'cyan',
+    color: 'red',
     icon: 'Database',
     description: 'Specific targeted data record',
     dc: 0,
@@ -197,7 +197,7 @@ const NODE_TEMPLATES = {
   spell_chip: {
     type: 'spell_chip',
     label: 'Spell Chip',
-    color: 'cyan',
+    color: 'green',
     icon: 'Sparkles',
     description: 'Magical data storage chip',
     dc: 0,

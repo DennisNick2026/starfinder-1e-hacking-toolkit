@@ -290,30 +290,30 @@ export default function BoardCanvas({
             const unitX = dist > 0 ? dx / dist : 0;
             const unitY = dist > 0 ? dy / dist : 0;
             
-            // Find intersection with from node boundary
+            // Find intersection with from node boundary (rectangle)
             const halfW = fromW / 2;
             const halfH = fromH / 2;
-            let tFromX = halfW, tFromY = halfH;
-            if (Math.abs(unitX) > Math.abs(unitY)) {
+            let tFromX, tFromY;
+            if (Math.abs(unitX) > 0) {
               tFromX = unitX > 0 ? halfW : -halfW;
-              tFromY = (tFromX * unitY) / unitX;
+              tFromY = Math.max(-halfH, Math.min(halfH, (tFromX * unitY) / unitX));
             } else {
               tFromY = unitY > 0 ? halfH : -halfH;
-              tFromX = (tFromY * unitX) / unitY;
+              tFromX = 0;
             }
             const fx = fromCenterX + tFromX;
             const fy = fromCenterY + tFromY;
             
-            // Find intersection with to node boundary
+            // Find intersection with to node boundary (rectangle)
             const toHalfW = toW / 2;
             const toHalfH = toH / 2;
-            let tToX = toHalfW, tToY = toHalfH;
-            if (Math.abs(unitX) > Math.abs(unitY)) {
-              tToX = unitX > 0 ? -halfW : halfW;
-              tToY = (tToX * unitY) / unitX;
+            let tToX, tToY;
+            if (Math.abs(unitX) > 0) {
+              tToX = unitX > 0 ? -toHalfW : toHalfW;
+              tToY = Math.max(-toHalfH, Math.min(toHalfH, (tToX * unitY) / unitX));
             } else {
-              tToY = unitY > 0 ? -halfH : halfH;
-              tToX = (tToY * unitX) / unitY;
+              tToY = unitY > 0 ? -toHalfH : toHalfH;
+              tToX = 0;
             }
             const tx = toCenterX + tToX;
             const ty = toCenterY + tToY;
@@ -345,13 +345,13 @@ export default function BoardCanvas({
             
             const halfW = fromW / 2;
             const halfH = fromH / 2;
-            let tFromX = halfW, tFromY = halfH;
-            if (Math.abs(unitX) > Math.abs(unitY)) {
+            let tFromX, tFromY;
+            if (Math.abs(unitX) > 0) {
               tFromX = unitX > 0 ? halfW : -halfW;
-              tFromY = (tFromX * unitY) / unitX;
+              tFromY = Math.max(-halfH, Math.min(halfH, (tFromX * unitY) / unitX));
             } else {
               tFromY = unitY > 0 ? halfH : -halfH;
-              tFromX = (tFromY * unitX) / unitY;
+              tFromX = 0;
             }
             const cx = fromCenterX + tFromX;
             const cy = fromCenterY + tFromY;
