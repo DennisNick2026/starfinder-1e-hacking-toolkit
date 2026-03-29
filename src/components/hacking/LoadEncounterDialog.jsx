@@ -20,18 +20,17 @@ export default function LoadEncounterDialog({ isOpen, onClose, onLoad }) {
     setResults(null);
     
     try {
-      const encounters = await base44.entities.Encounter.filter(
-        { shareCode: searchCode.trim().toUpperCase() },
-        undefined,
-        1
+      const encounters = await base44.entities.Encounter.list();
+      const encounter = encounters.find(e => 
+        e.shareCode === searchCode.trim().toUpperCase() && e.isPublic
       );
       
-      if (encounters.length === 0) {
+      if (!encounter) {
         setError('No encounter found with that code');
         return;
       }
       
-      setResults(encounters[0]);
+      setResults(encounter);
     } catch (err) {
       setError('Failed to load encounter');
       console.error(err);
