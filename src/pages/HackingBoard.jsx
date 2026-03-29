@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useHackingState } from '@/lib/hacking-state';
 import BoardCanvas from '@/components/hacking/BoardCanvas.jsx';
 import NodeEditor from '@/components/hacking/NodeEditor';
@@ -19,6 +19,7 @@ export default function HackingBoard() {
   const rootMode = rootModeOverride || state.rootAccessGranted;
   const canToggleRoot = mode === 'create' || state.rootAccessGranted;
   const [hackingNode, setHackingNode] = useState(null);
+  const boardCanvasRef = useRef(null);
 
   const [configuringNodeId, setConfiguringNodeId] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -77,6 +78,8 @@ export default function HackingBoard() {
     setSharedEncounter(encounter);
     setMode('play');
     setShowLoadDialog(false);
+    // Fit to screen after loading
+    setTimeout(() => boardCanvasRef.current?.fitAll?.(), 0);
   };
 
   const handleNewEncounter = () => {
@@ -216,6 +219,7 @@ export default function HackingBoard() {
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 flex flex-col overflow-hidden">
           <BoardCanvas
+            ref={boardCanvasRef}
             nodes={state.nodes}
             connections={state.connections}
             selectedNodeId={configuringNodeId || state.selectedNodeId}

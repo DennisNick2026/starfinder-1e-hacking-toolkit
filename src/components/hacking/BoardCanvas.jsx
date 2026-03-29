@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useRef, useState, useCallback, useMemo, useEffect, useImperativeHandle } from 'react';
 import NodeCard from './NodeCard';
 import ConnectionLines from './ConnectionLines';
 import { cn } from '@/lib/utils';
@@ -9,12 +9,12 @@ const NODE_H = 120;
 const COMPACT_NODE_W = 128;
 const COMPACT_NODE_H = 128;
 
-export default function BoardCanvas({
+const BoardCanvasImpl = React.forwardRef(function BoardCanvas({
   nodes, connections, selectedNodeId,
   connectingFrom, setConnectingFrom,
   onSelectNode, onMoveNode, onDeleteNode,
   onAddConnection, onHack, onUnhack, onConfigure, onDropNode, mode = 'create', onUnresolveCm = null, onResolveCm = null, onOpenFile = null,
-}) {
+}, ref) {
   const outerRef = useRef(null);
   const [draggingNode, setDraggingNode] = useState(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -168,6 +168,11 @@ export default function BoardCanvas({
     });
     setZoom(clamped);
   }, [nodes]);
+
+  // Expose fitAll via ref for parent component
+  React.useImperativeHandle(ref, () => ({
+    fitAll: handleFitAll,
+  }), [handleFitAll]);
 
   // Center on entry node
   const handleCenter = useCallback(() => {
@@ -451,4 +456,6 @@ export default function BoardCanvas({
       </div>
     </div>
   );
-}
+});
+
+export default BoardCanvasImpl;
