@@ -369,7 +369,8 @@ export default function BoardCanvas({
               e.stopPropagation();
               const cmType = e.dataTransfer.getData('cmType');
               if (cmType && onDropNode) {
-                onDropNode(cmType, node.id);
+                // Pass nodeId as second param so it's recognized as a node target
+                onDropNode(cmType, undefined, node.id);
               }
             }}
             style={{

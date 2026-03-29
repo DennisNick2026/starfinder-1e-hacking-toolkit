@@ -29,14 +29,13 @@ export default function HackingBoard() {
   const selectedNode = configuringNode || state.nodes.find(n => n.id === state.selectedNodeId) || null;
 
   const handleDropNode = (templateKey, x, y) => {
-    // If it's a countermeasure type, y is actually the target node ID
-    if (typeof y === 'string') {
-      const nodeId = y;
-      state.addCountermeasure(nodeId, templateKey);
-      setConfiguringNodeId(nodeId);
+    // If second arg is undefined and third is a string, it's a CM drop on a node
+    if (x === undefined && typeof y === 'string') {
+      state.addCountermeasure(y, templateKey);
+      setConfiguringNodeId(y);
       return;
     }
-    // Otherwise it's a node type
+    // Otherwise it's a node type with x,y coordinates
     state.addNode(templateKey, x, y);
   };
 
