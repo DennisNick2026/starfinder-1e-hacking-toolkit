@@ -239,7 +239,7 @@ export default function HackingBoard() {
 
       {hackingNode && (
         <HackDialog
-          key={hackingNode.node.id + (hackingNode.cmId || '')}
+          key={hackingNode.node.id + (hackingNode.cmId || '') + (rootMode ? '-root' : '')}
           node={state.nodes.find(n => n.id === hackingNode.node.id) || hackingNode.node}
           onSubmit={handleSubmitRoll}
           onUnhack={(nodeId) => { state.unhackNode(nodeId); }}
