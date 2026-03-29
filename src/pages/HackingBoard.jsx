@@ -58,26 +58,31 @@ export default function HackingBoard() {
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Top bar */}
-      <header className="h-14 bg-background border-b border-primary/30 flex items-center px-4 gap-4 shrink-0">
+      <header className="h-20 bg-background border-b border-primary/30 flex items-center px-5 gap-4 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
-          <Cpu className="w-4 h-4 text-primary shrink-0" />
-          <span className="font-mono text-xs font-bold text-primary tracking-widest uppercase truncate">
+          <Cpu className="w-5 h-5 text-primary shrink-0" />
+          <span className="font-mono text-sm font-bold text-primary tracking-widest uppercase truncate">
             {state.computerName}
           </span>
-          <span className="font-mono text-[10px] text-primary/50 border border-primary/30 px-1.5 py-0.5 rounded">
-            T{state.tier}
+          <span className="font-mono text-xs text-primary/60 border border-primary/30 px-2 py-1 rounded">
+            TIER {state.tier}
           </span>
-          <span className="font-mono text-[10px] text-primary/50 border border-primary/30 px-1.5 py-0.5 rounded">
+          <span className="font-mono text-xs text-primary/60 border border-primary/30 px-2 py-1 rounded">
             DC {state.effectiveBaseDC}
           </span>
-          <span className={cn(
-            'font-mono text-[10px] border px-1.5 py-0.5 rounded',
-            state.totalCountermeasures > state.tier
-              ? 'text-destructive border-destructive/50 bg-destructive/10'
-              : 'text-primary/50 border-primary/30'
-          )}>
-            CM {state.totalCountermeasures}/{state.tier}
-          </span>
+          {mode === 'create' && (
+            <span className={cn(
+              'font-mono text-xs border px-2 py-1 rounded',
+              state.totalCountermeasures > state.tier
+                ? 'text-destructive border-destructive/50 bg-destructive/10'
+                : 'text-primary/60 border-primary/30'
+            )}>
+              Countermeasures {state.totalCountermeasures}/{state.tier}
+              {state.totalCountermeasures > state.tier && (
+                <span className="ml-1.5 text-destructive font-bold">⚠ Over Limit</span>
+              )}
+            </span>
+          )}
         </div>
 
         <div className="flex-1" />
@@ -85,21 +90,21 @@ export default function HackingBoard() {
         <div className="flex items-center border border-primary/30 rounded overflow-hidden">
           <button
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] tracking-widest transition-colors',
+              'flex items-center gap-1.5 px-4 py-2 font-mono text-xs tracking-widest transition-colors',
               mode === 'create' ? 'bg-primary text-primary-foreground' : 'text-primary/50 hover:text-primary'
             )}
             onClick={() => handleSwitchMode('create')}
           >
-            <Pencil className="w-3 h-3" /> ADMIN
+            <Pencil className="w-3.5 h-3.5" /> ADMIN
           </button>
           <button
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] tracking-widest transition-colors border-l border-primary/30',
+              'flex items-center gap-1.5 px-4 py-2 font-mono text-xs tracking-widest transition-colors border-l border-primary/30',
               mode === 'play' ? 'bg-primary text-primary-foreground' : 'text-primary/50 hover:text-primary'
             )}
             onClick={() => handleSwitchMode('play')}
           >
-            <Play className="w-3 h-3" /> PLAY
+            <Play className="w-3.5 h-3.5" /> PLAY
           </button>
         </div>
 
@@ -108,13 +113,13 @@ export default function HackingBoard() {
           <button
             onClick={() => setRootModeOverride(v => !v)}
             className={cn(
-              'flex items-center gap-1.5 px-2.5 py-1 font-mono text-[10px] tracking-widest border rounded transition-colors',
+              'flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border rounded transition-colors',
               rootModeOverride
                 ? 'border-chart-3 bg-chart-3/20 text-chart-3'
                 : 'border-primary/30 text-primary/50 hover:text-primary/80 hover:border-primary/50'
             )}
           >
-            <ShieldCheck className="w-3 h-3" />
+            <ShieldCheck className="w-3.5 h-3.5" />
             ROOT {rootModeOverride ? 'ON' : 'OFF'}
           </button>
         )}
@@ -122,36 +127,36 @@ export default function HackingBoard() {
         <div className="flex-1" />
 
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] text-primary/50 tracking-widest">PHASE</span>
-          <span className="font-mono text-xs text-primary font-bold w-6 text-center">{state.phase}</span>
+          <span className="font-mono text-xs text-primary/50 tracking-widest">PHASE</span>
+          <span className="font-mono text-sm text-primary font-bold w-7 text-center">{state.phase}</span>
           <button
             onClick={state.advancePhase}
-            className="flex items-center gap-1 px-2 py-1 text-[10px] font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
           >
-            <SkipForward className="w-3 h-3" /> NEXT
+            <SkipForward className="w-3.5 h-3.5" /> NEXT
           </button>
           <button
             onClick={state.resetEncounter}
-            className="flex items-center gap-1 px-2 py-1 text-[10px] font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded"
           >
-            <RotateCcw className="w-3 h-3" /> RESET
+            <RotateCcw className="w-3.5 h-3.5" /> RESET
           </button>
           <button
             onClick={state.clearNodes}
-            className="flex items-center gap-1 px-2 py-1 text-[10px] font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded"
           >
-            <Trash2 className="w-3 h-3" /> CLEAR
+            <Trash2 className="w-3.5 h-3.5" /> CLEAR
           </button>
           <button
             onClick={() => setShowSettings(s => !s)}
             className={cn(
-              'flex items-center gap-1 px-2 py-1 text-[10px] font-mono border rounded transition-colors',
+              'flex items-center gap-1.5 px-3 py-2 text-xs font-mono border rounded transition-colors',
               showSettings
                 ? 'border-primary text-primary bg-primary/10'
                 : 'border-primary/30 text-primary/50 hover:text-primary hover:border-primary'
             )}
           >
-            <Settings className="w-3 h-3" />
+            <Settings className="w-4 h-4" />
           </button>
         </div>
       </header>
@@ -193,6 +198,8 @@ export default function HackingBoard() {
             onAddCm={state.addCountermeasure}
             onUpdateCm={state.updateCountermeasure}
             onRemoveCm={state.removeCountermeasure}
+            totalCountermeasures={state.totalCountermeasures}
+            tier={state.tier}
           />
         )}
 

@@ -17,10 +17,20 @@ const CM_COLOR = {
   purple: 'border-chart-3/40 bg-chart-3/5 text-chart-3',
 };
 
-export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateCm, onRemoveCm }) {
+export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateCm, onRemoveCm, totalCountermeasures = 0, tier = 3 }) {
   if (!node) return null;
 
   const set = (field, value) => onUpdate(node.id, { [field]: value });
+
+  const handleAddCm = (nodeId, cmType) => {
+    if (totalCountermeasures >= tier) {
+      const confirmed = window.confirm(
+        `⚠ Over Countermeasure Limit\n\nThis computer already has ${totalCountermeasures}/${tier} countermeasures (at the Tier ${tier} maximum).\n\nAs admin you can override this limit — add anyway?`
+      );
+      if (!confirmed) return;
+    }
+    onAddCm(nodeId, cmType);
+  };
 
   return (
     <div className="w-72 bg-card border-l border-border flex flex-col overflow-hidden">
@@ -100,7 +110,7 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
                   const Icon = CM_ICONS[tpl.icon];
                   return (
                     <DropdownMenuItem key={key} className="font-mono text-xs gap-2 cursor-pointer"
-                      onClick={() => onAddCm(node.id, key)}>
+                      onClick={() => handleAddCm(node.id, key)}>
                       {Icon && <Icon className="w-3 h-3 text-destructive" />}
                       {tpl.label}
                     </DropdownMenuItem>
