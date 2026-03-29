@@ -26,15 +26,6 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
   const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef(null);
 
-  // Convert screen coords → canvas coords
-  const toCanvas = useCallback((screenX, screenY) => {
-    const rect = outerRef.current.getBoundingClientRect();
-    return {
-      x: (screenX - rect.left - pan.x) / zoom,
-      y: (screenY - rect.top - pan.y) / zoom,
-    };
-  }, [pan, zoom]);
-
   const handleWheel = useCallback((e) => {
     e.preventDefault();
     const rect = outerRef.current.getBoundingClientRect();
@@ -49,12 +40,60 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
     setZoom(newZoom);
   }, [zoom]);
 
-  useEffect(() => {
-    const el = outerRef.current;
-    if (!el) return;
-    el.addEventListener('wheel', handleWheel, { passive: false });
-    return () => el.removeEventListener('wheel', handleWheel);
-  }, [handleWheel]);
+  // Convert screen coords → canvas coords
+  const toCanvas = useCallback((screenX, screenY) => {
+    const rect = outerRef.current.getBoundingClientRect();
+    return {
+      x: (screenX - rect.left - pan.x) / zoom,
+      y: (screenY - rect.top - pan.y) / zoom,
+    };
+  }, [pan, zoom]);
+
+  // Fit all nodes to screen
+  const handleFitAll = useCallback(() => {
+    if (nodes.length === 0) return;
+    const rect = outerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const padding = 80;
+    const minX = Math.min(...nodes.map(n => n.x));
+    const minY = Math.min(...nodes.map(n => n.y));
+    const maxX = Math.max(...nodes.map(n => n.x + NODE_W));
+    const maxY = Math.max(...nodes.map(n => n.y + NODE_H));
+    const contentW = maxX - minX;
+    const contentH = maxY - minY;
+    const newZoom = Math.min(
+      (rect.width - padding * 2) / contentW,
+      (rect.height - padding * 2) / contentH,
+      1.5,
+      3
+    );
+    const clamped = Math.max(newZoom, 0.2);
+    setPan({
+      x: (rect.width - contentW * clamped) / 2 - minX * clamped,
+      y: (rect.height - contentH * clamped) / 2 - minY * clamped,
+    });
+    setZoom(clamped);
+  }, [nodes]);
+
+  // Center on entry node
+  const handleCenter = useCallback(() => {
+    const entry = nodes.find(n => n.id === 'entry');
+    if (!entry) return;
+    const rect = outerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const w = COMPACT_NODE_W / 2;
+    const h = COMPACT_NODE_H / 2;
+    setPan({
+      x: rect.width / 2 - (entry.x + w) * zoom,
+      y: rect.height / 2 - (entry.y + h) * zoom,
+    });
+  }, [nodes, zoom]);
+
+  // Expose fitAll and center via ref for parent component
+  React.useImperativeHandle(ref, () => ({
+    fitAll: handleFitAll,
+    center: handleCenter,
+  }), [handleFitAll, handleCenter]);
 
   const handleBoardMouseDown = (e) => {
     if (draggingNode) return;
@@ -142,52 +181,6 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
     const canvas = toCanvas(e.clientX, e.clientY);
     onDropNode(nodeType, canvas.x - NODE_W / 2, canvas.y - 40);
   };
-
-  // Fit all nodes to screen
-  const handleFitAll = useCallback(() => {
-    if (nodes.length === 0) return;
-    const rect = outerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const padding = 80;
-    const minX = Math.min(...nodes.map(n => n.x));
-    const minY = Math.min(...nodes.map(n => n.y));
-    const maxX = Math.max(...nodes.map(n => n.x + NODE_W));
-    const maxY = Math.max(...nodes.map(n => n.y + NODE_H));
-    const contentW = maxX - minX;
-    const contentH = maxY - minY;
-    const newZoom = Math.min(
-      (rect.width - padding * 2) / contentW,
-      (rect.height - padding * 2) / contentH,
-      1.5,
-      3
-    );
-    const clamped = Math.max(newZoom, 0.2);
-    setPan({
-      x: (rect.width - contentW * clamped) / 2 - minX * clamped,
-      y: (rect.height - contentH * clamped) / 2 - minY * clamped,
-    });
-    setZoom(clamped);
-  }, [nodes]);
-
-  // Center on entry node
-  const handleCenter = useCallback(() => {
-    const entry = nodes.find(n => n.id === 'entry');
-    if (!entry) return;
-    const rect = outerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const w = COMPACT_NODE_W / 2;
-    const h = COMPACT_NODE_H / 2;
-    setPan({
-      x: rect.width / 2 - (entry.x + w) * zoom,
-      y: rect.height / 2 - (entry.y + h) * zoom,
-    });
-  }, [nodes, zoom]);
-
-  // Expose fitAll and center via ref for parent component
-  React.useImperativeHandle(ref, () => ({
-    fitAll: handleFitAll,
-    center: handleCenter,
-  }), [handleFitAll, handleCenter]);
 
   // Compute which nodes are hidden (play mode)
   const hiddenNodeIds = useMemo(() => {
