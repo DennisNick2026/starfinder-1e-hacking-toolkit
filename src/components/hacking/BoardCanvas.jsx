@@ -116,6 +116,7 @@ export default function BoardCanvas({
 
   const handleDrop = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     const nodeType = e.dataTransfer.getData('nodeType');
     const cmType = e.dataTransfer.getData('cmType');
     
@@ -229,6 +230,8 @@ export default function BoardCanvas({
       {/* Infinite canvas transform container */}
       <div
         data-canvas="true"
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
         style={{
           position: 'absolute',
           top: 0,
