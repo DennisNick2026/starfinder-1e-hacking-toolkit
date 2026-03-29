@@ -8,11 +8,10 @@ import { base44 } from '@/api/base44Client';
 
 export default function SaveEncounterDialog({ isOpen, onClose, encounterData }) {
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [shareCode, setShareCode] = useState('');
+  const [shareCode] = useState(() => Math.random().toString(36).substring(2, 8).toUpperCase());
 
   if (!isOpen) return null;
 
@@ -20,7 +19,6 @@ export default function SaveEncounterDialog({ isOpen, onClose, encounterData }) 
     if (!title.trim()) return;
     setLoading(true);
     try {
-      const code = Math.random().toString(36).substring(2, 8).toUpperCase();
       const encounter = {
         title: title.trim(),
         computerName: encounterData.computerName,
@@ -31,11 +29,10 @@ export default function SaveEncounterDialog({ isOpen, onClose, encounterData }) 
         nodes: encounterData.nodes,
         connections: encounterData.connections,
         isPublic,
-        shareCode: code,
+        shareCode,
       };
       
       await base44.entities.Encounter.create(encounter);
-      setShareCode(code);
       setSaved(true);
     } catch (err) {
       console.error('Failed to save encounter:', err);
@@ -77,13 +74,24 @@ export default function SaveEncounterDialog({ isOpen, onClose, encounterData }) 
             </div>
 
             <div>
-              <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Description (optional)</label>
-              <Textarea
-                className="mt-2 font-mono text-xs bg-input border-primary/30 h-20 resize-none"
-                placeholder="Notes about this encounter..."
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-              />
+              <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Share Code</label>
+              <div className="flex items-center gap-2 mt-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={shareCode}
+                  className="flex-1 font-mono text-sm font-bold bg-input border border-primary/30 rounded px-3 py-2 text-primary"
+                />
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={() => navigator.clipboard.writeText(shareCode)}
+                  className="border-primary/30 shrink-0"
+                  title="Copy share code"
+                >
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
 
             <div className="flex items-center gap-3 p-3 bg-primary/10 border border-primary/30 rounded">
@@ -116,27 +124,7 @@ export default function SaveEncounterDialog({ isOpen, onClose, encounterData }) 
           <div className="space-y-4">
             <div className="text-center space-y-2">
               <p className="font-mono text-sm text-accent">✓ Encounter Saved</p>
-              <p className="font-mono text-xs text-muted-foreground">Share this code with others to let them play</p>
-            </div>
-
-            <div className="bg-secondary/20 border border-secondary/40 rounded p-3">
-              <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Share Code</p>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  readOnly
-                  value={shareCode}
-                  className="flex-1 font-mono text-lg font-bold bg-background border border-primary/30 rounded px-3 py-2 text-primary"
-                />
-                <Button
-                  size="icon"
-                  variant="outline"
-                  onClick={copyShareCode}
-                  className="border-primary/30"
-                >
-                  <Copy className="w-4 h-4" />
-                </Button>
-              </div>
+              <p className="font-mono text-xs text-muted-foreground">Share code copied to clipboard automatically</p>
             </div>
 
             <Button
@@ -144,8 +132,6 @@ export default function SaveEncounterDialog({ isOpen, onClose, encounterData }) 
               onClick={() => {
                 setSaved(false);
                 setTitle('');
-                setDescription('');
-                setShareCode('');
                 onClose();
               }}
             >
