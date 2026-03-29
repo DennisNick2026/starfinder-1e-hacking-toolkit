@@ -74,6 +74,7 @@ export default function HackingBoard() {
   };
 
   const handleLoadEncounter = (encounter) => {
+    console.log('handleLoadEncounter called');
     state.loadEncounter(encounter);
     setSharedEncounter(encounter);
     setMode('play');
