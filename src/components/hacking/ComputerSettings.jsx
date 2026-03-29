@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Settings, ChevronDown, ChevronRight, Plus, Minus } from 'lucide-react';
+import { Plus, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const TIER_DC = {
@@ -39,7 +38,6 @@ export default function ComputerSettings({
   securityModule, setSecurityModule,
   upgrades, setUpgrades,
 }) {
-  const [expanded, setExpanded] = useState(false);
 
   const basePrice = TIER_PRICE[tier] || TIER_PRICE[1];
 
@@ -75,18 +73,7 @@ export default function ComputerSettings({
   };
 
   return (
-    <div className="space-y-2">
-      <button
-        className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-        onClick={() => setExpanded(!expanded)}
-      >
-        <Settings className="w-3.5 h-3.5" />
-        <span className="font-mono text-xs font-semibold uppercase tracking-wider">Computer Settings</span>
-        {expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-      </button>
-
-      {expanded && (
-        <div className="space-y-4 pl-2">
+    <div className="space-y-4">
           {/* Name */}
           <div>
             <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">System Name</Label>
@@ -180,8 +167,6 @@ export default function ComputerSettings({
               <span className="text-primary font-bold">{totalPrice.toLocaleString()} cr</span>
             </div>
           </div>
-        </div>
-      )}
     </div>
   );
 }
