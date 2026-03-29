@@ -66,7 +66,7 @@ export default function BottomToolbar({ onDragStart, mode, rootMode = false, act
   if (mode === 'play' && !rootMode) return null;
 
   return (
-    <div className="shrink-0 border-t border-primary/30 bg-background flex" style={{ height: 60 }}>
+    <div className="shrink-0 border-t border-primary/30 bg-background flex" style={{ height: 80 }}>
       {CATEGORIES.map(cat => {
         const Icon = cat.icon;
         const isActive = activeCategory === cat.key;
@@ -75,13 +75,13 @@ export default function BottomToolbar({ onDragStart, mode, rootMode = false, act
             key={cat.key}
             onClick={() => setActiveCategory(isActive ? null : cat.key)}
             className={cn(
-              'flex flex-col items-center justify-center gap-1.5 h-full font-mono text-[10px] tracking-widest border-r border-primary/20 transition-colors flex-1',
+              'flex flex-col items-center justify-center gap-2 h-full font-mono text-[11px] tracking-widest border-r border-primary/20 transition-colors flex-1',
               isActive
                 ? 'text-primary bg-primary/15 border-b-2 border-b-primary'
                 : 'text-primary/50 hover:text-primary hover:bg-primary/5'
             )}
           >
-            <Icon className="w-5 h-5" />
+            <Icon className="w-7 h-7" />
             {cat.label}
           </button>
         );
