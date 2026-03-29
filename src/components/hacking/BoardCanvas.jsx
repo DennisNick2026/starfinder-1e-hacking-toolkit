@@ -359,6 +359,19 @@ export default function BoardCanvas({
                 handleNodeMouseDown(e, node.id);
               }
             }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              e.dataTransfer.dropEffect = 'copy';
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const cmType = e.dataTransfer.getData('cmType');
+              if (cmType && onDropNode) {
+                onDropNode(cmType, node.id);
+              }
+            }}
             style={{
               position: 'absolute',
               left: node.x,
