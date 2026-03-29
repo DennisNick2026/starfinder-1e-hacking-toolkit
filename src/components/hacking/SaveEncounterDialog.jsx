@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Save, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,14 @@ export default function SaveEncounterDialog({ isOpen, onClose, encounterData }) 
   const [isPublic, setIsPublic] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [shareCode] = useState(() => Math.random().toString(36).substring(2, 8).toUpperCase());
+  const [shareCode, setShareCode] = useState('');
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setShareCode(Math.random().toString(36).substring(2, 8).toUpperCase());
+      setSaved(false);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
