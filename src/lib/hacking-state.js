@@ -115,8 +115,6 @@ const NODE_TEMPLATES = {
     dc: 0,
     successes_required: 1,
     successes_current: 0,
-    failures_current: 0,
-    failures_max: 3,
     resolved: false,
     countermeasures: [],
   },
@@ -129,8 +127,6 @@ const NODE_TEMPLATES = {
     dc: 0,
     successes_required: 1,
     successes_current: 0,
-    failures_current: 0,
-    failures_max: 3,
     resolved: false,
     countermeasures: [],
   },
@@ -484,7 +480,6 @@ export function useHackingState() {
       return {
         ...n,
         successes_current: 0,
-        failures_current: 0,
         resolved: false,
         ...(n.type === 'directory' ? { locked: true } : {}),
         countermeasures: (n.countermeasures || []).map(cm => ({
@@ -540,10 +535,6 @@ export function useHackingState() {
       });
 
       if (!success) {
-        if (n.failures_max !== undefined) {
-          const newFailures = (n.failures_current || 0) + 1;
-          return { ...n, failures_current: newFailures, countermeasures: updatedCms };
-        }
         return { ...n, countermeasures: updatedCms };
       }
       if (n.successes_required !== undefined) {
@@ -579,7 +570,6 @@ export function useHackingState() {
     setNodes(prev => prev.map(n => ({
       ...n,
       successes_current: 0,
-      failures_current: 0,
       resolved: false,
       triggered: false,
       ...(n.type === 'directory' ? { locked: true } : {}),

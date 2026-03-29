@@ -59,14 +59,7 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
               </div>
             )}
           </div>
-          {node.failures_max !== undefined && (
-            <div>
-              <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Max Failures</Label>
-              <Input type="number" className="font-mono text-xs mt-1 bg-muted border-border w-24"
-                value={node.failures_max}
-                onChange={e => set('failures_max', parseInt(e.target.value) || 1)} />
-            </div>
-          )}
+
           {node.dc_reduction !== undefined && (
             <div>
               <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">DC Reduction</Label>

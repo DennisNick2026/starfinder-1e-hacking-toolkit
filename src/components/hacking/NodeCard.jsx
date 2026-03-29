@@ -122,22 +122,7 @@ export default function NodeCard({
           </div>
         )}
 
-        {/* Failure dots */}
-        {node.failures_max > 0 && !node.noHack && (
-          <div className="flex items-center gap-1">
-            <span className="font-mono text-[10px] text-muted-foreground">Fails:</span>
-            <div className="flex gap-0.5">
-              {Array.from({ length: node.failures_max }).map((_, i) => (
-                <div key={i} className={cn(
-                  'w-2 h-2 rounded-full border',
-                  i < (node.failures_current || 0)
-                    ? 'bg-destructive border-destructive'
-                    : 'border-muted-foreground/40'
-                )} />
-              ))}
-            </div>
-          </div>
-        )}
+
 
         {firewallBlocked ? (
           <p className="font-mono text-[9px] text-muted-foreground/60 italic">Contents hidden</p>
