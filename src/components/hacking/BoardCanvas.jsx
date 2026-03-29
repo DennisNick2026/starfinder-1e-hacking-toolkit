@@ -117,6 +117,24 @@ export default function BoardCanvas({
   const handleDrop = (e) => {
     e.preventDefault();
     const nodeType = e.dataTransfer.getData('nodeType');
+    const cmType = e.dataTransfer.getData('cmType');
+    
+    if (cmType) {
+      // Dropping a countermeasure onto the canvas
+      const canvas = toCanvas(e.clientX, e.clientY);
+      // Find which node was dropped on
+      const dropX = canvas.x;
+      const dropY = canvas.y;
+      const targetNode = nodes.find(n => {
+        return dropX >= n.x && dropX <= n.x + NODE_W &&
+               dropY >= n.y && dropY <= n.y + NODE_H;
+      });
+      if (targetNode && onDropNode) {
+        onDropNode(cmType, targetNode.id);
+      }
+      return;
+    }
+    
     if (!nodeType || !onDropNode) return;
     const canvas = toCanvas(e.clientX, e.clientY);
     onDropNode(nodeType, canvas.x - NODE_W / 2, canvas.y - 40);

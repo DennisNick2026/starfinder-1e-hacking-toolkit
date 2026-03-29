@@ -25,7 +25,11 @@ export default function BottomLog({ log, selectedNode, activeCategory, onDragSta
                   key={item.key}
                   draggable
                   onDragStart={(e) => {
-                    e.dataTransfer.setData('nodeType', item.key);
+                    if (activeCat?.key === 'countermeasures') {
+                      e.dataTransfer.setData('cmType', item.key);
+                    } else {
+                      e.dataTransfer.setData('nodeType', item.key);
+                    }
                     onDragStart && onDragStart(item.key);
                   }}
                   className={cn(

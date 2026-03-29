@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import {
   Terminal, FolderLock, Database, SquareTerminal, Unlock, Sparkles,
-  FolderOpen, Box, Hand, Triangle, Cpu, Monitor,
+  FolderOpen, Box, Hand, Cpu, Monitor,
   DoorOpen, Camera, Crosshair, Wind, Bomb, Zap, Gauge, Bot,
   Shield, Rocket, Sword, Heart, Radio, Power,
+  ShieldAlert, Siren, UserX, Lock, Bug, EyeOff,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -52,10 +53,17 @@ const CATEGORIES = [
     ],
   },
   {
-    key: 'trap',
-    label: 'TRAP',
-    icon: Triangle,
+    key: 'countermeasures',
+    label: 'COUNTERMEASURES',
+    icon: ShieldAlert,
     items: [
+      { key: 'firewall', label: 'Firewall', icon: ShieldAlert },
+      { key: 'alarm', label: 'Alarm', icon: Siren },
+      { key: 'fake_shell', label: 'Fake Shell', icon: Terminal },
+      { key: 'trace', label: 'Trace', icon: UserX },
+      { key: 'encryption', label: 'Encryption', icon: Lock },
+      { key: 'hidden_subroutine', label: 'Hidden Subroutine', icon: Bug },
+      { key: 'surveillance', label: 'Surveillance', icon: EyeOff },
       { key: 'vulnerability', label: 'Vulnerability', icon: Unlock },
     ],
   },
