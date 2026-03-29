@@ -9,7 +9,8 @@ import ComputerSettingsModal from '@/components/hacking/ComputerSettingsModal';
 import DataFileModal from '@/components/hacking/DataFileModal';
 import SaveEncounterDialog from '@/components/hacking/SaveEncounterDialog';
 import LoadEncounterDialog from '@/components/hacking/LoadEncounterDialog';
-import { Cpu, ShieldCheck, Play, SkipForward, RotateCcw, Settings, Shield, Pencil, Trash2, Upload, Download } from 'lucide-react';
+import ImportEncounterDialog from '@/components/hacking/ImportEncounterDialog';
+import { Cpu, ShieldCheck, Play, SkipForward, RotateCcw, Settings, Shield, Pencil, Trash2, Upload, Download, FileJson } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function HackingBoard() {
@@ -27,6 +28,7 @@ export default function HackingBoard() {
   const [fileNode, setFileNode] = useState(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [sharedEncounter, setSharedEncounter] = useState(null);
   const [currentShareCode, setCurrentShareCode] = useState(() => Math.random().toString(36).substring(2, 8).toUpperCase());
 
@@ -88,6 +90,34 @@ export default function HackingBoard() {
     setSharedEncounter(null);
   };
 
+  const handleExportJSON = () => {
+    const encounterData = {
+      computerName: state.computerName,
+      tier: state.tier,
+      baseDC: state.baseDC,
+      securityModule: state.securityModule,
+      upgrades: state.upgrades,
+      nodes: state.nodes,
+      connections: state.connections,
+    };
+    const jsonString = JSON.stringify(encounterData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `encounter_${state.computerName.replace(/\s+/g, '_')}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportJSON = (data) => {
+    state.loadEncounter(data);
+    setSharedEncounter(null);
+    setMode('play');
+    setShowImportDialog(false);
+    setTimeout(() => boardCanvasRef.current?.center?.(), 100);
+  };
+
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Top bar */}
@@ -139,6 +169,18 @@ export default function HackingBoard() {
               className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
             >
               <Download className="w-3.5 h-3.5" /> LOAD
+            </button>
+            <button
+              onClick={handleExportJSON}
+              className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
+            >
+              <FileJson className="w-3.5 h-3.5" /> EXPORT
+            </button>
+            <button
+              onClick={() => setShowImportDialog(true)}
+              className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
+            >
+              <FileJson className="w-3.5 h-3.5" /> IMPORT
             </button>
           </div>
         )}
@@ -302,6 +344,12 @@ export default function HackingBoard() {
         isOpen={showLoadDialog}
         onClose={() => setShowLoadDialog(false)}
         onLoad={handleLoadEncounter}
+      />
+
+      <ImportEncounterDialog
+        isOpen={showImportDialog}
+        onClose={() => setShowImportDialog(false)}
+        onImport={handleImportJSON}
       />
 
       <ComputerSettingsModal
