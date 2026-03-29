@@ -245,10 +245,46 @@ export default function BoardCanvas({
             const fromNode = nodes.find(n => n.id === conn.from);
             const toNode = nodes.find(n => n.id === conn.to);
             if (!fromNode || !toNode) return null;
-            const fx = fromNode.x + NODE_W / 2;
-            const fy = fromNode.y + NODE_H / 2;
-            const tx = toNode.x + NODE_W / 2;
-            const ty = toNode.y + NODE_H / 2;
+            
+            // Calculate edge-to-edge connection points
+            const fromCenterX = fromNode.x + NODE_W / 2;
+            const fromCenterY = fromNode.y + NODE_H / 2;
+            const toCenterX = toNode.x + NODE_W / 2;
+            const toCenterY = toNode.y + NODE_H / 2;
+            
+            // Direction vector
+            const dx = toCenterX - fromCenterX;
+            const dy = toCenterY - fromCenterY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const unitX = dist > 0 ? dx / dist : 0;
+            const unitY = dist > 0 ? dy / dist : 0;
+            
+            // Find intersection with from node boundary
+            const halfW = NODE_W / 2;
+            const halfH = NODE_H / 2;
+            let tFromX = halfW, tFromY = halfH;
+            if (Math.abs(unitX) > Math.abs(unitY)) {
+              tFromX = unitX > 0 ? halfW : -halfW;
+              tFromY = (tFromX * unitY) / unitX;
+            } else {
+              tFromY = unitY > 0 ? halfH : -halfH;
+              tFromX = (tFromY * unitX) / unitY;
+            }
+            const fx = fromCenterX + tFromX;
+            const fy = fromCenterY + tFromY;
+            
+            // Find intersection with to node boundary
+            let tToX = halfW, tToY = halfH;
+            if (Math.abs(unitX) > Math.abs(unitY)) {
+              tToX = unitX > 0 ? -halfW : halfW;
+              tToY = (tToX * unitY) / unitX;
+            } else {
+              tToY = unitY > 0 ? -halfH : halfH;
+              tToX = (tToY * unitX) / unitY;
+            }
+            const tx = toCenterX + tToX;
+            const ty = toCenterY + tToY;
+            
             return (
               <g key={conn.id}>
                 <line x1={fx} y1={fy} x2={tx} y2={ty}
@@ -262,8 +298,28 @@ export default function BoardCanvas({
           {connectingFrom && canvasMousePos && (() => {
             const fromNode = nodes.find(n => n.id === connectingFrom);
             if (!fromNode) return null;
-            const cx = fromNode.x + NODE_W / 2;
-            const cy = fromNode.y + NODE_H / 2;
+            
+            const fromCenterX = fromNode.x + NODE_W / 2;
+            const fromCenterY = fromNode.y + NODE_H / 2;
+            const dx = canvasMousePos.x - fromCenterX;
+            const dy = canvasMousePos.y - fromCenterY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const unitX = dist > 0 ? dx / dist : 0;
+            const unitY = dist > 0 ? dy / dist : 0;
+            
+            const halfW = NODE_W / 2;
+            const halfH = NODE_H / 2;
+            let tFromX = halfW, tFromY = halfH;
+            if (Math.abs(unitX) > Math.abs(unitY)) {
+              tFromX = unitX > 0 ? halfW : -halfW;
+              tFromY = (tFromX * unitY) / unitX;
+            } else {
+              tFromY = unitY > 0 ? halfH : -halfH;
+              tFromX = (tFromY * unitX) / unitY;
+            }
+            const cx = fromCenterX + tFromX;
+            const cy = fromCenterY + tFromY;
+            
             return (
               <line x1={cx} y1={cy} x2={canvasMousePos.x} y2={canvasMousePos.y}
                 stroke="hsl(175 80% 50% / 0.6)" strokeWidth="2" strokeLinecap="round" strokeDasharray="6 3" />
