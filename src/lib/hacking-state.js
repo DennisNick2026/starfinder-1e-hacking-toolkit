@@ -81,6 +81,7 @@ export const COUNTERMEASURE_TEMPLATES = {
 // DC modifiers per node type relative to base DC (13 + 4*tier)
 export const NODE_DC_MODIFIERS = {
   access_point:        0,
+  user_interface:      0,
   directory:           0,
   control_complex:    +2,
   secure_data_average: 0,
@@ -111,6 +112,20 @@ const NODE_TEMPLATES = {
     color: 'cyan',
     icon: 'Terminal',
     description: 'Entry point to the system',
+    dc: 0,
+    successes_required: 1,
+    successes_current: 0,
+    failures_current: 0,
+    failures_max: 3,
+    resolved: false,
+    countermeasures: [],
+  },
+  user_interface: {
+    type: 'user_interface',
+    label: 'User Interface',
+    color: 'cyan',
+    icon: 'Terminal',
+    description: 'Secondary entry point — a physical or remote UI terminal into the system',
     dc: 0,
     successes_required: 1,
     successes_current: 0,

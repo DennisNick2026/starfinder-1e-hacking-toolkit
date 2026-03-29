@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Terminal, FolderLock, Database, SquareTerminal, Unlock, Sparkles,
-  FolderOpen, Box, Hand, Triangle, Cpu,
+  FolderOpen, Box, Hand, Triangle, Cpu, Monitor,
   DoorOpen, Camera, Crosshair, Wind, Bomb, Zap, Gauge, Bot,
   Shield, Rocket, Sword, Heart, Radio, Power,
 } from 'lucide-react';
@@ -15,6 +15,7 @@ const CATEGORIES = [
     items: [
       { key: 'directory', label: 'Directory', icon: FolderLock },
       { key: 'access_point', label: 'Access Point', icon: Terminal },
+      { key: 'user_interface', label: 'User Interface', icon: Monitor },
     ],
   },
   {
