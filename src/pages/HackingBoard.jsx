@@ -64,7 +64,15 @@ export default function HackingBoard() {
             T{state.tier}
           </span>
           <span className="font-mono text-[10px] text-primary/50 border border-primary/30 px-1.5 py-0.5 rounded">
-            DC {state.baseDC}
+            DC {state.effectiveBaseDC}
+          </span>
+          <span className={cn(
+            'font-mono text-[10px] border px-1.5 py-0.5 rounded',
+            state.totalCountermeasures > state.tier
+              ? 'text-destructive border-destructive/50 bg-destructive/10'
+              : 'text-primary/50 border-primary/30'
+          )}>
+            CM {state.totalCountermeasures}/{state.tier}
           </span>
         </div>
 
@@ -185,6 +193,10 @@ export default function HackingBoard() {
               setTier={state.setTier}
               baseDC={state.baseDC}
               setBaseDC={state.setBaseDC}
+              securityModule={state.securityModule}
+              setSecurityModule={state.setSecurityModule}
+              upgrades={state.upgrades}
+              setUpgrades={state.setUpgrades}
             />
           </div>
         )}

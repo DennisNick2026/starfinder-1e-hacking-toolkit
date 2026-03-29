@@ -247,11 +247,17 @@ const ROOT_ACCESS_NODE = {
 };
 
 export function useHackingState() {
-  const baseDCInit = 24;
+  const baseDCInit = 25;
   const [computerName, setComputerName] = useState('Untitled Encounter');
   const [tier, setTier] = useState(3);
   const [baseDC, setBaseDC] = useState(baseDCInit);
+  const [securityModule, setSecurityModule] = useState(null); // null or 0–3
+  const [upgrades, setUpgrades] = useState([]);
   const [phase, setPhase] = useState(1);
+
+  const SECURITY_DC_BONUSES = [1, 2, 3, 4];
+  const securityDCBonus = securityModule !== null ? (SECURITY_DC_BONUSES[securityModule] || 0) : 0;
+  const effectiveBaseDC = baseDC + securityDCBonus;
 
   const getCenteredNodes = (dc) => {
     const cx = Math.max(200, window.innerWidth / 2 - 96);
@@ -267,14 +273,14 @@ export function useHackingState() {
     { from: 'entry', to: 'root_access', id: 'conn_root' },
   ]);
 
-  // Keep entry node and root access DC in sync with baseDC
+  // Keep entry node and root access DC in sync with baseDC + security bonus
   useEffect(() => {
     setNodes(prev => prev.map(n => {
-      if (n.id === 'entry') return { ...n, dc: baseDC };
-      if (n.id === 'root_access') return { ...n, dc: baseDC + 20 };
+      if (n.id === 'entry') return { ...n, dc: effectiveBaseDC };
+      if (n.id === 'root_access') return { ...n, dc: effectiveBaseDC + 20 };
       return n;
     }));
-  }, [baseDC]);
+  }, [effectiveBaseDC]);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const [connectingFrom, setConnectingFrom] = useState(null);
   const [log, setLog] = useState([]);
@@ -286,7 +292,7 @@ export function useHackingState() {
   const addNode = useCallback((templateKey, x, y) => {
     const template = NODE_TEMPLATES[templateKey];
     if (!template) return;
-    const node = createNode(template, x, y, baseDC);
+    const node = createNode(template, x, y, effectiveBaseDC);
     // Auto-number directories: DIR-01, DIR-02, etc.
     if (templateKey === 'directory') {
       setNodes(prev => {
@@ -496,10 +502,19 @@ export function useHackingState() {
 
   const selectedNode = nodes.find(n => n.id === selectedNodeId);
 
+  // Count total countermeasures across all nodes (for tier limit)
+  const totalCountermeasures = nodes.reduce((sum, n) =>
+    sum + (n.countermeasures || []).filter(cm => !cm.resolved).length, 0
+  );
+
   return {
     computerName, setComputerName,
     tier, setTier,
     baseDC, setBaseDC,
+    securityModule, setSecurityModule,
+    upgrades, setUpgrades,
+    effectiveBaseDC,
+    totalCountermeasures,
     phase, setPhase,
     nodes, connections,
     selectedNodeId, setSelectedNodeId,
