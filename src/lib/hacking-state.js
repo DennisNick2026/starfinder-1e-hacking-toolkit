@@ -499,7 +499,7 @@ export function useHackingState() {
 
   // Submit a manual roll total against a node or countermeasure DC
   // target: { nodeId, cmId? } — if cmId present, rolling against a countermeasure
-  const submitRoll = useCallback((nodeId, total, cmId = null) => {
+  const submitRoll = useCallback((nodeId, total, cmId = null, rootMode = false) => {
     setNodes(prev => prev.map(n => {
       if (n.id !== nodeId) return n;
 
@@ -508,7 +508,8 @@ export function useHackingState() {
         const cms = (n.countermeasures || []).map(cm => {
           if (cm.id !== cmId) return cm;
           if (cm.resolved || cm.triggered) return cm;
-          const success = total >= cm.dc;
+          const effectiveDC = rootMode ? 10 : cm.dc;
+          const success = total >= effectiveDC;
           if (!success) return cm;
           if (cm.successes_required !== undefined) {
             const newSuccesses = Math.min((cm.successes_current || 0) + 1, cm.successes_required);
@@ -522,7 +523,8 @@ export function useHackingState() {
 
       // Rolling against the node itself
       if (n.resolved) return n;
-      const margin = total - n.dc; // positive = success, negative = failure
+      const effectiveNodeDC = rootMode ? 10 : n.dc;
+      const margin = total - effectiveNodeDC; // positive = success, negative = failure
       const success = margin >= 0;
 
       // Update alarm countermeasures based on roll result

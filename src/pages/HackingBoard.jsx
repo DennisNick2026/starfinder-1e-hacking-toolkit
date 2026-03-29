@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHackingState } from '@/lib/hacking-state';
 import BoardCanvas from '@/components/hacking/BoardCanvas.jsx';
 import NodeEditor from '@/components/hacking/NodeEditor';
@@ -51,8 +51,13 @@ export default function HackingBoard() {
     if (newMode === 'play') setActiveCategory(null);
   };
 
+  // Auto-enable root mode when root access node is resolved
+  useEffect(() => {
+    if (state.rootAccessGranted) setRootModeOverride(true);
+  }, [state.rootAccessGranted]);
+
   const handleSubmitRoll = (nodeId, total, cmId) => {
-    state.submitRoll(nodeId, total, cmId);
+    state.submitRoll(nodeId, total, cmId, rootMode);
   };
 
   return (
