@@ -36,6 +36,30 @@ export default function NodeCard({
   // In play mode, nodes hidden inside a locked directory are invisible
   if (hiddenByDirectory && mode === 'play') return null;
 
+  // Special compact rendering for entry and root access nodes
+  if (node.isEntry || node.isRootAccess) {
+    const Icon = node.isRootAccess ? ShieldCheck : LogIn;
+    const colors = node.isRootAccess 
+      ? COLOR_MAP.purple 
+      : COLOR_MAP.cyan;
+    
+    return (
+      <div
+        className={cn(
+          'select-none cursor-grab active:cursor-grabbing',
+          'w-32 h-32 rounded-lg border-2 transition-shadow duration-200 flex flex-col items-center justify-center gap-2',
+          colors.border, colors.bg,
+          isSelected && colors.glow,
+          isDragging && 'opacity-70 scale-105',
+        )}
+        onClick={(e) => { e.stopPropagation(); onSelect(node.id); }}
+      >
+        <Icon className={cn('w-8 h-8', colors.text)} />
+        <span className="font-mono text-xs font-bold text-foreground text-center">{node.label}</span>
+      </div>
+    );
+  }
+
   const Icon = node.type === 'directory'
     ? (node.locked ? FolderLock : FolderOpen)
     : (ICONS[node.icon] || Terminal);
