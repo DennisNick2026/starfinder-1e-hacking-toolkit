@@ -75,6 +75,8 @@ export default function BoardCanvas({
 
   const handleNodeMouseDown = useCallback((e, nodeId) => {
     e.stopPropagation();
+    // Don't start drag if clicking a button or input inside the card
+    if (e.target.closest('button') || e.target.closest('input')) return;
     if (connectingFrom) {
       onAddConnection(connectingFrom, nodeId);
       setConnectingFrom(null);
