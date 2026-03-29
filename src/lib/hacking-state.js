@@ -165,6 +165,7 @@ const NODE_TEMPLATES = {
     successes_required: 1,
     successes_current: 0,
     resolved: false,
+    file_content: '',
     countermeasures: [],
   },
   secure_data_large: {
@@ -177,6 +178,7 @@ const NODE_TEMPLATES = {
     successes_required: 1,
     successes_current: 0,
     resolved: false,
+    file_content: '',
     countermeasures: [],
   },
   secure_data_specific: {
@@ -189,6 +191,7 @@ const NODE_TEMPLATES = {
     successes_required: 1,
     successes_current: 0,
     resolved: false,
+    file_content: '',
     countermeasures: [],
   },
   spell_chip: {

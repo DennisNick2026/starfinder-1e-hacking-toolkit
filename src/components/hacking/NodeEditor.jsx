@@ -68,6 +68,15 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
                 onChange={e => set('dc_reduction', parseInt(e.target.value) || 0)} />
             </div>
           )}
+          {node.file_content !== undefined && (
+            <div>
+              <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">File Contents</Label>
+              <Textarea className="font-mono text-xs mt-1 bg-muted border-border h-28 resize-none"
+                placeholder="Enter secret data file contents..."
+                value={node.file_content || ''}
+                onChange={e => set('file_content', e.target.value)} />
+            </div>
+          )}
 
         </div>
 

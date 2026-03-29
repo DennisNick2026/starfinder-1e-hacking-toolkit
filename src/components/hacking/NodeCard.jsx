@@ -2,9 +2,11 @@ import React from 'react';
 import {
   Terminal, GitBranch, Database, SquareTerminal,
   ShieldAlert, Siren, UserX, Bug, Unlock, Link, Trash2, Settings, Zap,
-  Sparkles, EyeOff, Lock, LogIn, ShieldCheck, FolderLock, FolderOpen
+  Sparkles, EyeOff, Lock, LogIn, ShieldCheck, FolderLock, FolderOpen, FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const DATA_NODE_TYPES = ['secure_data_average', 'secure_data_large', 'secure_data_specific'];
 
 const ICONS = {
   Terminal, GitBranch, Database, SquareTerminal,
@@ -28,7 +30,7 @@ const CM_BADGE = {
 
 export default function NodeCard({
   node, isSelected, isDragging,
-  onSelect, onStartConnect, onDelete, onHack, onConfigure, mode = 'create',
+  onSelect, onStartConnect, onDelete, onHack, onConfigure, onOpenFile, mode = 'create',
   hiddenByDirectory = false, onUnresolveCm = null,
 }) {
   // In play mode, nodes hidden inside a locked directory are invisible
@@ -189,6 +191,16 @@ export default function NodeCard({
           >
             <Zap className="w-3 h-3" />
             <span>Hack</span>
+          </button>
+        )}
+        {DATA_NODE_TYPES.includes(node.type) && (mode === 'create' || node.resolved) && (
+          <button
+            className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-accent hover:bg-accent/10 transition-colors flex items-center justify-center gap-1 border-l border-border/50"
+            onClick={(e) => { e.stopPropagation(); onOpenFile?.(node); }}
+            title="Open data file"
+          >
+            <FileText className="w-3 h-3" />
+            <span>File</span>
           </button>
         )}
         {mode === 'create' && (

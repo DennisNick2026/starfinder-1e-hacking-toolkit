@@ -6,6 +6,7 @@ import HackDialog from '@/components/hacking/HackDialog';
 import BottomToolbar from '@/components/hacking/BottomToolbar';
 import BottomLog from '@/components/hacking/BottomLog';
 import ComputerSettings from '@/components/hacking/ComputerSettings';
+import DataFileModal from '@/components/hacking/DataFileModal';
 import { Cpu, ShieldCheck, Play, SkipForward, RotateCcw, Settings, Shield, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -21,6 +22,7 @@ export default function HackingBoard() {
   const [configuringNodeId, setConfiguringNodeId] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
+  const [fileNode, setFileNode] = useState(null);
 
   const configuringNode = state.nodes.find(n => n.id === configuringNodeId) || null;
   const selectedNode = configuringNode || state.nodes.find(n => n.id === state.selectedNodeId) || null;
@@ -168,6 +170,7 @@ export default function HackingBoard() {
             onDropNode={handleDropNode}
             mode={mode}
             onUnresolveCm={mode === 'play' ? state.unresolveCountermeasure : null}
+            onOpenFile={setFileNode}
           />
 
           <BottomLog log={state.log} selectedNode={selectedNode} activeCategory={activeCategory} onDragStart={() => {}} />
@@ -202,6 +205,15 @@ export default function HackingBoard() {
           </div>
         )}
       </div>
+
+      {fileNode && (
+        <DataFileModal
+          node={state.nodes.find(n => n.id === fileNode.id) || fileNode}
+          canEdit={mode === 'create' || rootMode}
+          onClose={() => setFileNode(null)}
+          onSave={(nodeId, content) => state.updateNode(nodeId, { file_content: content })}
+        />
+      )}
 
       {hackingNode && (
         <HackDialog
