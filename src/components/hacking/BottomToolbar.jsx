@@ -81,7 +81,7 @@ export default function BottomToolbar({ onDragStart, mode, rootMode = false, act
                 : 'text-primary/50 hover:text-primary hover:bg-primary/5'
             )}
           >
-            <Icon className="w-7 h-7" />
+            <Icon className="w-12 h-12" />
             {cat.label}
           </button>
         );
