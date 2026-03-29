@@ -187,8 +187,8 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
                 className={cn(
                   'w-full py-3 rounded-lg border-2 font-mono text-sm font-bold transition-all',
                   result === 'success'
-                    ? 'border-accent bg-accent/20 text-accent'
-                    : 'border-accent/40 bg-accent/5 text-accent/80 hover:border-accent hover:bg-accent/15',
+                    ? 'border-primary bg-primary/20 text-primary'
+                    : 'border-primary/40 bg-primary/5 text-primary/80 hover:border-primary hover:bg-primary/15',
                   closing && 'opacity-50 cursor-not-allowed'
                 )}
               >
