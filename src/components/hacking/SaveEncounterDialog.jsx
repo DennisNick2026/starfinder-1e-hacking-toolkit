@@ -6,12 +6,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { base44 } from '@/api/base44Client';
 
-export default function SaveEncounterDialog({ isOpen, onClose, encounterData }) {
+export default function SaveEncounterDialog({ isOpen, onClose, shareCode, encounterData }) {
   const [title, setTitle] = useState('');
   const [isPublic, setIsPublic] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [shareCode] = useState(() => Math.random().toString(36).substring(2, 8).toUpperCase());
 
   if (!isOpen) return null;
 

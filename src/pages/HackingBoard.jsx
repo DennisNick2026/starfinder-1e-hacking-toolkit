@@ -27,6 +27,7 @@ export default function HackingBoard() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [sharedEncounter, setSharedEncounter] = useState(null);
+  const [currentShareCode, setCurrentShareCode] = useState(() => Math.random().toString(36).substring(2, 8).toUpperCase());
 
   const configuringNode = state.nodes.find(n => n.id === configuringNodeId) || null;
   const selectedNode = configuringNode || state.nodes.find(n => n.id === state.selectedNodeId) || null;
@@ -78,6 +79,13 @@ export default function HackingBoard() {
     setShowLoadDialog(false);
   };
 
+  const handleNewEncounter = () => {
+    state.clearNodes();
+    state.resetEncounter();
+    setCurrentShareCode(Math.random().toString(36).substring(2, 8).toUpperCase());
+    setSharedEncounter(null);
+  };
+
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Top bar */}
@@ -112,6 +120,12 @@ export default function HackingBoard() {
 
         {mode === 'create' && (
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleNewEncounter}
+              className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
+            >
+              <Pencil className="w-3.5 h-3.5" /> NEW
+            </button>
             <button
               onClick={() => setShowSaveDialog(true)}
               className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
@@ -288,6 +302,7 @@ export default function HackingBoard() {
       <SaveEncounterDialog
         isOpen={showSaveDialog}
         onClose={() => setShowSaveDialog(false)}
+        shareCode={currentShareCode}
         encounterData={{
           computerName: state.computerName,
           tier: state.tier,
