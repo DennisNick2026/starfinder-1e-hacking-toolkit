@@ -285,13 +285,13 @@ export default function NodeCard({
           <button
             className={cn(
               'flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 border-l border-border/50',
-              node.locked ? 'hover:bg-destructive/10' : 'hover:bg-accent/10'
+              node.locked ? 'hover:bg-accent/10' : 'hover:bg-destructive/10'
             )}
             onClick={(e) => { e.stopPropagation(); onToggleDirectoryLocked?.(node.id); }}
             title={node.locked ? 'Open directory' : 'Close directory'}
           >
             {node.locked ? <FolderLock className="w-3 h-3" /> : <FolderOpen className="w-3 h-3" />}
-            <span>{node.locked ? 'Closed' : 'Open'}</span>
+            <span>{node.locked ? 'Open' : 'Close'}</span>
           </button>
         )}
         {DATA_NODE_TYPES.includes(node.type) && (mode === 'create' || node.resolved) && (

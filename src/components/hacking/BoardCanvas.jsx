@@ -263,7 +263,7 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
             width: 10000,
             height: 10000,
             zIndex: 0,
-            pointerEvents: 'none',
+            pointerEvents: 'auto',
           }}
         >
           <defs>
