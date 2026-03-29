@@ -20,6 +20,7 @@ export default function HackingBoard() {
   const [hackingNode, setHackingNode] = useState(null);
   const [configuringNodeId, setConfiguringNodeId] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [activeCategory, setActiveCategory] = useState(null);
 
   const configuringNode = state.nodes.find(n => n.id === configuringNodeId) || null;
   const selectedNode = configuringNode || state.nodes.find(n => n.id === state.selectedNodeId) || null;
@@ -169,8 +170,8 @@ export default function HackingBoard() {
             onUnresolveCm={mode === 'play' ? state.unresolveCountermeasure : null}
           />
 
-          <BottomLog log={state.log} selectedNode={selectedNode} />
-          <BottomToolbar mode={mode} onDragStart={() => {}} rootMode={rootMode} />
+          <BottomLog log={state.log} selectedNode={selectedNode} activeCategory={activeCategory} onDragStart={() => {}} />
+          <BottomToolbar mode={mode} onDragStart={() => {}} rootMode={rootMode} activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
         </div>
 
         {mode === 'create' && configuringNode && (
