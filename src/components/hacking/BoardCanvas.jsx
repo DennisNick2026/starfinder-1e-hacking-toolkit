@@ -169,12 +169,6 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
     setZoom(clamped);
   }, [nodes]);
 
-  // Expose fitAll and center via ref for parent component
-  React.useImperativeHandle(ref, () => ({
-    fitAll: handleFitAll,
-    center: handleCenter,
-  }), [handleFitAll, handleCenter]);
-
   // Center on entry node
   const handleCenter = useCallback(() => {
     const entry = nodes.find(n => n.id === 'entry');
@@ -186,6 +180,12 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
       y: rect.height / 2 - (entry.y + NODE_H / 2) * zoom,
     });
   }, [nodes, zoom]);
+
+  // Expose fitAll and center via ref for parent component
+  React.useImperativeHandle(ref, () => ({
+    fitAll: handleFitAll,
+    center: handleCenter,
+  }), [handleFitAll, handleCenter]);
 
   // Compute which nodes are hidden (play mode)
   const hiddenNodeIds = useMemo(() => {
