@@ -13,7 +13,7 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
   nodes, connections, selectedNodeId,
   connectingFrom, setConnectingFrom,
   onSelectNode, onMoveNode, onDeleteNode,
-  onAddConnection, onHack, onUnhack, onConfigure, onDropNode, mode = 'create', onUnresolveCm = null, onResolveCm = null, onOpenFile = null,
+  onAddConnection, onDeleteConnection, onHack, onUnhack, onConfigure, onDropNode, mode = 'create', onUnresolveCm = null, onResolveCm = null, onOpenFile = null, onToggleDirectoryLocked = null,
 }, ref) {
   const outerRef = useRef(null);
   const [draggingNode, setDraggingNode] = useState(null);
@@ -279,18 +279,26 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
             const fromNode = nodes.find(n => n.id === conn.from);
             const toNode = nodes.find(n => n.id === conn.to);
             if (!fromNode || !toNode) return null;
-            
+
             // Get node dimensions (compact nodes are smaller)
             const fromW = (fromNode.isEntry || fromNode.isRootAccess) ? COMPACT_NODE_W : NODE_W;
             const fromH = (fromNode.isEntry || fromNode.isRootAccess) ? COMPACT_NODE_H : NODE_H;
             const toW = (toNode.isEntry || toNode.isRootAccess) ? COMPACT_NODE_W : NODE_W;
             const toH = (toNode.isEntry || toNode.isRootAccess) ? COMPACT_NODE_H : NODE_H;
-            
+
             // Calculate edge-to-edge connection points
             const fromCenterX = fromNode.x + fromW / 2;
             const fromCenterY = fromNode.y + fromH / 2;
             const toCenterX = toNode.x + toW / 2;
             const toCenterY = toNode.y + toH / 2;
+
+            const handleConnContextMenu = (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (mode === 'create' && conn.id !== 'conn_root') {
+                onDeleteConnection?.(conn.id);
+              }
+            };
             
             // Direction vector
             const dx = toCenterX - fromCenterX;
@@ -328,12 +336,12 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
             const ty = toCenterY + tToY;
             
             return (
-              <g key={conn.id}>
+              <g key={conn.id} onContextMenu={handleConnContextMenu} style={{ cursor: mode === 'create' && conn.id !== 'conn_root' ? 'pointer' : 'default' }}>
                 <line x1={fx} y1={fy} x2={tx} y2={ty}
                   stroke="hsl(175 80% 50% / 0.15)" strokeWidth="4" strokeLinecap="round" />
                 <line x1={fx} y1={fy} x2={tx} y2={ty}
                   stroke="hsl(175 80% 50% / 0.5)" strokeWidth="1.5" strokeLinecap="round"
-                  strokeDasharray="8 4" filter="url(#glow)" />
+                  strokeDasharray="8 4" filter="url(#glow)" style={{ pointerEvents: 'auto' }} />
               </g>
             );
           })}
@@ -422,6 +430,7 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
               hiddenByDirectory={hiddenNodeIds.has(node.id)}
               onUnresolveCm={onUnresolveCm}
               onResolveCm={onResolveCm}
+              onToggleDirectoryLocked={onToggleDirectoryLocked}
             />
           </div>
         );

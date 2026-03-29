@@ -231,6 +231,7 @@ export default function HackingBoard() {
             onMoveNode={state.moveNode}
             onDeleteNode={mode === 'create' ? state.removeNode : () => {}}
             onAddConnection={state.addConnection}
+            onDeleteConnection={mode === 'create' ? state.removeConnection : null}
             onHack={(node, cmId) => handleHack(node, cmId)}
             onUnhack={state.unhackNode}
             onConfigure={handleConfigure}
@@ -239,6 +240,7 @@ export default function HackingBoard() {
             onUnresolveCm={mode === 'play' ? state.unresolveCountermeasure : null}
             onResolveCm={mode === 'play' ? (nodeId, cmId) => state.updateCountermeasure(nodeId, cmId, { resolved: true }) : null}
             onOpenFile={setFileNode}
+            onToggleDirectoryLocked={state.toggleDirectoryLocked}
           />
 
           <BottomLog log={state.log} selectedNode={selectedNode} activeCategory={activeCategory} onDragStart={() => {}} />

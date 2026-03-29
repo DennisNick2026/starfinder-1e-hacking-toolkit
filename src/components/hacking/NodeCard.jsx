@@ -32,7 +32,7 @@ const CM_BADGE = {
 export default function NodeCard({
   node, isSelected, isDragging,
   onSelect, onStartConnect, onDelete, onHack, onUnhack, onConfigure, onOpenFile, mode = 'create',
-  hiddenByDirectory = false, onUnresolveCm = null, onResolveCm = null,
+  hiddenByDirectory = false, onUnresolveCm = null, onResolveCm = null, onToggleDirectoryLocked = null,
 }) {
   // In play mode, nodes hidden inside a locked directory are invisible
   if (hiddenByDirectory && mode === 'play') return null;
@@ -280,6 +280,19 @@ export default function NodeCard({
               <span>Hack</span>
             </button>
           )
+        )}
+        {node.type === 'directory' && node.resolved && (
+          <button
+            className={cn(
+              'flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 border-l border-border/50',
+              node.locked ? 'hover:bg-destructive/10' : 'hover:bg-accent/10'
+            )}
+            onClick={(e) => { e.stopPropagation(); onToggleDirectoryLocked?.(node.id); }}
+            title={node.locked ? 'Open directory' : 'Close directory'}
+          >
+            {node.locked ? <FolderLock className="w-3 h-3" /> : <FolderOpen className="w-3 h-3" />}
+            <span>{node.locked ? 'Closed' : 'Open'}</span>
+          </button>
         )}
         {DATA_NODE_TYPES.includes(node.type) && (mode === 'create' || node.resolved) && (
           <button

@@ -499,6 +499,13 @@ export function useHackingState() {
     }));
   }, []);
 
+  const toggleDirectoryLocked = useCallback((nodeId) => {
+    setNodes(prev => prev.map(n => {
+      if (n.id !== nodeId || n.type !== 'directory') return n;
+      return { ...n, locked: !n.locked };
+    }));
+  }, []);
+
   // Submit a manual roll total against a node or countermeasure DC
   // target: { nodeId, cmId? } — if cmId present, rolling against a countermeasure
   const submitRoll = useCallback((nodeId, total, cmId = null, rootMode = false) => {
@@ -642,7 +649,7 @@ export function useHackingState() {
     addConnection, removeConnection,
     addCountermeasure, updateCountermeasure, removeCountermeasure, unresolveCountermeasure,
     submitRoll, advancePhase,
-    resetEncounter, clearNodes, addLogEntry, unhackNode, loadEncounter,
+    resetEncounter, clearNodes, addLogEntry, unhackNode, loadEncounter, toggleDirectoryLocked,
     rootAccessGranted,
     NODE_TEMPLATES,
   };
