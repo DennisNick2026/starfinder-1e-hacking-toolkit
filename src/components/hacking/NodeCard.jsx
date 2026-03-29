@@ -135,21 +135,21 @@ export default function NodeCard({
               <div className="flex flex-wrap gap-1 pt-0.5">
                 {activeCms.map(cm => {
                   const CmIcon = CM_ICONS[cm.icon];
-                  // Triggered alarms in play mode are clickable to silence
+                  // Triggered alarms in play mode are clickable to open hack dialog
                   if (mode === 'play' && cm.type === 'alarm' && cm.triggered) {
                     return (
                       <button
                         key={cm.id}
-                        onClick={(e) => { e.stopPropagation(); onResolveCm?.(node.id, cm.id); }}
+                        onClick={(e) => { e.stopPropagation(); onHack?.(node); }}
                         className={cn(
                           'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border text-[9px] font-mono font-semibold animate-pulse',
                           'cursor-pointer hover:opacity-80 hover:animate-none transition-opacity',
                           CM_BADGE[cm.color] || CM_BADGE.red
                         )}
-                        title="Click to silence alarm"
+                        title="Click to hack this alarm"
                       >
                         {CmIcon && <CmIcon className="w-2.5 h-2.5" />}
-                        {cm.label} ! <span className="ml-0.5 opacity-60">[silence]</span>
+                        {cm.label} ! <span className="ml-0.5 opacity-60">[hack]</span>
                       </button>
                     );
                   }
