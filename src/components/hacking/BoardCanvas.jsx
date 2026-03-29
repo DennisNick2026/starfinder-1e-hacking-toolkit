@@ -169,10 +169,11 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
     setZoom(clamped);
   }, [nodes]);
 
-  // Expose fitAll via ref for parent component
+  // Expose fitAll and center via ref for parent component
   React.useImperativeHandle(ref, () => ({
     fitAll: handleFitAll,
-  }), [handleFitAll]);
+    center: handleCenter,
+  }), [handleFitAll, handleCenter]);
 
   // Center on entry node
   const handleCenter = useCallback(() => {

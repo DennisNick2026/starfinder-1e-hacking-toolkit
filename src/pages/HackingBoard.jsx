@@ -74,18 +74,11 @@ export default function HackingBoard() {
   };
 
   const handleLoadEncounter = (encounter) => {
-    console.log('handleLoadEncounter called');
     state.loadEncounter(encounter);
     setSharedEncounter(encounter);
     setMode('play');
     setShowLoadDialog(false);
-    // Fit to screen after DOM updates and layout
-    setTimeout(() => {
-      console.log('fitAll ref:', boardCanvasRef.current);
-      if (boardCanvasRef.current && boardCanvasRef.current.fitAll) {
-        boardCanvasRef.current.fitAll();
-      }
-    }, 100);
+    setTimeout(() => boardCanvasRef.current?.center?.(), 100);
   };
 
   const handleNewEncounter = () => {
