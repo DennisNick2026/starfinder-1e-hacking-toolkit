@@ -64,7 +64,7 @@ export default function NodeCard({
     <div
       className={cn(
         'select-none cursor-grab active:cursor-grabbing',
-        'w-56 rounded-lg border-2 transition-shadow duration-200',
+        'w-72 rounded-lg border-2 transition-shadow duration-200',
         colors.border, colors.bg,
         isSelected && colors.glow,
         isDragging && 'opacity-70 scale-105',
@@ -84,7 +84,7 @@ export default function NodeCard({
         ) : (
           <>
             <Icon className={cn('w-4 h-4 shrink-0', colors.text)} />
-            <span className="font-mono text-xs font-semibold truncate text-foreground flex-1">{node.name}</span>
+            <span className="font-mono text-xs font-semibold text-foreground flex-1 break-words">{node.name}</span>
             <span className="font-mono text-[10px] text-muted-foreground shrink-0">DC {node.dc}</span>
           </>
         )}
@@ -200,7 +200,7 @@ export default function NodeCard({
       </div>
 
       {/* Action buttons */}
-      <div className="flex border-t border-border/50">
+      <div className="flex flex-wrap border-t border-border/50">
         {!node.noHack && (
           node.resolved ? (
             <>

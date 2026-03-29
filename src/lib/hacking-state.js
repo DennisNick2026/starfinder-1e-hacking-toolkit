@@ -146,7 +146,7 @@ const NODE_TEMPLATES = {
   control_complex: {
     type: 'control_complex',
     label: 'Control (Complex)',
-    color: 'green',
+    color: 'cyan',
     icon: 'SquareTerminal',
     description: 'Controls a complex system function',
     dc: 0,
@@ -158,7 +158,7 @@ const NODE_TEMPLATES = {
   secure_data_average: {
     type: 'secure_data_average',
     label: 'Secure Data (Avg)',
-    color: 'green',
+    color: 'cyan',
     icon: 'Database',
     description: 'Average-security stored data',
     dc: 0,
@@ -171,7 +171,7 @@ const NODE_TEMPLATES = {
   secure_data_large: {
     type: 'secure_data_large',
     label: 'Secure Data (Large)',
-    color: 'green',
+    color: 'cyan',
     icon: 'Database',
     description: 'Large volume of secured data',
     dc: 0,
@@ -184,7 +184,7 @@ const NODE_TEMPLATES = {
   secure_data_specific: {
     type: 'secure_data_specific',
     label: 'Secure Data (Specific)',
-    color: 'green',
+    color: 'cyan',
     icon: 'Database',
     description: 'Specific targeted data record',
     dc: 0,
@@ -197,7 +197,7 @@ const NODE_TEMPLATES = {
   spell_chip: {
     type: 'spell_chip',
     label: 'Spell Chip',
-    color: 'purple',
+    color: 'cyan',
     icon: 'Sparkles',
     description: 'Magical data storage chip',
     dc: 0,
@@ -209,7 +209,7 @@ const NODE_TEMPLATES = {
   vulnerability: {
     type: 'vulnerability',
     label: 'Vulnerability',
-    color: 'yellow',
+    color: 'cyan',
     icon: 'Unlock',
     description: 'Exploit to lower an access point DC',
     dc: 0,
@@ -218,22 +218,22 @@ const NODE_TEMPLATES = {
     countermeasures: [],
   },
   ctrl_door: {
-    type: 'ctrl_door', label: 'Door', color: 'green', icon: 'SquareTerminal',
+    type: 'ctrl_door', label: 'Door', color: 'cyan', icon: 'SquareTerminal',
     description: 'Control a door — lock, unlock, or open/close remotely',
     dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
   ctrl_camera: {
-    type: 'ctrl_camera', label: 'Camera', color: 'green', icon: 'SquareTerminal',
+    type: 'ctrl_camera', label: 'Camera', color: 'cyan', icon: 'SquareTerminal',
     description: 'Access or disable a security camera',
     dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
   ctrl_turret: {
-    type: 'ctrl_turret', label: 'Turret', color: 'green', icon: 'SquareTerminal',
+    type: 'ctrl_turret', label: 'Turret', color: 'cyan', icon: 'SquareTerminal',
     description: 'Disable, redirect, or take control of a turret',
     dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
   ctrl_vent: {
-    type: 'ctrl_vent', label: 'Vent', color: 'green', icon: 'SquareTerminal',
+    type: 'ctrl_vent', label: 'Vent', color: 'cyan', icon: 'SquareTerminal',
     description: 'Open, close, or reroute ventilation systems',
     dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
@@ -243,17 +243,17 @@ const NODE_TEMPLATES = {
     dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
   ctrl_laser: {
-    type: 'ctrl_laser', label: 'Laser', color: 'green', icon: 'SquareTerminal',
+    type: 'ctrl_laser', label: 'Laser', color: 'cyan', icon: 'SquareTerminal',
     description: 'Redirect or disable a laser system',
     dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
   ctrl_gravity: {
-    type: 'ctrl_gravity', label: 'Gravity', color: 'purple', icon: 'SquareTerminal',
+    type: 'ctrl_gravity', label: 'Gravity', color: 'cyan', icon: 'SquareTerminal',
     description: 'Alter gravity plating settings in an area',
     dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
   ctrl_robot: {
-    type: 'ctrl_robot', label: 'Robot', color: 'green', icon: 'SquareTerminal',
+    type: 'ctrl_robot', label: 'Robot', color: 'cyan', icon: 'SquareTerminal',
     description: 'Hack and override a robot or drone',
     dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
@@ -263,27 +263,27 @@ const NODE_TEMPLATES = {
     dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
   ctrl_engine: {
-    type: 'ctrl_engine', label: 'Engine', color: 'yellow', icon: 'SquareTerminal',
+    type: 'ctrl_engine', label: 'Engine', color: 'cyan', icon: 'SquareTerminal',
     description: 'Sabotage or control an engine or thruster',
     dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
   ctrl_weapon: {
-    type: 'ctrl_weapon', label: 'Weapon', color: 'red', icon: 'SquareTerminal',
+    type: 'ctrl_weapon', label: 'Weapon', color: 'cyan', icon: 'SquareTerminal',
     description: 'Override or disable a weapons system',
     dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
   ctrl_life_support: {
-    type: 'ctrl_life_support', label: 'Life Support', color: 'red', icon: 'SquareTerminal',
+    type: 'ctrl_life_support', label: 'Life Support', color: 'cyan', icon: 'SquareTerminal',
     description: 'Tamper with life support systems',
     dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
   ctrl_sensor: {
-    type: 'ctrl_sensor', label: 'Sensor', color: 'green', icon: 'SquareTerminal',
+    type: 'ctrl_sensor', label: 'Sensor', color: 'cyan', icon: 'SquareTerminal',
     description: 'Blind, loop, or spoof sensor arrays',
     dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
   ctrl_power_core: {
-    type: 'ctrl_power_core', label: 'Power Core', color: 'yellow', icon: 'SquareTerminal',
+    type: 'ctrl_power_core', label: 'Power Core', color: 'cyan', icon: 'SquareTerminal',
     description: 'Access and manipulate the main power core',
     dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
