@@ -7,7 +7,7 @@ import BottomToolbar from '@/components/hacking/BottomToolbar';
 import BottomLog from '@/components/hacking/BottomLog';
 import ComputerSettings from '@/components/hacking/ComputerSettings';
 import DataFileModal from '@/components/hacking/DataFileModal';
-import { Cpu, ShieldCheck, Play, SkipForward, RotateCcw, Settings, Shield, Pencil } from 'lucide-react';
+import { Cpu, ShieldCheck, Play, SkipForward, RotateCcw, Settings, Shield, Pencil, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function HackingBoard() {
@@ -48,6 +48,7 @@ export default function HackingBoard() {
     setConfiguringNodeId(null);
     setHackingNode(null);
     setShowSettings(false);
+    if (newMode === 'play') setActiveCategory(null);
   };
 
   const handleSubmitRoll = (nodeId, total, cmId) => {
@@ -134,6 +135,12 @@ export default function HackingBoard() {
             className="flex items-center gap-1 px-2 py-1 text-[10px] font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded"
           >
             <RotateCcw className="w-3 h-3" /> RESET
+          </button>
+          <button
+            onClick={state.clearNodes}
+            className="flex items-center gap-1 px-2 py-1 text-[10px] font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded"
+          >
+            <Trash2 className="w-3 h-3" /> CLEAR
           </button>
           <button
             onClick={() => setShowSettings(s => !s)}

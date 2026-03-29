@@ -568,6 +568,15 @@ export function useHackingState() {
     addLogEntry(`Phase ${phase + 1} begins`, 'system');
   }, [phase, addLogEntry]);
 
+  const clearNodes = useCallback(() => {
+    setNodes(prev => prev.filter(n => n.id === 'entry' || n.id === 'root_access'));
+    setConnections(prev => prev.filter(c =>
+      (c.from === 'entry' || c.from === 'root_access') &&
+      (c.to === 'entry' || c.to === 'root_access')
+    ));
+    addLogEntry('All nodes cleared', 'system');
+  }, [addLogEntry]);
+
   const resetEncounter = useCallback(() => {
     setPhase(1);
     setNodes(prev => prev.map(n => ({
@@ -617,7 +626,7 @@ export function useHackingState() {
     addConnection, removeConnection,
     addCountermeasure, updateCountermeasure, removeCountermeasure, unresolveCountermeasure,
     submitRoll, advancePhase,
-    resetEncounter, addLogEntry, unhackNode,
+    resetEncounter, clearNodes, addLogEntry, unhackNode,
     rootAccessGranted,
     NODE_TEMPLATES,
   };
