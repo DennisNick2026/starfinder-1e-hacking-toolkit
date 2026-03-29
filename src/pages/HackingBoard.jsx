@@ -297,7 +297,6 @@ export default function HackingBoard() {
           nodes: state.nodes,
           connections: state.connections,
         }}
-        onSaved={() => setShowSaveDialog(false)}
       />
 
       <LoadEncounterDialog
