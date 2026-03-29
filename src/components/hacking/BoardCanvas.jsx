@@ -133,7 +133,7 @@ export default function BoardCanvas({
                dropY >= n.y && dropY <= n.y + NODE_H;
       });
       if (targetNode && onDropNode) {
-        onDropNode(cmType, targetNode.id);
+        onDropNode(cmType, undefined, targetNode.id);
       }
       return;
     }
@@ -293,30 +293,27 @@ export default function BoardCanvas({
             // Find intersection with from node boundary (rectangle)
             const halfW = fromW / 2;
             const halfH = fromH / 2;
-            let tFromX, tFromY;
-            if (Math.abs(unitX) > 0) {
-              tFromX = unitX > 0 ? halfW : -halfW;
-              tFromY = Math.max(-halfH, Math.min(halfH, (tFromX * unitY) / unitX));
+            const slope = unitY / unitX;
+            let fx, fy;
+            if (Math.abs(unitX) >= Math.abs(unitY)) {
+              fx = fromCenterX + (unitX > 0 ? halfW : -halfW);
+              fy = fromCenterY + slope * (unitX > 0 ? halfW : -halfW);
             } else {
-              tFromY = unitY > 0 ? halfH : -halfH;
-              tFromX = 0;
+              fy = fromCenterY + (unitY > 0 ? halfH : -halfH);
+              fx = fromCenterX + (1 / slope) * (unitY > 0 ? halfH : -halfH);
             }
-            const fx = fromCenterX + tFromX;
-            const fy = fromCenterY + tFromY;
             
             // Find intersection with to node boundary (rectangle)
             const toHalfW = toW / 2;
             const toHalfH = toH / 2;
-            let tToX, tToY;
-            if (Math.abs(unitX) > 0) {
-              tToX = unitX > 0 ? -toHalfW : toHalfW;
-              tToY = Math.max(-toHalfH, Math.min(toHalfH, (tToX * unitY) / unitX));
+            let tx, ty;
+            if (Math.abs(unitX) >= Math.abs(unitY)) {
+              tx = toCenterX + (unitX > 0 ? -toHalfW : toHalfW);
+              ty = toCenterY + slope * (unitX > 0 ? -toHalfW : toHalfW);
             } else {
-              tToY = unitY > 0 ? -toHalfH : toHalfH;
-              tToX = 0;
+              ty = toCenterY + (unitY > 0 ? -toHalfH : toHalfH);
+              tx = toCenterX + (1 / slope) * (unitY > 0 ? -toHalfH : toHalfH);
             }
-            const tx = toCenterX + tToX;
-            const ty = toCenterY + tToY;
             
             return (
               <g key={conn.id}>
