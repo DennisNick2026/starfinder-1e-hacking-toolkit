@@ -249,8 +249,8 @@ export default function BoardCanvas({
             overflow: 'visible',
             left: 0,
             top: 0,
-            width: '100%',
-            height: '100%',
+            width: 10000,
+            height: 10000,
             zIndex: 0,
             pointerEvents: 'none',
           }}
