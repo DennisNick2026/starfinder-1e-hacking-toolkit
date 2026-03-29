@@ -188,6 +188,7 @@ export default function HackingBoard() {
             onDropNode={handleDropNode}
             mode={mode}
             onUnresolveCm={mode === 'play' ? state.unresolveCountermeasure : null}
+            onResolveCm={mode === 'play' ? (nodeId, cmId) => state.updateCountermeasure(nodeId, cmId, { resolved: true }) : null}
             onOpenFile={setFileNode}
           />
 

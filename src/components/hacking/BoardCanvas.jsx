@@ -11,7 +11,7 @@ export default function BoardCanvas({
   nodes, connections, selectedNodeId,
   connectingFrom, setConnectingFrom,
   onSelectNode, onMoveNode, onDeleteNode,
-  onAddConnection, onHack, onUnhack, onConfigure, onDropNode, mode = 'create', onUnresolveCm = null, onOpenFile = null,
+  onAddConnection, onHack, onUnhack, onConfigure, onDropNode, mode = 'create', onUnresolveCm = null, onResolveCm = null, onOpenFile = null,
 }) {
   const outerRef = useRef(null);
   const [draggingNode, setDraggingNode] = useState(null);
@@ -296,6 +296,7 @@ export default function BoardCanvas({
               mode={mode}
               hiddenByDirectory={hiddenNodeIds.has(node.id)}
               onUnresolveCm={onUnresolveCm}
+              onResolveCm={onResolveCm}
             />
           </div>
         ))}

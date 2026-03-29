@@ -31,7 +31,7 @@ const CM_BADGE = {
 export default function NodeCard({
   node, isSelected, isDragging,
   onSelect, onStartConnect, onDelete, onHack, onUnhack, onConfigure, onOpenFile, mode = 'create',
-  hiddenByDirectory = false, onUnresolveCm = null,
+  hiddenByDirectory = false, onUnresolveCm = null, onResolveCm = null,
 }) {
   // In play mode, nodes hidden inside a locked directory are invisible
   if (hiddenByDirectory && mode === 'play') return null;
@@ -152,6 +152,26 @@ export default function NodeCard({
                 })}
               </div>
             )}
+
+            {/* Triggered alarms — clickable to silence/resolve */}
+            {mode === 'play' && allCms.filter(cm => cm.type === 'alarm' && cm.triggered && !cm.resolved).map(cm => {
+              const CmIcon = CM_ICONS[cm.icon];
+              return (
+                <button
+                  key={cm.id + '_triggered'}
+                  onClick={(e) => { e.stopPropagation(); onResolveCm?.(node.id, cm.id); }}
+                  className={cn(
+                    'inline-flex items-center gap-1 px-2.5 py-1.5 rounded border text-xs font-mono font-semibold animate-pulse',
+                    'cursor-pointer hover:opacity-80 hover:animate-none transition-opacity',
+                    CM_BADGE[cm.color] || CM_BADGE.red
+                  )}
+                  title="Click to silence alarm"
+                >
+                  {CmIcon && <CmIcon className="w-3 h-3" />}
+                  {cm.label} ! <span className="ml-1 opacity-60 text-[9px]">silence</span>
+                </button>
+              );
+            })}
 
             {/* Resolved countermeasures (play mode) */}
             {mode === 'play' && allCms.filter(cm => cm.resolved).length > 0 && (
