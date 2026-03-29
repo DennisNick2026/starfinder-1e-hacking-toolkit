@@ -135,6 +135,24 @@ export default function NodeCard({
               <div className="flex flex-wrap gap-1 pt-0.5">
                 {activeCms.map(cm => {
                   const CmIcon = CM_ICONS[cm.icon];
+                  // Triggered alarms in play mode are clickable to silence
+                  if (mode === 'play' && cm.type === 'alarm' && cm.triggered) {
+                    return (
+                      <button
+                        key={cm.id}
+                        onClick={(e) => { e.stopPropagation(); onResolveCm?.(node.id, cm.id); }}
+                        className={cn(
+                          'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border text-[9px] font-mono font-semibold animate-pulse',
+                          'cursor-pointer hover:opacity-80 hover:animate-none transition-opacity',
+                          CM_BADGE[cm.color] || CM_BADGE.red
+                        )}
+                        title="Click to silence alarm"
+                      >
+                        {CmIcon && <CmIcon className="w-2.5 h-2.5" />}
+                        {cm.label} ! <span className="ml-0.5 opacity-60">[silence]</span>
+                      </button>
+                    );
+                  }
                   return (
                     <span key={cm.id} className={cn(
                       'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border text-[9px] font-mono font-semibold',
@@ -152,26 +170,6 @@ export default function NodeCard({
                 })}
               </div>
             )}
-
-            {/* Triggered alarms — clickable to silence/resolve */}
-            {mode === 'play' && allCms.filter(cm => cm.type === 'alarm' && cm.triggered && !cm.resolved).map(cm => {
-              const CmIcon = CM_ICONS[cm.icon];
-              return (
-                <button
-                  key={cm.id + '_triggered'}
-                  onClick={(e) => { e.stopPropagation(); onResolveCm?.(node.id, cm.id); }}
-                  className={cn(
-                    'inline-flex items-center gap-1 px-2.5 py-1.5 rounded border text-xs font-mono font-semibold animate-pulse',
-                    'cursor-pointer hover:opacity-80 hover:animate-none transition-opacity',
-                    CM_BADGE[cm.color] || CM_BADGE.red
-                  )}
-                  title="Click to silence alarm"
-                >
-                  {CmIcon && <CmIcon className="w-3 h-3" />}
-                  {cm.label} ! <span className="ml-1 opacity-60 text-[9px]">silence</span>
-                </button>
-              );
-            })}
 
             {/* Resolved countermeasures (play mode) */}
             {mode === 'play' && allCms.filter(cm => cm.resolved).length > 0 && (
