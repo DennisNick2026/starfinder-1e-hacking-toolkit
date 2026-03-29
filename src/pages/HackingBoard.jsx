@@ -95,7 +95,6 @@ export default function HackingBoard() {
       computerName: state.computerName,
       tier: state.tier,
       baseDC: state.baseDC,
-      securityModule: state.securityModule,
       upgrades: state.upgrades,
       nodes: state.nodes,
       connections: state.connections,
