@@ -238,10 +238,11 @@ export default function BoardCanvas({
           position: 'absolute',
           top: 0,
           left: 0,
-          width: 0,
-          height: 0,
+          width: '100%',
+          height: '100%',
           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
           transformOrigin: '0 0',
+          pointerEvents: 'none',
         }}
       >
         {/* SVG must be big enough to cover all nodes */}
