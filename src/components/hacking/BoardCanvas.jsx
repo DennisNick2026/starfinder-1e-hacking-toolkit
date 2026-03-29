@@ -249,8 +249,8 @@ export default function BoardCanvas({
             overflow: 'visible',
             left: 0,
             top: 0,
-            width: 1,
-            height: 1,
+            width: '100%',
+            height: '100%',
             zIndex: 0,
             pointerEvents: 'none',
           }}
@@ -377,6 +377,7 @@ export default function BoardCanvas({
               left: node.x,
               top: node.y,
               zIndex: draggingNode === node.id ? 50 : 10,
+              pointerEvents: 'auto',
             }}
           >
             <NodeCard
