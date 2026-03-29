@@ -63,7 +63,7 @@ export default function NodeCard({
   return (
     <div
       className={cn(
-        'absolute select-none cursor-grab active:cursor-grabbing',
+        'select-none cursor-grab active:cursor-grabbing',
         'w-56 rounded-lg border-2 transition-shadow duration-200',
         colors.border, colors.bg,
         isSelected && colors.glow,
@@ -71,7 +71,7 @@ export default function NodeCard({
         node.resolved && 'opacity-50 border-dashed',
         node.isEntry && 'border-primary glow-cyan',
       )}
-      style={{ left: node.x, top: node.y }}
+      style={{  }}
       onClick={(e) => { e.stopPropagation(); onSelect(node.id); }}
     >
       {/* Header */}

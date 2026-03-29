@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHackingState } from '@/lib/hacking-state';
-import BoardCanvas from '@/components/hacking/BoardCanvas';
+import BoardCanvas from '@/components/hacking/BoardCanvas.jsx';
 import NodeEditor from '@/components/hacking/NodeEditor';
 import HackDialog from '@/components/hacking/HackDialog';
 import BottomToolbar from '@/components/hacking/BottomToolbar';
@@ -58,7 +58,7 @@ export default function HackingBoard() {
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Top bar */}
-      <header className="h-10 bg-background border-b border-primary/30 flex items-center px-4 gap-4 shrink-0">
+      <header className="h-14 bg-background border-b border-primary/30 flex items-center px-4 gap-4 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           <Cpu className="w-4 h-4 text-primary shrink-0" />
           <span className="font-mono text-xs font-bold text-primary tracking-widest uppercase truncate">

@@ -1,7 +1,11 @@
-import React, { useRef, useState, useCallback, useMemo } from 'react';
+import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import NodeCard from './NodeCard';
 import ConnectionLines from './ConnectionLines';
 import { cn } from '@/lib/utils';
+import { Maximize2, Home } from 'lucide-react';
+
+const NODE_W = 224;
+const NODE_H = 120;
 
 export default function BoardCanvas({
   nodes, connections, selectedNodeId,
@@ -9,19 +13,68 @@ export default function BoardCanvas({
   onSelectNode, onMoveNode, onDeleteNode,
   onAddConnection, onHack, onUnhack, onConfigure, onDropNode, mode = 'create', onUnresolveCm = null, onOpenFile = null,
 }) {
-  const boardRef = useRef(null);
-  const [dragging, setDragging] = useState(null);
+  const outerRef = useRef(null);
+  const [draggingNode, setDraggingNode] = useState(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [mousePos, setMousePos] = useState(null);
 
+  // Pan/zoom state
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [isPanning, setIsPanning] = useState(false);
+  const panStart = useRef(null);
+
+  // Convert screen coords → canvas coords
+  const toCanvas = useCallback((screenX, screenY) => {
+    const rect = outerRef.current.getBoundingClientRect();
+    return {
+      x: (screenX - rect.left - pan.x) / zoom,
+      y: (screenY - rect.top - pan.y) / zoom,
+    };
+  }, [pan, zoom]);
+
+  const handleWheel = useCallback((e) => {
+    e.preventDefault();
+    const rect = outerRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    const newZoom = Math.min(Math.max(zoom * delta, 0.2), 3);
+    setPan(prev => ({
+      x: mouseX - (mouseX - prev.x) * (newZoom / zoom),
+      y: mouseY - (mouseY - prev.y) * (newZoom / zoom),
+    }));
+    setZoom(newZoom);
+  }, [zoom]);
+
+  useEffect(() => {
+    const el = outerRef.current;
+    if (!el) return;
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, [handleWheel]);
+
   const handleBoardMouseDown = (e) => {
-    if (e.target === boardRef.current || e.target.tagName === 'svg') {
+    if (draggingNode) return;
+    if (connectingFrom) {
+      setConnectingFrom(null);
+      return;
+    }
+    // Only start panning if clicking on the canvas background (not a node)
+    const tag = e.target.tagName.toLowerCase();
+    if (tag === 'div' && (e.target === outerRef.current || e.target.getAttribute('data-canvas') === 'true')) {
       onSelectNode(null);
-      if (connectingFrom) setConnectingFrom(null);
+      setIsPanning(true);
+      panStart.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
+    } else if (tag === 'svg' || tag === 'line' || tag === 'g' || tag === 'defs' || tag === 'filter' || tag === 'fegaussianblur' || tag === 'femerge' || tag === 'femergenode') {
+      onSelectNode(null);
+      setIsPanning(true);
+      panStart.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
     }
   };
 
   const handleNodeMouseDown = useCallback((e, nodeId) => {
+    e.stopPropagation();
     if (connectingFrom) {
       onAddConnection(connectingFrom, nodeId);
       setConnectingFrom(null);
@@ -29,21 +82,30 @@ export default function BoardCanvas({
     }
     const node = nodes.find(n => n.id === nodeId);
     if (!node) return;
-    const rect = boardRef.current.getBoundingClientRect();
-    setDragOffset({ x: e.clientX - rect.left - node.x, y: e.clientY - rect.top - node.y });
-    setDragging(nodeId);
-  }, [connectingFrom, nodes, onAddConnection, setConnectingFrom]);
+    const canvas = toCanvas(e.clientX, e.clientY);
+    setDragOffset({ x: canvas.x - node.x, y: canvas.y - node.y });
+    setDraggingNode(nodeId);
+  }, [connectingFrom, nodes, onAddConnection, setConnectingFrom, toCanvas]);
 
   const handleMouseMove = useCallback((e) => {
-    const rect = boardRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    if (connectingFrom) setMousePos({ x, y });
-    if (dragging) onMoveNode(dragging, x - dragOffset.x, y - dragOffset.y);
-  }, [dragging, dragOffset, onMoveNode, connectingFrom]);
+    if (isPanning && panStart.current) {
+      setPan({ x: e.clientX - panStart.current.x, y: e.clientY - panStart.current.y });
+    }
+    if (connectingFrom) {
+      const rect = outerRef.current?.getBoundingClientRect();
+      if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    }
+    if (draggingNode) {
+      const canvas = toCanvas(e.clientX, e.clientY);
+      onMoveNode(draggingNode, canvas.x - dragOffset.x, canvas.y - dragOffset.y);
+    }
+  }, [isPanning, draggingNode, dragOffset, onMoveNode, connectingFrom, toCanvas]);
 
-  const handleMouseUp = useCallback(() => setDragging(null), []);
+  const handleMouseUp = useCallback(() => {
+    setDraggingNode(null);
+    setIsPanning(false);
+    panStart.current = null;
+  }, []);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -54,16 +116,51 @@ export default function BoardCanvas({
     e.preventDefault();
     const nodeType = e.dataTransfer.getData('nodeType');
     if (!nodeType || !onDropNode) return;
-    const rect = boardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left - 112; // center the 224px wide card
-    const y = e.clientY - rect.top - 40;
-    onDropNode(nodeType, Math.max(0, x), Math.max(0, y));
+    const canvas = toCanvas(e.clientX, e.clientY);
+    onDropNode(nodeType, canvas.x - NODE_W / 2, canvas.y - 40);
   };
 
-  // Compute which nodes are hidden (play mode): inside locked directories or behind firewalls
+  // Fit all nodes to screen
+  const handleFitAll = useCallback(() => {
+    if (nodes.length === 0) return;
+    const rect = outerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const padding = 80;
+    const minX = Math.min(...nodes.map(n => n.x));
+    const minY = Math.min(...nodes.map(n => n.y));
+    const maxX = Math.max(...nodes.map(n => n.x + NODE_W));
+    const maxY = Math.max(...nodes.map(n => n.y + NODE_H));
+    const contentW = maxX - minX;
+    const contentH = maxY - minY;
+    const newZoom = Math.min(
+      (rect.width - padding * 2) / contentW,
+      (rect.height - padding * 2) / contentH,
+      1.5,
+      3
+    );
+    const clamped = Math.max(newZoom, 0.2);
+    setPan({
+      x: (rect.width - contentW * clamped) / 2 - minX * clamped,
+      y: (rect.height - contentH * clamped) / 2 - minY * clamped,
+    });
+    setZoom(clamped);
+  }, [nodes]);
+
+  // Center on entry node
+  const handleCenter = useCallback(() => {
+    const entry = nodes.find(n => n.id === 'entry');
+    if (!entry) return;
+    const rect = outerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setPan({
+      x: rect.width / 2 - (entry.x + NODE_W / 2) * zoom,
+      y: rect.height / 2 - (entry.y + NODE_H / 2) * zoom,
+    });
+  }, [nodes, zoom]);
+
+  // Compute which nodes are hidden (play mode)
   const hiddenNodeIds = useMemo(() => {
     const hidden = new Set();
-    // Locked directories hide their connected nodes
     const lockedDirs = nodes.filter(n => n.type === 'directory' && n.locked);
     lockedDirs.forEach(dir => {
       connections.forEach(c => {
@@ -71,8 +168,7 @@ export default function BoardCanvas({
         if (c.to === dir.id && c.from !== 'entry' && c.from !== 'root_access') hidden.add(c.from);
       });
     });
-    // Nodes with unresolved firewalls hide their connected nodes
-    const firewalled = nodes.filter(n => 
+    const firewalled = nodes.filter(n =>
       (n.countermeasures || []).some(cm => cm.type === 'firewall' && !cm.resolved)
     );
     firewalled.forEach(node => {
@@ -84,17 +180,25 @@ export default function BoardCanvas({
     return hidden;
   }, [nodes, connections]);
 
-  // Also hide connections to/from hidden nodes in play mode
   const visibleConnections = useMemo(() => {
     if (mode !== 'play') return connections;
     return connections.filter(c => !hiddenNodeIds.has(c.from) && !hiddenNodeIds.has(c.to));
   }, [connections, hiddenNodeIds, mode]);
 
+  // Mouse position in canvas space for the live drag line
+  const canvasMousePos = mousePos ? {
+    x: (mousePos.x - pan.x) / zoom,
+    y: (mousePos.y - pan.y) / zoom,
+  } : null;
+
   return (
     <div
-      ref={boardRef}
-      className={cn('relative flex-1 board-grid overflow-auto', connectingFrom && 'cursor-crosshair')}
-      style={{ minHeight: '600px' }}
+      ref={outerRef}
+      data-canvas="true"
+      className={cn(
+        'relative flex-1 board-grid overflow-hidden',
+        connectingFrom ? 'cursor-crosshair' : isPanning ? 'cursor-grabbing' : 'cursor-grab'
+      )}
       onMouseDown={handleBoardMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -102,40 +206,130 @@ export default function BoardCanvas({
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      <ConnectionLines nodes={nodes} connections={visibleConnections} connectingFrom={connectingFrom} mousePos={mousePos} />
-
-      {nodes.map(node => (
-        <div
-          key={node.id}
-          onMouseDown={(e) => { e.preventDefault(); handleNodeMouseDown(e, node.id); }}
-          style={{ zIndex: dragging === node.id ? 50 : 10 }}
+      {/* Infinite canvas transform container */}
+      <div
+        data-canvas="true"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: 0,
+          height: 0,
+          transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+          transformOrigin: '0 0',
+        }}
+      >
+        {/* SVG must be big enough to cover all nodes */}
+        <svg
+          style={{
+            position: 'absolute',
+            overflow: 'visible',
+            left: 0,
+            top: 0,
+            width: 1,
+            height: 1,
+            zIndex: 0,
+            pointerEvents: 'none',
+          }}
         >
-          <NodeCard
-            node={node}
-            isSelected={selectedNodeId === node.id}
-            isDragging={dragging === node.id}
-            onSelect={onSelectNode}
-            onStartConnect={setConnectingFrom}
-            onDelete={onDeleteNode}
-            onHack={onHack}
-            onUnhack={onUnhack}
-            onConfigure={onConfigure}
-            onOpenFile={onOpenFile}
-            mode={mode}
-            hiddenByDirectory={hiddenNodeIds.has(node.id)}
-            onUnresolveCm={onUnresolveCm}
-          />
-        </div>
-      ))}
+          <defs>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          {visibleConnections.map(conn => {
+            const fromNode = nodes.find(n => n.id === conn.from);
+            const toNode = nodes.find(n => n.id === conn.to);
+            if (!fromNode || !toNode) return null;
+            const fx = fromNode.x + NODE_W / 2;
+            const fy = fromNode.y + NODE_H / 2;
+            const tx = toNode.x + NODE_W / 2;
+            const ty = toNode.y + NODE_H / 2;
+            return (
+              <g key={conn.id}>
+                <line x1={fx} y1={fy} x2={tx} y2={ty}
+                  stroke="hsl(175 80% 50% / 0.15)" strokeWidth="4" strokeLinecap="round" />
+                <line x1={fx} y1={fy} x2={tx} y2={ty}
+                  stroke="hsl(175 80% 50% / 0.5)" strokeWidth="1.5" strokeLinecap="round"
+                  strokeDasharray="8 4" filter="url(#glow)" />
+              </g>
+            );
+          })}
+          {connectingFrom && canvasMousePos && (() => {
+            const fromNode = nodes.find(n => n.id === connectingFrom);
+            if (!fromNode) return null;
+            const cx = fromNode.x + NODE_W / 2;
+            const cy = fromNode.y + NODE_H / 2;
+            return (
+              <line x1={cx} y1={cy} x2={canvasMousePos.x} y2={canvasMousePos.y}
+                stroke="hsl(175 80% 50% / 0.6)" strokeWidth="2" strokeLinecap="round" strokeDasharray="6 3" />
+            );
+          })()}
+        </svg>
+
+        {nodes.map(node => (
+          <div
+            key={node.id}
+            onMouseDown={(e) => { e.preventDefault(); handleNodeMouseDown(e, node.id); }}
+            style={{
+              position: 'absolute',
+              left: node.x,
+              top: node.y,
+              zIndex: draggingNode === node.id ? 50 : 10,
+            }}
+          >
+            <NodeCard
+              node={node}
+              isSelected={selectedNodeId === node.id}
+              isDragging={draggingNode === node.id}
+              onSelect={onSelectNode}
+              onStartConnect={setConnectingFrom}
+              onDelete={onDeleteNode}
+              onHack={onHack}
+              onUnhack={onUnhack}
+              onConfigure={onConfigure}
+              onOpenFile={onOpenFile}
+              mode={mode}
+              hiddenByDirectory={hiddenNodeIds.has(node.id)}
+              onUnresolveCm={onUnresolveCm}
+            />
+          </div>
+        ))}
+      </div>
 
       {nodes.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center space-y-2">
             <p className="font-mono text-sm text-muted-foreground/60">No nodes yet</p>
-            <p className="font-mono text-xs text-muted-foreground/40">Click "Add Node" to build your computer system</p>
+            <p className="font-mono text-xs text-muted-foreground/40">Drag nodes from the toolbar below</p>
           </div>
         </div>
       )}
+
+      {/* Overlay controls */}
+      <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-50">
+        <button
+          onClick={handleFitAll}
+          className="flex items-center gap-1.5 px-3 py-2 font-mono text-[10px] tracking-widest bg-card/90 border border-primary/30 text-primary/70 hover:text-primary hover:border-primary rounded transition-colors backdrop-blur-sm"
+          title="Fit all nodes to screen"
+        >
+          <Maximize2 className="w-3 h-3" /> FIT ALL
+        </button>
+        <button
+          onClick={handleCenter}
+          className="flex items-center gap-1.5 px-3 py-2 font-mono text-[10px] tracking-widest bg-card/90 border border-primary/30 text-primary/70 hover:text-primary hover:border-primary rounded transition-colors backdrop-blur-sm"
+          title="Center on entry node"
+        >
+          <Home className="w-3 h-3" /> ENTRY
+        </button>
+        <div className="flex items-center justify-center px-3 py-1.5 font-mono text-[10px] tracking-widest bg-card/90 border border-primary/30 text-primary/40 rounded backdrop-blur-sm">
+          {Math.round(zoom * 100)}%
+        </div>
+      </div>
     </div>
   );
 }
