@@ -22,11 +22,12 @@ export default function LoadEncounterDialog({ isOpen, onClose, onLoad }) {
     try {
       const encounters = await base44.entities.Encounter.list();
       const encounter = encounters.find(e => 
-        e.shareCode === searchCode.trim().toUpperCase() && e.isPublic
+        e.shareCode && e.shareCode.toUpperCase() === searchCode.trim().toUpperCase()
       );
       
       if (!encounter) {
         setError('No encounter found with that code');
+        console.log('Available share codes:', encounters.map(e => e.shareCode));
         return;
       }
       
