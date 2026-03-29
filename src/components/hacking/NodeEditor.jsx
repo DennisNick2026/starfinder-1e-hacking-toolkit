@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { X, Plus, Trash2, ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock } from 'lucide-react';
+import { X, Plus, Trash2, ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, AlertTriangle } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuTrigger, DropdownMenuLabel,
@@ -18,18 +18,23 @@ const CM_COLOR = {
 };
 
 export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateCm, onRemoveCm, totalCountermeasures = 0, tier = 3 }) {
+  const [pendingCm, setPendingCm] = useState(null); // { nodeId, cmType } waiting for override confirm
+
   if (!node) return null;
 
   const set = (field, value) => onUpdate(node.id, { [field]: value });
 
   const handleAddCm = (nodeId, cmType) => {
     if (totalCountermeasures >= tier) {
-      const confirmed = window.confirm(
-        `⚠ Over Countermeasure Limit\n\nThis computer already has ${totalCountermeasures}/${tier} countermeasures (at the Tier ${tier} maximum).\n\nAs admin you can override this limit — add anyway?`
-      );
-      if (!confirmed) return;
+      setPendingCm({ nodeId, cmType });
+      return;
     }
     onAddCm(nodeId, cmType);
+  };
+
+  const confirmOverride = () => {
+    if (pendingCm) onAddCm(pendingCm.nodeId, pendingCm.cmType);
+    setPendingCm(null);
   };
 
   return (
@@ -120,7 +125,26 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
             </DropdownMenu>
           </div>
 
-          {(node.countermeasures || []).length === 0 && (
+          {pendingCm && (
+            <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3 space-y-2 mb-2">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                <p className="font-mono text-xs text-destructive leading-relaxed">
+                  Already at limit ({totalCountermeasures}/{tier} for Tier {tier}). Override as admin and add anyway?
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" variant="destructive" className="flex-1 font-mono text-xs h-7" onClick={confirmOverride}>
+                  Override & Add
+                </Button>
+                <Button size="sm" variant="outline" className="flex-1 font-mono text-xs h-7" onClick={() => setPendingCm(null)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {(node.countermeasures || []).length === 0 && !pendingCm && (
             <p className="font-mono text-[10px] text-muted-foreground/50 italic">No countermeasures</p>
           )}
 
