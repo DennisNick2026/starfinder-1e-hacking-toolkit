@@ -4,7 +4,7 @@ import {
   FolderOpen, Box, Hand, Cpu, Monitor,
   DoorOpen, Camera, Crosshair, Wind, Bomb, Zap, Gauge, Bot,
   Shield, Rocket, Sword, Heart, Radio, Power,
-  ShieldAlert, Siren, UserX, Lock, Bug, EyeOff,
+  ShieldAlert, Siren, UserX, Lock, Bug, EyeOff, Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
