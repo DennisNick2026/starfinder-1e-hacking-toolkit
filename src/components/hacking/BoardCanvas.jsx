@@ -9,7 +9,7 @@ const NODE_H = 120;
 const COMPACT_NODE_W = 128;
 const COMPACT_NODE_H = 128;
 
-const BoardCanvasImpl = React.forwardRef(function BoardCanvas({
+const BoardCanvas = React.forwardRef(function BoardCanvas({
   nodes, connections, selectedNodeId,
   connectingFrom, setConnectingFrom,
   onSelectNode, onMoveNode, onDeleteNode,
@@ -458,4 +458,4 @@ const BoardCanvasImpl = React.forwardRef(function BoardCanvas({
   );
 });
 
-export default BoardCanvasImpl;
+export default BoardCanvas;
