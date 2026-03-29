@@ -289,7 +289,7 @@ const NODE_TEMPLATES = {
   },
 };
 
-let nextId = 1;
+let nextId = 2;  // Start at 2 since entry and root_access take slots
 let nextCmId = 1;
 
 function createNode(template, x, y, baseDC) {
