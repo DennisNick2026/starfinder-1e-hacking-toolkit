@@ -5,7 +5,7 @@ import NodeEditor from '@/components/hacking/NodeEditor';
 import HackDialog from '@/components/hacking/HackDialog';
 import BottomToolbar from '@/components/hacking/BottomToolbar';
 import BottomLog from '@/components/hacking/BottomLog';
-import ComputerSettings from '@/components/hacking/ComputerSettings';
+import ComputerSettingsModal from '@/components/hacking/ComputerSettingsModal';
 import DataFileModal from '@/components/hacking/DataFileModal';
 import SaveEncounterDialog from '@/components/hacking/SaveEncounterDialog';
 import LoadEncounterDialog from '@/components/hacking/LoadEncounterDialog';
@@ -203,13 +203,9 @@ export default function HackingBoard() {
             <Trash2 className="w-3.5 h-3.5" /> CLEAR
           </button>
           <button
-            onClick={() => setShowSettings(s => !s)}
-            className={cn(
-              'flex items-center gap-1.5 px-3 py-2 text-xs font-mono border rounded transition-colors',
-              showSettings
-                ? 'border-primary text-primary bg-primary/10'
-                : 'border-primary/30 text-primary/50 hover:text-primary hover:border-primary'
-            )}
+            onClick={() => setShowSettings(true)}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/50 hover:text-primary hover:border-primary rounded transition-colors"
+            title="Computer settings"
           >
             <Settings className="w-4 h-4" />
           </button>
@@ -258,23 +254,6 @@ export default function HackingBoard() {
             tier={state.tier}
           />
         )}
-
-        {showSettings && (
-          <div className="w-64 bg-card border-l border-primary/30 shrink-0 overflow-y-auto p-4">
-            <ComputerSettings
-              computerName={state.computerName}
-              setComputerName={state.setComputerName}
-              tier={state.tier}
-              setTier={state.setTier}
-              baseDC={state.baseDC}
-              setBaseDC={state.setBaseDC}
-              securityModule={state.securityModule}
-              setSecurityModule={state.setSecurityModule}
-              upgrades={state.upgrades}
-              setUpgrades={state.setUpgrades}
-            />
-          </div>
-        )}
       </div>
 
       {fileNode && (
@@ -318,6 +297,21 @@ export default function HackingBoard() {
         isOpen={showLoadDialog}
         onClose={() => setShowLoadDialog(false)}
         onLoad={handleLoadEncounter}
+      />
+
+      <ComputerSettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        computerName={state.computerName}
+        setComputerName={state.setComputerName}
+        tier={state.tier}
+        setTier={state.setTier}
+        baseDC={state.baseDC}
+        setBaseDC={state.setBaseDC}
+        securityModule={state.securityModule}
+        setSecurityModule={state.setSecurityModule}
+        upgrades={state.upgrades}
+        setUpgrades={state.setUpgrades}
       />
     </div>
   );
