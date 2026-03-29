@@ -36,6 +36,7 @@ export default function SaveEncounterDialog({ isOpen, onClose, encounterData }) 
       setSaved(true);
     } catch (err) {
       console.error('Failed to save encounter:', err);
+      alert(`Error: ${err.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
