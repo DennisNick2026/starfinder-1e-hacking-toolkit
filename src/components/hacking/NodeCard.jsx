@@ -56,6 +56,15 @@ export default function NodeCard({
       >
         <Icon className={cn('w-8 h-8', colors.text)} />
         <span className="font-mono text-xs font-bold text-foreground text-center">{node.label}</span>
+        {node.isRootAccess && !node.noHack && (
+          <button
+            className="mt-1 px-2 py-1 text-[10px] font-mono text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors rounded border border-primary/30"
+            onClick={(e) => { e.stopPropagation(); onHack(node); }}
+            title="Hack root access"
+          >
+            <Zap className="w-3 h-3" />
+          </button>
+        )}
       </div>
     );
   }

@@ -6,6 +6,8 @@ import { Maximize2, Home } from 'lucide-react';
 
 const NODE_W = 224;
 const NODE_H = 120;
+const COMPACT_NODE_W = 128;
+const COMPACT_NODE_H = 128;
 
 export default function BoardCanvas({
   nodes, connections, selectedNodeId,
@@ -269,11 +271,17 @@ export default function BoardCanvas({
             const toNode = nodes.find(n => n.id === conn.to);
             if (!fromNode || !toNode) return null;
             
+            // Get node dimensions (compact nodes are smaller)
+            const fromW = (fromNode.isEntry || fromNode.isRootAccess) ? COMPACT_NODE_W : NODE_W;
+            const fromH = (fromNode.isEntry || fromNode.isRootAccess) ? COMPACT_NODE_H : NODE_H;
+            const toW = (toNode.isEntry || toNode.isRootAccess) ? COMPACT_NODE_W : NODE_W;
+            const toH = (toNode.isEntry || toNode.isRootAccess) ? COMPACT_NODE_H : NODE_H;
+            
             // Calculate edge-to-edge connection points
-            const fromCenterX = fromNode.x + NODE_W / 2;
-            const fromCenterY = fromNode.y + NODE_H / 2;
-            const toCenterX = toNode.x + NODE_W / 2;
-            const toCenterY = toNode.y + NODE_H / 2;
+            const fromCenterX = fromNode.x + fromW / 2;
+            const fromCenterY = fromNode.y + fromH / 2;
+            const toCenterX = toNode.x + toW / 2;
+            const toCenterY = toNode.y + toH / 2;
             
             // Direction vector
             const dx = toCenterX - fromCenterX;
@@ -283,8 +291,8 @@ export default function BoardCanvas({
             const unitY = dist > 0 ? dy / dist : 0;
             
             // Find intersection with from node boundary
-            const halfW = NODE_W / 2;
-            const halfH = NODE_H / 2;
+            const halfW = fromW / 2;
+            const halfH = fromH / 2;
             let tFromX = halfW, tFromY = halfH;
             if (Math.abs(unitX) > Math.abs(unitY)) {
               tFromX = unitX > 0 ? halfW : -halfW;
@@ -297,7 +305,9 @@ export default function BoardCanvas({
             const fy = fromCenterY + tFromY;
             
             // Find intersection with to node boundary
-            let tToX = halfW, tToY = halfH;
+            const toHalfW = toW / 2;
+            const toHalfH = toH / 2;
+            let tToX = toHalfW, tToY = toHalfH;
             if (Math.abs(unitX) > Math.abs(unitY)) {
               tToX = unitX > 0 ? -halfW : halfW;
               tToY = (tToX * unitY) / unitX;
@@ -322,16 +332,19 @@ export default function BoardCanvas({
             const fromNode = nodes.find(n => n.id === connectingFrom);
             if (!fromNode) return null;
             
-            const fromCenterX = fromNode.x + NODE_W / 2;
-            const fromCenterY = fromNode.y + NODE_H / 2;
+            const fromW = (fromNode.isEntry || fromNode.isRootAccess) ? COMPACT_NODE_W : NODE_W;
+            const fromH = (fromNode.isEntry || fromNode.isRootAccess) ? COMPACT_NODE_H : NODE_H;
+            
+            const fromCenterX = fromNode.x + fromW / 2;
+            const fromCenterY = fromNode.y + fromH / 2;
             const dx = canvasMousePos.x - fromCenterX;
             const dy = canvasMousePos.y - fromCenterY;
             const dist = Math.sqrt(dx * dx + dy * dy);
             const unitX = dist > 0 ? dx / dist : 0;
             const unitY = dist > 0 ? dy / dist : 0;
             
-            const halfW = NODE_W / 2;
-            const halfH = NODE_H / 2;
+            const halfW = fromW / 2;
+            const halfH = fromH / 2;
             let tFromX = halfW, tFromY = halfH;
             if (Math.abs(unitX) > Math.abs(unitY)) {
               tFromX = unitX > 0 ? halfW : -halfW;
@@ -350,7 +363,11 @@ export default function BoardCanvas({
           })()}
         </svg>
 
-        {nodes.map(node => (
+        {nodes.map(node => {
+          const nodeW = (node.isEntry || node.isRootAccess) ? COMPACT_NODE_W : NODE_W;
+          const nodeH = (node.isEntry || node.isRootAccess) ? COMPACT_NODE_H : NODE_H;
+          
+          return (
           <div
             key={node.id}
             onMouseDown={(e) => { 
@@ -398,7 +415,8 @@ export default function BoardCanvas({
               onResolveCm={onResolveCm}
             />
           </div>
-        ))}
+        );
+        })}
       </div>
 
       {nodes.length === 0 && (
