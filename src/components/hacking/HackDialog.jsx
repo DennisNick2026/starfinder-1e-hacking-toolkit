@@ -63,7 +63,9 @@ function PasswordEntry({ label, password, onSuccess, disabled = false }) {
 
 export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = 'create', rootMode = false }) {
   const [result, setResult] = useState(null); // 'success' | 'fail_minor' | 'fail_major'
-  const [target, setTarget] = useState(null);
+  // If node is already resolved, auto-select the first triggered alarm as target
+  const firstTriggeredAlarm = (node?.countermeasures || []).find(cm => cm.type === 'alarm' && cm.triggered && !cm.resolved);
+  const [target, setTarget] = useState(node?.resolved && firstTriggeredAlarm ? firstTriggeredAlarm.id : null);
   const [closing, setClosing] = useState(false);
 
   if (!node) return null;
@@ -177,7 +179,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
         )}
 
         {/* Outcome buttons */}
-        {!node.resolved && (
+        {(!node.resolved || activeCms.length > 0) && (
           <div className="space-y-2">
             <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground text-center">Roll outcome:</p>
             <div className="grid grid-cols-1 gap-2">

@@ -203,14 +203,28 @@ export default function NodeCard({
       <div className="flex border-t border-border/50">
         {!node.noHack && (
           node.resolved ? (
-            <button
-              className="flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center gap-1.5"
-              onClick={(e) => { e.stopPropagation(); onUnhack?.(node.id); }}
-              title="Revert this node"
-            >
-              <Zap className="w-3 h-3" />
-              <span>Revert</span>
-            </button>
+            <>
+              {mode === 'play' && allCms.some(cm => cm.type === 'alarm' && cm.triggered && !cm.resolved) && (
+                <button
+                  className="flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center gap-1.5"
+                  onClick={(e) => { e.stopPropagation(); onHack(node); }}
+                  title="Hack triggered alarm"
+                >
+                  <Zap className="w-3 h-3" />
+                  <span>Alarm</span>
+                </button>
+              )}
+              {mode !== 'play' && (
+                <button
+                  className="flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center gap-1.5"
+                  onClick={(e) => { e.stopPropagation(); onUnhack?.(node.id); }}
+                  title="Revert this node"
+                >
+                  <Zap className="w-3 h-3" />
+                  <span>Revert</span>
+                </button>
+              )}
+            </>
           ) : (
             <button
               className="flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex items-center justify-center gap-1.5"
