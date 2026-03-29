@@ -133,7 +133,7 @@ export default function BoardCanvas({
                dropY >= n.y && dropY <= n.y + NODE_H;
       });
       if (targetNode && onDropNode) {
-        onDropNode(cmType, undefined, targetNode.id);
+        onDropNode(cmType, targetNode.id);
       }
       return;
     }
@@ -290,30 +290,33 @@ export default function BoardCanvas({
             const unitX = dist > 0 ? dx / dist : 0;
             const unitY = dist > 0 ? dy / dist : 0;
             
-            // Find intersection with from node boundary (rectangle)
+            // Find intersection with from node boundary
             const halfW = fromW / 2;
             const halfH = fromH / 2;
-            const slope = unitY / unitX;
-            let fx, fy;
-            if (Math.abs(unitX) >= Math.abs(unitY)) {
-              fx = fromCenterX + (unitX > 0 ? halfW : -halfW);
-              fy = fromCenterY + slope * (unitX > 0 ? halfW : -halfW);
+            let tFromX = halfW, tFromY = halfH;
+            if (Math.abs(unitX) > Math.abs(unitY)) {
+              tFromX = unitX > 0 ? halfW : -halfW;
+              tFromY = (tFromX * unitY) / unitX;
             } else {
-              fy = fromCenterY + (unitY > 0 ? halfH : -halfH);
-              fx = fromCenterX + (1 / slope) * (unitY > 0 ? halfH : -halfH);
+              tFromY = unitY > 0 ? halfH : -halfH;
+              tFromX = (tFromY * unitX) / unitY;
             }
+            const fx = fromCenterX + tFromX;
+            const fy = fromCenterY + tFromY;
             
-            // Find intersection with to node boundary (rectangle)
+            // Find intersection with to node boundary
             const toHalfW = toW / 2;
             const toHalfH = toH / 2;
-            let tx, ty;
-            if (Math.abs(unitX) >= Math.abs(unitY)) {
-              tx = toCenterX + (unitX > 0 ? -toHalfW : toHalfW);
-              ty = toCenterY + slope * (unitX > 0 ? -toHalfW : toHalfW);
+            let tToX = toHalfW, tToY = toHalfH;
+            if (Math.abs(unitX) > Math.abs(unitY)) {
+              tToX = unitX > 0 ? -halfW : halfW;
+              tToY = (tToX * unitY) / unitX;
             } else {
-              ty = toCenterY + (unitY > 0 ? -toHalfH : toHalfH);
-              tx = toCenterX + (1 / slope) * (unitY > 0 ? -toHalfH : toHalfH);
+              tToY = unitY > 0 ? -halfH : halfH;
+              tToX = (tToY * unitX) / unitY;
             }
+            const tx = toCenterX + tToX;
+            const ty = toCenterY + tToY;
             
             return (
               <g key={conn.id}>
@@ -342,13 +345,13 @@ export default function BoardCanvas({
             
             const halfW = fromW / 2;
             const halfH = fromH / 2;
-            let tFromX, tFromY;
-            if (Math.abs(unitX) > 0) {
+            let tFromX = halfW, tFromY = halfH;
+            if (Math.abs(unitX) > Math.abs(unitY)) {
               tFromX = unitX > 0 ? halfW : -halfW;
-              tFromY = Math.max(-halfH, Math.min(halfH, (tFromX * unitY) / unitX));
+              tFromY = (tFromX * unitY) / unitX;
             } else {
               tFromY = unitY > 0 ? halfH : -halfH;
-              tFromX = 0;
+              tFromX = (tFromY * unitX) / unitY;
             }
             const cx = fromCenterX + tFromX;
             const cy = fromCenterY + tFromY;
