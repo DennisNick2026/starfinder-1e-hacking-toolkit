@@ -12,8 +12,6 @@ export default function ComputerSettingsModal({
   setTier,
   baseDC,
   setBaseDC,
-  securityModule,
-  setSecurityModule,
   upgrades,
   setUpgrades,
 }) {
@@ -42,8 +40,6 @@ export default function ComputerSettingsModal({
           setTier={setTier}
           baseDC={baseDC}
           setBaseDC={setBaseDC}
-          securityModule={securityModule}
-          setSecurityModule={setSecurityModule}
           upgrades={upgrades}
           setUpgrades={setUpgrades}
         />

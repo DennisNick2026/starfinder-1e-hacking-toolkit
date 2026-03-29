@@ -14,13 +14,6 @@ const TIER_PRICE = {
   6: 20000, 7: 40000, 8: 80000, 9: 160000, 10: 320000,
 };
 
-const SECURITY_MODULES = [
-  { label: 'Security I',   dcBonus: 1, priceMultiplier: 0.25 },
-  { label: 'Security II',  dcBonus: 2, priceMultiplier: 0.50 },
-  { label: 'Security III', dcBonus: 3, priceMultiplier: 0.75 },
-  { label: 'Security IV',  dcBonus: 4, priceMultiplier: 1.00 },
-];
-
 const UPGRADES = [
   { key: 'artificial_personality', label: 'Artificial Personality', priceMultiplier: 0.10 },
   { key: 'hardened',               label: 'Hardened',               priceMultiplier: 0.50 },
@@ -35,7 +28,6 @@ export default function ComputerSettings({
   computerName, setComputerName,
   tier, setTier,
   baseDC, setBaseDC,
-  securityModule, setSecurityModule,
   upgrades, setUpgrades,
 }) {
 
@@ -46,12 +38,7 @@ export default function ComputerSettings({
     return Math.round(basePrice * upg.priceMultiplier);
   };
 
-  const securityPrice = securityModule !== null
-    ? Math.round(basePrice * SECURITY_MODULES[securityModule].priceMultiplier)
-    : 0;
-
   const totalPrice = basePrice
-    + securityPrice
     + (upgrades || []).reduce((sum, key) => {
         const upg = UPGRADES.find(u => u.key === key);
         return sum + (upg ? upgradePrice(upg) : 0);
@@ -102,38 +89,7 @@ export default function ComputerSettings({
             </div>
           </div>
 
-          {/* Security Module */}
-          <div>
-            <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Security Module</Label>
-            <div className="flex flex-col gap-1 mt-1">
-              <button
-                onClick={() => setSecurityModule(null)}
-                className={cn(
-                  'text-left px-2 py-1 rounded border font-mono text-xs transition-colors',
-                  securityModule === null
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border text-muted-foreground hover:border-primary/40'
-                )}
-              >
-                None
-              </button>
-              {SECURITY_MODULES.map((sm, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSecurityModule(i)}
-                  className={cn(
-                    'text-left px-2 py-1 rounded border font-mono text-xs transition-colors flex justify-between',
-                    securityModule === i
-                      ? 'border-destructive bg-destructive/10 text-destructive'
-                      : 'border-border text-muted-foreground hover:border-destructive/40'
-                  )}
-                >
-                  <span>{sm.label} <span className="opacity-60">+{sm.dcBonus} DC</span></span>
-                  <span className="opacity-60">{Math.round(basePrice * sm.priceMultiplier).toLocaleString()} cr</span>
-                </button>
-              ))}
-            </div>
-          </div>
+
 
           {/* Upgrades */}
           <div>

@@ -28,6 +28,10 @@ const CATEGORIES = [
       { key: 'secure_data_large', label: 'Data (Large)', icon: Database },
       { key: 'secure_data_specific', label: 'Data (Specific)', icon: Database },
       { key: 'spell_chip', label: 'Spell Chip', icon: Sparkles },
+      { key: 'security_module_1', label: 'Security I', icon: ShieldAlert },
+      { key: 'security_module_2', label: 'Security II', icon: ShieldAlert },
+      { key: 'security_module_3', label: 'Security III', icon: ShieldAlert },
+      { key: 'security_module_4', label: 'Security IV', icon: ShieldAlert },
     ],
   },
   {

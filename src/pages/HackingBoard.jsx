@@ -313,8 +313,6 @@ export default function HackingBoard() {
         setTier={state.setTier}
         baseDC={state.baseDC}
         setBaseDC={state.setBaseDC}
-        securityModule={state.securityModule}
-        setSecurityModule={state.setSecurityModule}
         upgrades={state.upgrades}
         setUpgrades={state.setUpgrades}
       />
