@@ -93,6 +93,28 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
             </div>
           )}
 
+          {node.tier !== undefined && (
+            <div>
+              <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Tier</Label>
+              <div className="flex gap-1 mt-1">
+                {[1, 2, 3, 4].map(t => (
+                  <button
+                    key={t}
+                    onClick={() => set('tier', t)}
+                    className={cn(
+                      'flex-1 py-2 rounded border font-mono text-xs font-semibold transition-colors',
+                      node.tier === t
+                        ? 'bg-primary/20 border-primary text-primary'
+                        : 'border-border text-muted-foreground hover:border-primary/50'
+                    )}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
         </div>
 
         {/* Countermeasures section */}

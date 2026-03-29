@@ -103,10 +103,7 @@ export const NODE_DC_MODIFIERS = {
   ctrl_life_support:  +4,
   ctrl_sensor:         0,
   ctrl_power_core:    +4,
-  security_module_1:   0,
-  security_module_2:   0,
-  security_module_3:   0,
-  security_module_4:   0,
+  security_module:   0,
 };
 
 const NODE_TEMPLATES = {
@@ -291,49 +288,14 @@ const NODE_TEMPLATES = {
     description: 'Access and manipulate the main power core',
     dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
-  security_module_1: {
-    type: 'security_module_1',
-    label: 'Security I',
+  security_module: {
+    type: 'security_module',
+    label: 'Security Module',
     color: 'red',
     icon: 'ShieldAlert',
-    description: 'Basic security module (+1 DC)',
+    description: 'Configurable security module (tier 1-4)',
     dc: 0,
-    successes_required: 1,
-    successes_current: 0,
-    resolved: false,
-    countermeasures: [],
-  },
-  security_module_2: {
-    type: 'security_module_2',
-    label: 'Security II',
-    color: 'red',
-    icon: 'ShieldAlert',
-    description: 'Enhanced security module (+2 DC)',
-    dc: 0,
-    successes_required: 1,
-    successes_current: 0,
-    resolved: false,
-    countermeasures: [],
-  },
-  security_module_3: {
-    type: 'security_module_3',
-    label: 'Security III',
-    color: 'red',
-    icon: 'ShieldAlert',
-    description: 'Advanced security module (+3 DC)',
-    dc: 0,
-    successes_required: 1,
-    successes_current: 0,
-    resolved: false,
-    countermeasures: [],
-  },
-  security_module_4: {
-    type: 'security_module_4',
-    label: 'Security IV',
-    color: 'red',
-    icon: 'ShieldAlert',
-    description: 'Military-grade security module (+4 DC)',
-    dc: 0,
+    tier: 1,
     successes_required: 1,
     successes_current: 0,
     resolved: false,
@@ -401,13 +363,8 @@ export function useHackingState() {
   const [computerName, setComputerName] = useState('Untitled Encounter');
   const [tier, setTier] = useState(3);
   const [baseDC, setBaseDC] = useState(baseDCInit);
-  const [securityModule, setSecurityModule] = useState(null); // null or 0–3
   const [upgrades, setUpgrades] = useState([]);
   const [phase, setPhase] = useState(1);
-
-  const SECURITY_DC_BONUSES = [1, 2, 3, 4];
-  const securityDCBonus = securityModule !== null ? (SECURITY_DC_BONUSES[securityModule] || 0) : 0;
-  const effectiveBaseDC = baseDC + securityDCBonus;
 
   const getCenteredNodes = (dc) => {
     const cx = Math.max(200, window.innerWidth / 2 - 96);
@@ -423,14 +380,22 @@ export function useHackingState() {
     { from: 'entry', to: 'root_access', id: 'conn_root' },
   ]);
 
-  // Keep entry node and root access DC in sync with baseDC + security bonus
+  // Calculate security DC bonus from highest tier security module on board
+  const getSecurityDCBonus = (nodesList) => {
+    const unresolved = nodesList.filter(n => n.type === 'security_module' && !n.resolved && n.tier);
+    return unresolved.length > 0 ? Math.max(...unresolved.map(n => n.tier || 0)) : 0;
+  };
+
+  // Keep entry node and root access DC in sync with baseDC + highest security bonus
   useEffect(() => {
+    const securityBonus = getSecurityDCBonus(nodes);
+    const effectiveDC = baseDC + securityBonus;
     setNodes(prev => prev.map(n => {
-      if (n.id === 'entry') return { ...n, dc: effectiveBaseDC };
-      if (n.id === 'root_access') return { ...n, dc: effectiveBaseDC + 20 };
+      if (n.id === 'entry') return { ...n, dc: effectiveDC };
+      if (n.id === 'root_access') return { ...n, dc: effectiveDC + 20 };
       return n;
     }));
-  }, [effectiveBaseDC]);
+  }, [baseDC, nodes]);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const [connectingFrom, setConnectingFrom] = useState(null);
   const [log, setLog] = useState([]);
@@ -687,9 +652,7 @@ export function useHackingState() {
     computerName, setComputerName,
     tier, setTier,
     baseDC, setBaseDC,
-    securityModule, setSecurityModule,
     upgrades, setUpgrades,
-    effectiveBaseDC,
     totalCountermeasures,
     phase, setPhase,
     nodes, connections,
