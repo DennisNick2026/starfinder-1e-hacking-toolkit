@@ -19,7 +19,7 @@ function getVisibleCms(node, mode) {
   return all.filter(cm => {
     if (cm.type === 'fake_shell') return false;
     if (cm.type === 'alarm' && !cm.revealed && !cm.triggered) return false;
-    if (hasUnresolvedFirewall && cm.type !== 'firewall' && !(cm.type === 'alarm' && cm.triggered)) return false;
+    if (hasUnresolvedFirewall && cm.type !== 'firewall') return false;
     return true;
   });
 }
