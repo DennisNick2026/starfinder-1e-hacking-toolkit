@@ -636,6 +636,10 @@ export function useHackingState() {
     sum + (n.countermeasures || []).filter(cm => !cm.resolved).length, 0
   );
 
+  // Calculate effective base DC with security bonus
+  const securityBonus = getSecurityDCBonus(nodes);
+  const effectiveBaseDC = baseDC + securityBonus;
+
   const loadEncounter = useCallback((encounterData) => {
     setComputerName(encounterData.computerName);
     setTier(encounterData.tier);
@@ -653,6 +657,7 @@ export function useHackingState() {
     tier, setTier,
     baseDC, setBaseDC,
     upgrades, setUpgrades,
+    effectiveBaseDC,
     totalCountermeasures,
     phase, setPhase,
     nodes, connections,
