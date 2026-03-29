@@ -274,7 +274,7 @@ export default function BoardCanvas({
         {nodes.map(node => (
           <div
             key={node.id}
-            onMouseDown={(e) => { e.preventDefault(); handleNodeMouseDown(e, node.id); }}
+            onMouseDown={(e) => { handleNodeMouseDown(e, node.id); }}
             style={{
               position: 'absolute',
               left: node.x,
