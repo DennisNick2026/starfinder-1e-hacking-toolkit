@@ -166,6 +166,7 @@ export default function HackingBoard() {
             onDeleteNode={mode === 'create' ? state.removeNode : () => {}}
             onAddConnection={state.addConnection}
             onHack={handleHack}
+            onUnhack={state.unhackNode}
             onConfigure={handleConfigure}
             onDropNode={handleDropNode}
             mode={mode}
