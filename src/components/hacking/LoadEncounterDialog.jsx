@@ -21,7 +21,8 @@ export default function LoadEncounterDialog({ isOpen, onClose, onLoad }) {
     
     try {
       const encounters = await base44.entities.Encounter.list();
-      const encounter = encounters.find(e => 
+      const publicEncounters = encounters.filter(e => e.isPublic);
+      const encounter = publicEncounters.find(e => 
         e.shareCode && e.shareCode.toUpperCase() === searchCode.trim().toUpperCase()
       );
       
