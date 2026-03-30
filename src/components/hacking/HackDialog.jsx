@@ -145,7 +145,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
                 )}
                 onClick={() => { setTarget(null); setResult(null); }}
               >
-                {node.name} (DC {rootMode ? 10 : node.dc})
+                {node.name} (DC {rootMode ? 10 : nodeDC})
               </button>
               {activeCms.map(cm => {
                 const Icon = CM_ICONS[cm.icon];

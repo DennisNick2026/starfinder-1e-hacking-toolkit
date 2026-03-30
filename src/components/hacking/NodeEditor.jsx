@@ -61,9 +61,25 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">DC</Label>
-              <Input type="number" className="font-mono text-xs mt-1 bg-muted border-border"
-                value={node.dc} onChange={e => set('dc', parseInt(e.target.value) || 0)} />
+              <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                DC {node.dcOverride !== undefined && node.dcOverride !== null ? <span className="text-chart-4 ml-1">override</span> : ''}
+              </Label>
+              <div className="flex gap-1 mt-1">
+                <Input type="number" className="font-mono text-xs bg-muted border-border"
+                  placeholder="Auto"
+                  value={node.dcOverride ?? ''}
+                  onChange={e => {
+                    const val = e.target.value === '' ? null : (parseInt(e.target.value) || 0);
+                    set('dcOverride', val);
+                  }} />
+                {node.dcOverride !== undefined && node.dcOverride !== null && (
+                  <button
+                    className="px-2 py-1 text-[10px] font-mono text-muted-foreground hover:text-destructive border border-border rounded"
+                    title="Clear override"
+                    onClick={() => set('dcOverride', null)}
+                  >✕</button>
+                )}
+              </div>
             </div>
             {node.successes_required !== undefined && (
               <div>
