@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { Maximize2, Home } from 'lucide-react';
 
 const NODE_W = 256;
-const NODE_H = 120;
+const NODE_H = 200;
 const COMPACT_NODE_W = 128;
 const COMPACT_NODE_H = 128;
 
