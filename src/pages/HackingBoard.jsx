@@ -359,7 +359,10 @@ export default function HackingBoard() {
             setConnectingFrom={state.setConnectingFrom}
             onSelectNode={(id) => {
               state.setSelectedNodeId(id);
-              if (!id) setConfiguringNodeId(null);
+              if (!id) {
+                setConfiguringNodeId(null);
+                setActiveCategory(null);
+              }
             }}
             onMoveNode={state.moveNode}
             onDeleteNode={mode === 'create' ? state.removeNode : () => {}}
