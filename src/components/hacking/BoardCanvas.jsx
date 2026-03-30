@@ -220,9 +220,10 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
       });
     });
 
-    // Fake shell: hide fake nodes once shell is detected
+    // Fake shell: hide fake nodes once detected; hide their real counterparts until then
     nodes.forEach(n => {
       if (n.fake_shell_hidden) hidden.add(n.id);
+      if (n.real_hidden) hidden.add(n.id);
     });
 
     return hidden;

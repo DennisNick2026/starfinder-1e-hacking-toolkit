@@ -428,19 +428,28 @@ export function useHackingState() {
   }, [effectiveBaseDC, addLogEntry]);
 
   const updateNode = useCallback((nodeId, updates) => {
-    setNodes(prev => prev.map(n => {
-      if (n.id !== nodeId) return n;
-      const updated = { ...n, ...updates };
-      
-      // Auto-update security module name when tier changes
-      if (n.type === 'security_module' && updates.tier !== undefined) {
-        const tierNames = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV' };
-        const tierName = tierNames[updates.tier] || 'I';
-        updated.name = `Security Module ${tierName}`;
-      }
-      
-      return updated;
-    }));
+    setNodes(prev => {
+      // If setting/clearing a realNodeId on a fake node, sync real_hidden on the target node
+      let newRealNodeId = updates.realNodeId;
+      let prevRealNodeId = prev.find(n => n.id === nodeId)?.realNodeId;
+
+      return prev.map(n => {
+        if (n.id === nodeId) {
+          const updated = { ...n, ...updates };
+          if (n.type === 'security_module' && updates.tier !== undefined) {
+            const tierNames = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV' };
+            updated.name = `Security Module ${tierNames[updates.tier] || 'I'}`;
+          }
+          return updated;
+        }
+        // If realNodeId changed, update real_hidden on affected nodes
+        if (newRealNodeId !== undefined) {
+          if (n.id === newRealNodeId) return { ...n, real_hidden: true };
+          if (n.id === prevRealNodeId) return { ...n, real_hidden: false };
+        }
+        return n;
+      });
+    });
   }, []);
 
   const removeNode = useCallback((nodeId) => {
@@ -601,9 +610,22 @@ export function useHackingState() {
 
       if (!fakeShellJustResolved) return updated;
 
-      // Fake nodes become hidden when fake shell is detected
+      // When fake shell is detected: fake nodes get replaced by their linked real node (if set), otherwise hidden
       return updated.map(n => {
-        if (n.fake) return { ...n, fake_shell_hidden: true };
+        if (!n.fake) return n;
+        // If this fake node has a linked real node id, reveal the real node
+        if (n.realNodeId) {
+          const realNode = updated.find(r => r.id === n.realNodeId);
+          if (realNode) {
+            // Reveal the real node (remove hidden flag) and hide this fake
+            return { ...n, fake_shell_hidden: true };
+          }
+        }
+        return { ...n, fake_shell_hidden: true };
+      }).map(n => {
+        // Reveal any real nodes that are linked to a now-hidden fake
+        const linkedFake = updated.find(f => f.fake && f.realNodeId === n.id);
+        if (linkedFake) return { ...n, real_hidden: false };
         return n;
       });
     });
@@ -643,6 +665,7 @@ export function useHackingState() {
       resolved: false,
       triggered: false,
       fake_shell_hidden: false,
+      real_hidden: !!n.realNodeId, // real nodes paired with a fake start hidden
       ...(n.type === 'directory' ? { locked: true } : {}),
       countermeasures: (n.countermeasures || []).map(cm => ({
         ...cm,
@@ -672,7 +695,13 @@ export function useHackingState() {
     setTier(encounterData.tier);
     setBaseDC(encounterData.baseDC);
     setUpgrades(encounterData.upgrades || []);
-    setNodes(encounterData.nodes || []);
+    // Ensure real_hidden is correctly set for linked real nodes
+    const nodes = (encounterData.nodes || []).map(n => {
+      const linkedFake = encounterData.nodes.find(f => f.fake && f.realNodeId === n.id);
+      if (linkedFake) return { ...n, real_hidden: true };
+      return n;
+    });
+    setNodes(nodes);
     setConnections(encounterData.connections || []);
     setPhase(1);
     setLog([]);

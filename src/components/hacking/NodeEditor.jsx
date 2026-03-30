@@ -8,6 +8,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuTrigger, DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { COUNTERMEASURE_TEMPLATES } from '@/lib/hacking-state';
 import { cn } from '@/lib/utils';
 
@@ -17,7 +18,7 @@ const CM_COLOR = {
   purple: 'border-chart-3/40 bg-chart-3/5 text-chart-3',
 };
 
-export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateCm, onRemoveCm, totalCountermeasures = 0, tier = 3 }) {
+export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateCm, onRemoveCm, totalCountermeasures = 0, tier = 3, allNodes = [] }) {
   const [pendingCm, setPendingCm] = useState(null); // { nodeId, cmType } waiting for override confirm
 
   if (!node) return null;
@@ -285,7 +286,32 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
             >
               {node.fake ? 'Fake Node ✓' : 'Mark as Fake Node'}
             </button>
-            {node.fake && <p className="font-mono text-[9px] text-chart-3/70">This node is a decoy. It will vanish when a fake shell is detected.</p>}
+            {node.fake && (
+              <>
+                <p className="font-mono text-[9px] text-chart-3/70 mt-1">This node is a decoy. It will vanish when a fake shell is detected.</p>
+                <div className="mt-2">
+                  <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Reveals Real Node</Label>
+                  <Select
+                    value={node.realNodeId || 'none'}
+                    onValueChange={v => set('realNodeId', v === 'none' ? null : v)}
+                  >
+                    <SelectTrigger className="mt-1 font-mono text-xs bg-muted border-border h-8">
+                      <SelectValue placeholder="None (just vanishes)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none" className="font-mono text-xs">None (just vanishes)</SelectItem>
+                      {allNodes
+                        .filter(n => n.id !== node.id && !n.fake && !n.isEntry && !n.isRootAccess)
+                        .map(n => (
+                          <SelectItem key={n.id} value={n.id} className="font-mono text-xs">{n.name}</SelectItem>
+                        ))
+                      }
+                    </SelectContent>
+                  </Select>
+                  {node.realNodeId && <p className="font-mono text-[9px] text-primary/60 mt-1">Linked real node will be hidden until this fake is detected.</p>}
+                </div>
+              </>
+            )}
           </div>
         )}
 

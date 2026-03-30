@@ -401,6 +401,7 @@ export default function HackingBoard() {
             onRemoveCm={state.removeCountermeasure}
             totalCountermeasures={state.totalCountermeasures}
             tier={state.tier}
+            allNodes={state.nodes}
           />
         )}
       </div>
