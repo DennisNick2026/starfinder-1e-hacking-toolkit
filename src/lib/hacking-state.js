@@ -380,17 +380,24 @@ export function useHackingState() {
   const effectiveBaseDC = baseDC + securityBonus;
 
   // Helper to calculate a node's DC based on effectiveBaseDC.
+  // If the entry node has a DC of 10 (unsecured system), all other nodes are 10 too.
   // If the node has a manually overridden dc (stored as node.dcOverride),
   // use that + security bonus. Otherwise derive from baseDC + type modifier.
   const getNodeDC = useCallback((node, effectiveDC) => {
     if (node.id === 'entry') return effectiveDC;
     if (node.id === 'root_access') return effectiveDC + 20;
+    
+    // If entry node is unsecured (DC 10), all nodes are 10
+    const entryNode = nodes.find(n => n.id === 'entry');
+    const entryDC = getNodeDC(entryNode, effectiveDC);
+    if (entryDC === 10) return 10;
+    
     if (node.dcOverride !== undefined && node.dcOverride !== null) {
       return Math.max(1, node.dcOverride + securityBonus);
     }
     const modifier = NODE_DC_MODIFIERS[node.type] ?? 0;
     return Math.max(1, effectiveDC + modifier);
-  }, [securityBonus]);
+  }, [securityBonus, nodes]);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const [connectingFrom, setConnectingFrom] = useState(null);
   const [log, setLog] = useState([]);
