@@ -8,8 +8,8 @@ export const COUNTERMEASURE_TEMPLATES = {
     color: 'red',
     icon: 'Siren',
     dc: 0,
-    countdown: 3,
-    countdown_current: 3,
+    trigger: '',
+    effect: '',
     triggered: false,
     resolved: false,
   },
@@ -28,10 +28,8 @@ export const COUNTERMEASURE_TEMPLATES = {
     color: 'red',
     icon: 'Zap',
     dc: 0,
-    damage_on_trigger: 4,
     triggered: false,
     resolved: false,
-    note: 'Deals damage to hacker on failure',
   },
 
   firewall: {
@@ -50,7 +48,6 @@ export const COUNTERMEASURE_TEMPLATES = {
     icon: 'Lock',
     dc: 0,
     resolved: false,
-    note: 'Boots hacker from system on trigger',
   },
   shock_grid: {
     type: 'shock_grid',
@@ -58,10 +55,9 @@ export const COUNTERMEASURE_TEMPLATES = {
     color: 'red',
     icon: 'Zap',
     dc: 0,
-    damage_on_trigger: 6,
+    level: 1,
     triggered: false,
     resolved: false,
-    note: 'Deals electricity damage to hacker on trigger',
   },
   wipe: {
     type: 'wipe',
@@ -69,11 +65,8 @@ export const COUNTERMEASURE_TEMPLATES = {
     color: 'red',
     icon: 'Trash2',
     dc: 0,
-    countdown: 2,
-    countdown_current: 2,
     triggered: false,
     resolved: false,
-    note: 'Destroys data in module when triggered',
   },
 };
 
@@ -504,6 +497,14 @@ export function useHackingState() {
       // alarm, feedback, lockout, wipe all use nodeHackDC
       
       const cm = { ...template, id: `cm_${nextCmId++}`, dc: cmDC };
+      
+      // For shock_grid, set level-based DC
+      if (cmType === 'shock_grid') {
+        const tierDCs = [20, 22, 24, 27, 30];
+        cm.level = 1;
+        cm.dc = tierDCs[0];
+      }
+      
       return prev.map(n =>
         n.id === nodeId ? { ...n, countermeasures: [...(n.countermeasures || []), cm] } : n
       );

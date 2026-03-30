@@ -228,33 +228,6 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
                           onChange={e => onUpdateCm(node.id, cm.id, { successes_required: parseInt(e.target.value) || 1 })} />
                       </div>
                     )}
-                    {cm.countdown !== undefined && (
-                      <div>
-                        <Label className="font-mono text-[9px] uppercase tracking-wider text-current opacity-60">Countdown</Label>
-                        <Input type="number" className="font-mono text-xs mt-0.5 bg-background/20 border-current/20 h-7"
-                          value={cm.countdown}
-                          onChange={e => {
-                            const v = parseInt(e.target.value) || 1;
-                            onUpdateCm(node.id, cm.id, { countdown: v, countdown_current: v });
-                          }} />
-                      </div>
-                    )}
-                    {cm.damage_per_phase !== undefined && (
-                      <div>
-                        <Label className="font-mono text-[9px] uppercase tracking-wider text-current opacity-60">Dmg/Phase</Label>
-                        <Input type="number" className="font-mono text-xs mt-0.5 bg-background/20 border-current/20 h-7"
-                          value={cm.damage_per_phase}
-                          onChange={e => onUpdateCm(node.id, cm.id, { damage_per_phase: parseInt(e.target.value) || 0 })} />
-                      </div>
-                    )}
-                    {cm.damage_on_trigger !== undefined && (
-                      <div>
-                        <Label className="font-mono text-[9px] uppercase tracking-wider text-current opacity-60">Dmg Trigger</Label>
-                        <Input type="number" className="font-mono text-xs mt-0.5 bg-background/20 border-current/20 h-7"
-                          value={cm.damage_on_trigger}
-                          onChange={e => onUpdateCm(node.id, cm.id, { damage_on_trigger: parseInt(e.target.value) || 0 })} />
-                      </div>
-                    )}
                     {cm.type === 'firewall' && !cm.resolved && (
                       <div className="col-span-2">
                         <Label className="font-mono text-[9px] uppercase tracking-wider text-current opacity-60">Password (optional)</Label>
@@ -262,6 +235,49 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
                           placeholder="Leave blank for none"
                           value={cm.password || ''}
                           onChange={e => onUpdateCm(node.id, cm.id, { password: e.target.value })} />
+                      </div>
+                    )}
+                    {cm.type === 'alarm' && (
+                      <>
+                        <div className="col-span-2">
+                          <Label className="font-mono text-[9px] uppercase tracking-wider text-current opacity-60">Trigger</Label>
+                          <Input className="font-mono text-xs mt-0.5 bg-background/20 border-current/20 h-7"
+                            placeholder="e.g., Failed hack attempt"
+                            value={cm.trigger || ''}
+                            onChange={e => onUpdateCm(node.id, cm.id, { trigger: e.target.value })} />
+                        </div>
+                        <div className="col-span-2">
+                          <Label className="font-mono text-[9px] uppercase tracking-wider text-current opacity-60">Effect</Label>
+                          <Input className="font-mono text-xs mt-0.5 bg-background/20 border-current/20 h-7"
+                            placeholder="e.g., Alerts security"
+                            value={cm.effect || ''}
+                            onChange={e => onUpdateCm(node.id, cm.id, { effect: e.target.value })} />
+                        </div>
+                      </>
+                    )}
+                    {cm.type === 'shock_grid' && (
+                      <div className="col-span-2">
+                        <Label className="font-mono text-[9px] uppercase tracking-wider text-current opacity-60">Level</Label>
+                        <div className="flex gap-1 mt-0.5">
+                          {[1, 2, 3, 4, 5].map(lvl => (
+                            <button
+                              key={lvl}
+                              onClick={() => {
+                                const tierDCs = [20, 22, 24, 27, 30];
+                                onUpdateCm(node.id, cm.id, { level: lvl, dc: tierDCs[lvl - 1] });
+                              }}
+                              className={cn(
+                                'flex-1 py-1 rounded border font-mono text-xs font-semibold transition-colors',
+                                cm.level === lvl
+                                  ? 'bg-current/20 border-current text-current'
+                                  : 'border-current/30 text-current/60 hover:border-current/50'
+                              )}
+                            >
+                              {lvl}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="font-mono text-[8px] text-current/50 mt-1">DC {cm.dc}</p>
                       </div>
                     )}
                     </div>
