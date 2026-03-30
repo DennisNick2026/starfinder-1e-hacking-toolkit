@@ -25,6 +25,19 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
 
   const set = (field, value) => onUpdate(node.id, { [field]: value });
 
+  // Calculate the "expected" DC for a CM based on node DC and CM type
+  const getExpectedCmDC = (cm) => {
+    if (!cm) return cm.dc;
+    const nodeHackDC = node.dc ?? 25;
+    if (cm.type === 'firewall') return nodeHackDC + 2;
+    if (cm.type === 'fake_shell') return nodeHackDC + 5;
+    if (cm.type === 'shock_grid') {
+      const tierDCs = [20, 22, 24, 27, 30];
+      return tierDCs[(cm.level || 1) - 1];
+    }
+    return nodeHackDC; // default for alarm, feedback, lockout, wipe
+  };
+
   const handleAddCm = (nodeId, cmType) => {
     if (totalCountermeasures >= tier) {
       setPendingCm({ nodeId, cmType });
@@ -216,7 +229,7 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <Label className="font-mono text-[9px] uppercase tracking-wider text-current opacity-60">
-                        DC {cm.originalDC !== undefined && cm.dc !== cm.originalDC ? <span className="text-chart-4 ml-1">override</span> : ''}
+                        DC {cm.dc !== getExpectedCmDC(cm) ? <span className="text-chart-4 ml-1">override</span> : ''}
                       </Label>
                       <Input type="number" className="font-mono text-xs mt-0.5 bg-background/20 border-current/20 h-7"
                         value={cm.dc}
