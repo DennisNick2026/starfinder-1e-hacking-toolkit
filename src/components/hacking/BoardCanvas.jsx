@@ -244,6 +244,10 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
     y: (mousePos.y - pan.y) / zoom,
   } : null;
 
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+  };
+
   return (
     <div
       ref={outerRef}
@@ -258,6 +262,7 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
       onMouseLeave={handleMouseUp}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
+      onContextMenu={handleContextMenu}
     >
       {/* Infinite canvas transform container */}
       <div

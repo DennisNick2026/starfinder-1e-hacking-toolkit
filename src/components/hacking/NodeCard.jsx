@@ -348,14 +348,14 @@ export default function NodeCard({
               )}
             </>
           ) : (
-            <button
-              className="flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex items-center justify-center gap-1.5"
-              onClick={(e) => { e.stopPropagation(); onHack(node); }}
-              title="Hack this node"
-            >
-              <Zap className="w-3 h-3" />
-              <span>Hack</span>
-            </button>
+           <button
+             className="flex-1 py-3 text-xs font-mono font-bold text-primary hover:bg-primary/20 transition-colors flex items-center justify-center gap-2 bg-primary/10 group"
+             onClick={(e) => { e.stopPropagation(); onHack(node); }}
+             title="Hack this node"
+           >
+             <Zap className="w-4 h-4 group-hover:animate-pulse" />
+             <span>HACK</span>
+           </button>
           )
         )}
         {node.type === 'directory' && node.resolved && (
