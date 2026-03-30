@@ -482,11 +482,33 @@ export function useHackingState() {
   const addCountermeasure = useCallback((nodeId, cmType) => {
     const template = COUNTERMEASURE_TEMPLATES[cmType];
     if (!template) return;
-    const cm = { ...template, id: `cm_${nextCmId++}` };
-    setNodes(prev => prev.map(n =>
-      n.id === nodeId ? { ...n, countermeasures: [...(n.countermeasures || []), cm] } : n
-    ));
-  }, []);
+    
+    setNodes(prev => {
+      const node = prev.find(n => n.id === nodeId);
+      if (!node) return prev;
+      
+      // Calculate the node's hack DC
+      const nodeHackDC = getNodeDC(node, effectiveBaseDC);
+      
+      // Calculate CM DC based on type
+      let cmDC = nodeHackDC;
+      if (cmType === 'fake_shell') {
+        cmDC = nodeHackDC + 5;
+      } else if (cmType === 'firewall') {
+        cmDC = nodeHackDC + 2;
+      } else if (cmType === 'shock_grid' && node.tier !== undefined) {
+        // Shock grid uses tier-based DCs
+        const tierDCs = [20, 22, 24, 27, 30];
+        cmDC = tierDCs[Math.max(0, Math.min(node.tier - 1, 4))];
+      }
+      // alarm, feedback, lockout, wipe all use nodeHackDC
+      
+      const cm = { ...template, id: `cm_${nextCmId++}`, dc: cmDC };
+      return prev.map(n =>
+        n.id === nodeId ? { ...n, countermeasures: [...(n.countermeasures || []), cm] } : n
+      );
+    });
+  }, [effectiveBaseDC, getNodeDC]);
 
   const updateCountermeasure = useCallback((nodeId, cmId, updates) => {
     setNodes(prev => prev.map(n => {
