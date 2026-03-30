@@ -83,6 +83,12 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
   const firewallCm = (node.countermeasures || []).find(cm => cm.type === 'firewall' && !cm.resolved);
   const hasFirewallPassword = !!firewallCm?.password;
 
+  // Detect if this is a fake shell scan
+  const fakeShellCm = (node.countermeasures || []).find(cm => cm.type === 'fake_shell' && !cm.resolved);
+  const isFakeShellScan = initialTarget !== null && (node.countermeasures || []).find(cm => cm.id === initialTarget)?.type === 'fake_shell';
+  // Node actually has a fake shell CM (whether or not it was the initialTarget)
+  const nodeHasFakeShell = !!fakeShellCm;
+
   const targetStillValid = target === null || activeCms.some(cm => cm.id === target);
   const resolvedTarget = targetStillValid ? target : null;
 
@@ -101,9 +107,36 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
   const targetLabel = activeTarget ? activeTarget.label : node.name;
   const effectiveTargetDC = rootMode ? 10 : targetDC;
 
+  // For fake shell scan, use the fake shell CM's DC (or nodeDC if no CM, for a "clean" scan)
+  const scanDC = fakeShellCm ? (rootMode ? 10 : fakeShellCm.dc) : (rootMode ? 10 : nodeDC);
+
+  const getFakeShellResultMessage = (outcome) => {
+    if (nodeHasFakeShell) {
+      if (outcome === 'success') return { text: 'Fake shell detected and neutralised — the decoy is gone.', color: 'text-primary' };
+      if (outcome === 'fail_minor') return { text: "You sense something's off but couldn't crack it. The fake shell is still active.", color: 'text-chart-4' };
+      if (outcome === 'fail_major') return { text: 'Scan inconclusive. You failed to detect anything definitive.', color: 'text-destructive' };
+    } else {
+      if (outcome === 'success') return { text: 'Thorough scan complete — no fake shell present. This node is legitimate.', color: 'text-primary' };
+      if (outcome === 'fail_minor') return { text: 'Scan inconclusive. You failed to detect anything definitive.', color: 'text-chart-4' };
+      if (outcome === 'fail_major') return { text: 'Scan complete — no fake shell detected. This node appears legitimate.', color: 'text-primary' };
+    }
+  };
+
   const handleOutcome = (outcome) => {
     if (closing) return;
     setResult(outcome);
+
+    if (isFakeShellScan) {
+      // Only submit if there's actually a fake shell CM to resolve
+      if (nodeHasFakeShell && outcome === 'success') {
+        onSubmit(node.id, scanDC, fakeShellCm.id);
+        setClosing(true);
+        setTimeout(onClose, 1800);
+      }
+      // For failures or no-fake-shell cases, don't submit anything (no state change needed)
+      return;
+    }
+
     // Map outcome to a total that drives the existing submitRoll logic
     const total = outcome === 'success' ? effectiveTargetDC
       : outcome === 'fail_minor' ? effectiveTargetDC - 1   // margin = -1 (fail by < 5)
@@ -114,6 +147,8 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
       setTimeout(onClose, 400);
     }
   };
+
+  const scanResultMsg = result ? getFakeShellResultMessage(result) : null;
 
   return (
     <div
@@ -129,109 +164,152 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
         {/* Header */}
         <div className="text-center space-y-1">
           <p className="font-mono text-xs text-muted-foreground uppercase tracking-widest">Hacking</p>
-          <p className="font-mono text-lg font-bold text-foreground">{targetLabel}</p>
-          <p className="font-mono text-sm text-primary">DC {targetDC}</p>
+          <p className="font-mono text-lg font-bold text-foreground">
+            {isFakeShellScan ? 'Detect Fake Shell' : targetLabel}
+          </p>
+          <p className="font-mono text-sm text-primary">DC {isFakeShellScan ? scanDC : targetDC}</p>
         </div>
 
-        {/* Target selector (CMs) */}
-        {activeCms.length > 0 && (
-          <div className="space-y-1.5">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Target:</p>
-            <div className="flex flex-wrap gap-1.5">
-              <button
-                className={cn(
-                  'font-mono text-xs px-2.5 py-1 rounded border transition-colors',
-                  effectiveTarget === null
-                    ? 'border-primary bg-primary/20 text-primary'
-                    : 'border-border text-muted-foreground hover:border-primary/50'
-                )}
-                onClick={() => { setTarget(null); setResult(null); }}
-              >
-                {node.name} (DC {rootMode ? 10 : nodeDC})
-              </button>
-              {activeCms.map(cm => {
-                const Icon = CM_ICONS[cm.icon];
-                return (
-                  <button
-                    key={cm.id}
-                    className={cn(
-                      'font-mono text-xs px-2.5 py-1 rounded border transition-colors flex items-center gap-1',
-                      effectiveTarget === cm.id
-                        ? CM_COLOR[cm.color]
-                        : 'border-border text-muted-foreground hover:border-destructive/50'
-                    )}
-                    onClick={() => { setTarget(cm.id); setResult(null); }}
-                  >
-                    {Icon && <Icon className="w-3 h-3" />}
-                    {cm.label} (DC {rootMode ? 10 : cm.dc})
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Password entry for firewall */}
-        {hasFirewallPassword && hasUnresolvedFirewall && effectiveTarget === firewallCm?.id && (
-          <PasswordEntry
-            key={firewallCm.id}
-            label="Or enter firewall password:"
-            password={firewallCm.password}
-            disabled={closing}
-            onSuccess={() => {
-              setClosing(true);
-              onSubmit(node.id, 9999, firewallCm.id);
-              setTimeout(onClose, 400);
-            }}
-          />
-        )}
-
-        {/* Outcome buttons */}
-        {(!node.resolved || activeCms.length > 0) && (
+        {/* Fake shell scan: simplified outcome UI */}
+        {isFakeShellScan ? (
           <div className="space-y-2">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground text-center">Roll outcome:</p>
-            <div className="grid grid-cols-1 gap-2">
-              <button
-                disabled={closing}
-                onClick={() => handleOutcome('success')}
-                className={cn(
-                  'w-full py-3 rounded-lg border-2 font-mono text-sm font-bold transition-all',
-                  result === 'success'
-                    ? 'border-primary bg-primary/20 text-primary'
-                    : 'border-primary/40 bg-primary/5 text-primary/80 hover:border-primary hover:bg-primary/15',
-                  closing && 'opacity-50 cursor-not-allowed'
-                )}
-              >
-                ✓ Success
-              </button>
-              <button
-                disabled={closing}
-                onClick={() => handleOutcome('fail_minor')}
-                className={cn(
-                  'w-full py-3 rounded-lg border-2 font-mono text-sm font-bold transition-all',
-                  result === 'fail_minor'
-                    ? 'border-chart-4 bg-chart-4/20 text-chart-4'
-                    : 'border-chart-4/40 bg-chart-4/5 text-chart-4/80 hover:border-chart-4 hover:bg-chart-4/15',
-                  closing && 'opacity-50 cursor-not-allowed'
-                )}
-              >
-                ~ Fail by less than 5
-              </button>
-              <button
-                disabled={closing}
-                onClick={() => handleOutcome('fail_major')}
-                className={cn(
-                  'w-full py-3 rounded-lg border-2 font-mono text-sm font-bold transition-all',
-                  result === 'fail_major'
-                    ? 'border-destructive bg-destructive/20 text-destructive'
-                    : 'border-destructive/40 bg-destructive/5 text-destructive/80 hover:border-destructive hover:bg-destructive/15',
-                  closing && 'opacity-50 cursor-not-allowed'
-                )}
-              >
-                ✗ Fail by 5 or more
-              </button>
-            </div>
+            {!result && (
+              <>
+                <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground text-center">Roll outcome:</p>
+                <div className="grid grid-cols-1 gap-2">
+                  <button
+                    disabled={closing}
+                    onClick={() => handleOutcome('success')}
+                    className="w-full py-3 rounded-lg border-2 font-mono text-sm font-bold transition-all border-primary/40 bg-primary/5 text-primary/80 hover:border-primary hover:bg-primary/15"
+                  >
+                    ✓ Success
+                  </button>
+                  <button
+                    disabled={closing}
+                    onClick={() => handleOutcome('fail_minor')}
+                    className="w-full py-3 rounded-lg border-2 font-mono text-sm font-bold transition-all border-chart-4/40 bg-chart-4/5 text-chart-4/80 hover:border-chart-4 hover:bg-chart-4/15"
+                  >
+                    ~ Fail by less than 5
+                  </button>
+                  <button
+                    disabled={closing}
+                    onClick={() => handleOutcome('fail_major')}
+                    className="w-full py-3 rounded-lg border-2 font-mono text-sm font-bold transition-all border-destructive/40 bg-destructive/5 text-destructive/80 hover:border-destructive hover:bg-destructive/15"
+                  >
+                    ✗ Fail by 5 or more
+                  </button>
+                </div>
+              </>
+            )}
+            {scanResultMsg && (
+              <div className={cn('font-mono text-xs leading-relaxed p-3 rounded-lg border border-border bg-muted', scanResultMsg.color)}>
+                {scanResultMsg.text}
+              </div>
+            )}
           </div>
+        ) : (
+          <>
+            {/* Target selector (CMs) */}
+            {activeCms.length > 0 && (
+              <div className="space-y-1.5">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Target:</p>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    className={cn(
+                      'font-mono text-xs px-2.5 py-1 rounded border transition-colors',
+                      effectiveTarget === null
+                        ? 'border-primary bg-primary/20 text-primary'
+                        : 'border-border text-muted-foreground hover:border-primary/50'
+                    )}
+                    onClick={() => { setTarget(null); setResult(null); }}
+                  >
+                    {node.name} (DC {rootMode ? 10 : nodeDC})
+                  </button>
+                  {activeCms.map(cm => {
+                    const Icon = CM_ICONS[cm.icon];
+                    return (
+                      <button
+                        key={cm.id}
+                        className={cn(
+                          'font-mono text-xs px-2.5 py-1 rounded border transition-colors flex items-center gap-1',
+                          effectiveTarget === cm.id
+                            ? CM_COLOR[cm.color]
+                            : 'border-border text-muted-foreground hover:border-destructive/50'
+                        )}
+                        onClick={() => { setTarget(cm.id); setResult(null); }}
+                      >
+                        {Icon && <Icon className="w-3 h-3" />}
+                        {cm.label} (DC {rootMode ? 10 : cm.dc})
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Password entry for firewall */}
+            {hasFirewallPassword && hasUnresolvedFirewall && effectiveTarget === firewallCm?.id && (
+              <PasswordEntry
+                key={firewallCm.id}
+                label="Or enter firewall password:"
+                password={firewallCm.password}
+                disabled={closing}
+                onSuccess={() => {
+                  setClosing(true);
+                  onSubmit(node.id, 9999, firewallCm.id);
+                  setTimeout(onClose, 400);
+                }}
+              />
+            )}
+
+            {/* Outcome buttons */}
+            {(!node.resolved || activeCms.length > 0) && (
+              <div className="space-y-2">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground text-center">Roll outcome:</p>
+                <div className="grid grid-cols-1 gap-2">
+                  <button
+                    disabled={closing}
+                    onClick={() => handleOutcome('success')}
+                    className={cn(
+                      'w-full py-3 rounded-lg border-2 font-mono text-sm font-bold transition-all',
+                      result === 'success'
+                        ? 'border-primary bg-primary/20 text-primary'
+                        : 'border-primary/40 bg-primary/5 text-primary/80 hover:border-primary hover:bg-primary/15',
+                      closing && 'opacity-50 cursor-not-allowed'
+                    )}
+                  >
+                    ✓ Success
+                  </button>
+                  <button
+                    disabled={closing}
+                    onClick={() => handleOutcome('fail_minor')}
+                    className={cn(
+                      'w-full py-3 rounded-lg border-2 font-mono text-sm font-bold transition-all',
+                      result === 'fail_minor'
+                        ? 'border-chart-4 bg-chart-4/20 text-chart-4'
+                        : 'border-chart-4/40 bg-chart-4/5 text-chart-4/80 hover:border-chart-4 hover:bg-chart-4/15',
+                      closing && 'opacity-50 cursor-not-allowed'
+                    )}
+                  >
+                    ~ Fail by less than 5
+                  </button>
+                  <button
+                    disabled={closing}
+                    onClick={() => handleOutcome('fail_major')}
+                    className={cn(
+                      'w-full py-3 rounded-lg border-2 font-mono text-sm font-bold transition-all',
+                      result === 'fail_major'
+                        ? 'border-destructive bg-destructive/20 text-destructive'
+                        : 'border-destructive/40 bg-destructive/5 text-destructive/80 hover:border-destructive hover:bg-destructive/15',
+                      closing && 'opacity-50 cursor-not-allowed'
+                    )}
+                  >
+                    ✗ Fail by 5 or more
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* Actions */}
@@ -239,7 +317,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
           <Button variant="outline" className="flex-1 font-mono text-xs" onClick={onClose} disabled={closing}>
             Back
           </Button>
-          {node.resolved && (
+          {node.resolved && !isFakeShellScan && (
             <Button
               className="flex-1 font-mono text-xs bg-destructive/80 text-destructive-foreground hover:bg-destructive"
               onClick={() => { onUnhack(node.id); setResult(null); }}
