@@ -312,13 +312,13 @@ export default function NodeCard({
       </div>
 
       {/* Action buttons */}
-      <div className="flex flex-wrap border-t border-border/50">
+      <div className="grid grid-cols-2 gap-px border-t border-border/50">
         {!node.noHack && (
           node.resolved ? (
             <>
               {mode === 'play' && allCms.some(cm => cm.type === 'alarm' && cm.triggered && !cm.resolved) && (
                 <button
-                  className="flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center gap-1.5"
+                  className="py-2 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center gap-1.5 border-r border-b border-border/50"
                   onClick={(e) => { e.stopPropagation(); onHack(node); }}
                   title="Hack triggered alarm"
                 >
@@ -328,7 +328,7 @@ export default function NodeCard({
               )}
               {mode === 'play' && (
                 <button
-                  className="flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center gap-1.5 border-l border-border/50"
+                  className="py-2 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center gap-1.5 border-b border-border/50"
                   onClick={(e) => { e.stopPropagation(); onUnhack?.(node.id); }}
                   title="Revert breach"
                 >
@@ -338,7 +338,7 @@ export default function NodeCard({
               )}
               {mode !== 'play' && (
                 <button
-                  className="flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center gap-1.5"
+                  className="py-2 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center gap-1.5 border-r border-b border-border/50"
                   onClick={(e) => { e.stopPropagation(); onUnhack?.(node.id); }}
                   title="Revert this node"
                 >
@@ -348,20 +348,20 @@ export default function NodeCard({
               )}
             </>
           ) : (
-           <button
-             className="flex-1 py-3 text-xs font-mono font-bold text-primary hover:bg-primary/20 transition-colors flex items-center justify-center gap-2 bg-primary/10 group"
-             onClick={(e) => { e.stopPropagation(); onHack(node); }}
-             title="Hack this node"
-           >
-             <Zap className="w-4 h-4 group-hover:animate-pulse" />
-             <span>HACK</span>
-           </button>
+            <button
+              className="col-span-2 py-3 text-xs font-mono font-bold text-primary hover:bg-primary/20 transition-colors flex items-center justify-center gap-2 bg-primary/10 group"
+              onClick={(e) => { e.stopPropagation(); onHack(node); }}
+              title="Hack this node"
+            >
+              <Zap className="w-4 h-4 group-hover:animate-pulse" />
+              <span>HACK</span>
+            </button>
           )
         )}
         {node.type === 'directory' && node.resolved && (
           <button
             className={cn(
-              'flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 border-l border-border/50',
+              'py-2 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 border-r border-b border-border/50',
               node.locked ? 'hover:bg-accent/10' : 'hover:bg-destructive/10'
             )}
             onClick={(e) => { e.stopPropagation(); onToggleDirectoryLocked?.(node.id); }}
@@ -373,7 +373,7 @@ export default function NodeCard({
         )}
         {DATA_NODE_TYPES.includes(node.type) && (mode === 'create' || node.resolved) && (
           <button
-            className="flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-accent hover:bg-accent/10 transition-colors flex items-center justify-center gap-1.5 border-l border-border/50"
+            className="py-2 text-[10px] font-mono text-muted-foreground hover:text-accent hover:bg-accent/10 transition-colors flex items-center justify-center gap-1.5 border-b border-border/50"
             onClick={(e) => { e.stopPropagation(); onOpenFile?.(node); }}
             title="Open data file"
           >
@@ -384,7 +384,7 @@ export default function NodeCard({
         {/* Fake shell scan button — visible in play mode on ALL resolved nodes (to avoid revealing which nodes have the CM) */}
         {mode === 'play' && node.resolved && !node.isEntry && !node.isRootAccess && (
           <button
-            className="flex-1 py-2 text-[10px] font-mono text-chart-3/70 hover:text-chart-3 hover:bg-chart-3/10 transition-colors flex items-center justify-center gap-1.5 border-l border-border/50"
+            className="py-2 text-[10px] font-mono text-chart-3/70 hover:text-chart-3 hover:bg-chart-3/10 transition-colors flex items-center justify-center gap-1.5 border-b border-border/50"
             onClick={(e) => { e.stopPropagation(); onHack?.(node, allCms.find(cm => cm.type === 'fake_shell' && !cm.resolved)?.id ?? 'fake_shell_scan'); }}
             title="Scan for fake shell"
           >
@@ -396,7 +396,7 @@ export default function NodeCard({
           <>
             <button
               className={cn(
-                'flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center justify-center border-l border-border/50'
+                'py-2 text-[10px] font-mono text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center justify-center border-r border-b border-border/50'
               )}
               onClick={(e) => { e.stopPropagation(); onConfigure(node.id); }}
               title="Configure node"
@@ -404,7 +404,7 @@ export default function NodeCard({
               <Settings className="w-3.5 h-3.5" />
             </button>
             <button
-              className="flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex items-center justify-center border-l border-border/50"
+              className="py-2 text-[10px] font-mono text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex items-center justify-center border-b border-border/50"
               onClick={(e) => { e.stopPropagation(); onStartConnect(node.id); }}
               title="Connect to another node"
             >
@@ -412,7 +412,7 @@ export default function NodeCard({
             </button>
             {!node.isEntry && !node.isRootAccess && (
               <button
-                className="flex-1 py-2 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center border-l border-border/50"
+                className="py-2 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center border-r border-b border-border/50"
                 onClick={(e) => { e.stopPropagation(); onDelete(node.id); }}
                 title="Remove node"
               >
