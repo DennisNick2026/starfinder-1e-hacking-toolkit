@@ -26,6 +26,7 @@ export default function HackingBoard() {
   const [showSettings, setShowSettings] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [fileNode, setFileNode] = useState(null);
+  const [showSecretButtons, setShowSecretButtons] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
@@ -122,7 +123,7 @@ export default function HackingBoard() {
       {/* Top bar */}
       <header className="h-20 bg-background border-b border-primary/30 flex items-center px-5 gap-4 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
-          <Cpu className="w-5 h-5 text-primary shrink-0" />
+          <Cpu className="w-5 h-5 text-primary shrink-0 cursor-pointer" onClick={(e) => { if (e.shiftKey) setShowSecretButtons(v => !v); }} />
           <span className="font-mono text-sm font-bold text-primary tracking-widest uppercase truncate">
             {state.computerName}
           </span>
@@ -151,24 +152,28 @@ export default function HackingBoard() {
 
         {mode === 'create' && (
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleNewEncounter}
-              className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
-            >
-              <Pencil className="w-3.5 h-3.5" /> NEW
-            </button>
-            <button
-              onClick={() => setShowSaveDialog(true)}
-              className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
-            >
-              <Upload className="w-3.5 h-3.5" /> SAVE
-            </button>
-            <button
-              onClick={() => setShowLoadDialog(true)}
-              className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
-            >
-              <Download className="w-3.5 h-3.5" /> LOAD
-            </button>
+            {showSecretButtons && (
+              <>
+                <button
+                  onClick={handleNewEncounter}
+                  className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
+                >
+                  <Pencil className="w-3.5 h-3.5" /> NEW
+                </button>
+                <button
+                  onClick={() => setShowSaveDialog(true)}
+                  className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
+                >
+                  <Upload className="w-3.5 h-3.5" /> SAVE
+                </button>
+                <button
+                  onClick={() => setShowLoadDialog(true)}
+                  className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
+                >
+                  <Download className="w-3.5 h-3.5" /> LOAD
+                </button>
+              </>
+            )}
             <button
               onClick={handleExportJSON}
               className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
