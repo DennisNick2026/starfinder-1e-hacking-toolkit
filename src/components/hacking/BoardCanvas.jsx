@@ -13,7 +13,8 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
   nodes, connections, selectedNodeId,
   connectingFrom, setConnectingFrom,
   onSelectNode, onMoveNode, onDeleteNode,
-  onAddConnection, onDeleteConnection, onHack, onUnhack, onConfigure, onDropNode, mode = 'create', onUnresolveCm = null, onResolveCm = null, onOpenFile = null, onToggleDirectoryLocked = null,
+  onAddConnection, onDeleteConnection, onHack, onUnhack, onConfigure, onDropNode,
+  mode = 'create', onUnresolveCm = null, onResolveCm = null, onOpenFile = null, onToggleDirectoryLocked = null,
   effectiveBaseDC = 25, getNodeDC = null,
 }, ref) {
   const outerRef = useRef(null);
@@ -105,17 +106,18 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
 
   const handleBoardMouseDown = (e) => {
     if (draggingNode) return;
+
+    const tag = e.target.tagName.toLowerCase();
+    const isCanvasBg = tag === 'div'
+      ? (e.target === outerRef.current || e.target.getAttribute('data-canvas') === 'true')
+      : ['svg', 'line', 'g', 'defs', 'filter', 'fegaussianblur', 'femerge', 'femergenode'].includes(tag);
+
     if (connectingFrom) {
       setConnectingFrom(null);
       return;
     }
-    // Only start panning if clicking on the canvas background (not a node)
-    const tag = e.target.tagName.toLowerCase();
-    if (tag === 'div' && (e.target === outerRef.current || e.target.getAttribute('data-canvas') === 'true')) {
-      onSelectNode(null);
-      setIsPanning(true);
-      panStart.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
-    } else if (tag === 'svg' || tag === 'line' || tag === 'g' || tag === 'defs' || tag === 'filter' || tag === 'fegaussianblur' || tag === 'femerge' || tag === 'femergenode') {
+
+    if (isCanvasBg) {
       onSelectNode(null);
       setIsPanning(true);
       panStart.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
@@ -124,6 +126,7 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
 
   const handleNodeMouseDown = useCallback((e, nodeId) => {
     e.stopPropagation();
+
     if (connectingFrom) {
       onAddConnection(connectingFrom, nodeId);
       setConnectingFrom(null);
@@ -136,7 +139,7 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
     const canvas = toCanvas(e.clientX, e.clientY);
     setDragOffset({ x: canvas.x - node.x, y: canvas.y - node.y });
     setDraggingNode(nodeId);
-  }, [connectingFrom, nodes, onAddConnection, setConnectingFrom, toCanvas]);
+  }, [pendingPlacement, connectingFrom, nodes, onAddConnection, setConnectingFrom, toCanvas, onCanvasClick]);
 
   const handleMouseMove = useCallback((e) => {
     if (isPanning && panStart.current) {

@@ -56,6 +56,8 @@ export default function HackingBoard() {
     state.addNode(templateKey, x, y);
   };
 
+
+
   const handleHack = (node, cmId = null) => {
     setConfiguringNodeId(null);
     setHackingNode({ node, cmId });
@@ -80,6 +82,8 @@ export default function HackingBoard() {
   useEffect(() => {
     if (state.rootAccessGranted) setRootModeOverride(true);
   }, [state.rootAccessGranted]);
+
+
 
   const handleSubmitRoll = (nodeId, total, cmId) => {
     state.submitRoll(nodeId, total, cmId, rootMode);
@@ -378,6 +382,7 @@ export default function HackingBoard() {
             onUnhack={state.unhackNode}
             onConfigure={handleConfigure}
             onDropNode={handleDropNode}
+
             mode={mode}
             onUnresolveCm={mode === 'play' ? state.unresolveCountermeasure : null}
             onResolveCm={mode === 'play' ? (nodeId, cmId) => state.updateCountermeasure(nodeId, cmId, { resolved: true }) : null}
@@ -387,8 +392,8 @@ export default function HackingBoard() {
             getNodeDC={state.getNodeDC}
           />
 
-          <BottomLog log={state.log} selectedNode={selectedNode} activeCategory={activeCategory} onDragStart={() => {}} getNodeDC={state.getNodeDC} effectiveBaseDC={state.effectiveBaseDC} />
-          <BottomToolbar mode={mode} onDragStart={() => {}} rootMode={rootMode} activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
+          <BottomLog log={state.log} selectedNode={selectedNode} activeCategory={activeCategory} getNodeDC={state.getNodeDC} effectiveBaseDC={state.effectiveBaseDC} />
+          <BottomToolbar mode={mode} rootMode={rootMode} activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
         </div>
 
         {mode === 'create' && configuringNode && (

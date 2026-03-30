@@ -9,33 +9,35 @@ const TYPE_COLOR = {
   info: 'text-primary/70',
 };
 
-export default function BottomLog({ log, selectedNode, activeCategory, onDragStart, getNodeDC, effectiveBaseDC }) {
+export default function BottomLog({ log, selectedNode, activeCategory, getNodeDC, effectiveBaseDC }) {
   const activeCat = CATEGORIES.find(c => c.key === activeCategory);
 
   return (
-    <div className="flex border-t border-primary/30 bg-background shrink-0" style={{ height: 120 }}>
+    <div className="relative flex border-t border-primary/30 bg-background shrink-0" style={{ height: 120 }}>
       {/* Activity log OR node palette - left half */}
       <div className="flex-1 border-r border-primary/20 overflow-hidden px-3 py-2">
+
         {activeCat ? (
           <div className="flex items-center gap-3 h-full overflow-x-auto">
             {activeCat.items.map(item => {
               const Icon = item.icon;
+              const isCm = activeCat.key === 'countermeasures';
               return (
                 <div
                   key={item.key}
                   draggable
-                  onDragStart={(e) => {
-                    if (activeCat?.key === 'countermeasures') {
+                  onDragStart={e => {
+                    if (isCm) {
                       e.dataTransfer.setData('cmType', item.key);
                     } else {
                       e.dataTransfer.setData('nodeType', item.key);
                     }
-                    onDragStart && onDragStart(item.key);
+                    e.dataTransfer.effectAllowed = 'copy';
                   }}
                   className={cn(
-                    'flex flex-col items-center gap-1.5 px-4 py-2 rounded border border-primary/40',
-                    'bg-primary/5 hover:bg-primary/20 cursor-grab active:cursor-grabbing',
-                    'transition-colors text-primary select-none shrink-0'
+                    'flex flex-col items-center gap-1.5 px-4 py-2 rounded border',
+                    'transition-colors text-primary select-none shrink-0 cursor-grab active:cursor-grabbing',
+                    'border-primary/40 bg-primary/5 hover:bg-primary/20'
                   )}
                   title={`Drag to place: ${item.label}`}
                 >
