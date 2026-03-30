@@ -52,34 +52,34 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
   };
 
   return (
-    <div className="w-72 bg-card border-l border-border flex flex-col overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        <h3 className="font-mono text-sm font-semibold text-primary">Configure Node</h3>
-        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
+    <div className="w-96 bg-card border-l border-border flex flex-col overflow-hidden shadow-xl">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border/50 bg-gradient-to-r from-card to-card/80">
+        <h3 className="font-mono text-base font-bold text-primary uppercase tracking-wider">Configure Node</h3>
+        <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={onClose}>
           <X className="w-4 h-4" />
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {/* Basic fields */}
-        <div className="space-y-3">
+        <div className="space-y-5">
           <div>
-            <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Name</Label>
-            <Input className="font-mono text-xs mt-1 bg-muted border-border" value={node.name}
+            <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-2">Name</Label>
+            <Input className="font-mono text-sm mt-1 bg-muted border-border/60 h-10" value={node.name}
               onChange={e => set('name', e.target.value)} />
           </div>
           <div>
-            <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Description</Label>
-            <Textarea className="font-mono text-xs mt-1 bg-muted border-border h-14 resize-none"
+            <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-2">Description</Label>
+            <Textarea className="font-mono text-sm mt-1 bg-muted border-border/60 h-20 resize-none"
               value={node.description || ''} onChange={e => set('description', e.target.value)} />
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                DC {node.dcOverride !== undefined && node.dcOverride !== null ? <span className="text-chart-4 ml-1">override</span> : ''}
+              <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-2">
+                DC {node.dcOverride !== undefined && node.dcOverride !== null ? <span className="text-chart-4 text-[10px]">override</span> : ''}
               </Label>
               <div className="flex gap-1 mt-1">
-                <Input type="number" className="font-mono text-xs bg-muted border-border"
+                <Input type="number" className="font-mono text-sm bg-muted border-border/60 h-9"
                   placeholder="Auto"
                   value={node.dcOverride ?? ''}
                   onChange={e => {
@@ -88,7 +88,7 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
                   }} />
                 {node.dcOverride !== undefined && node.dcOverride !== null && (
                   <button
-                    className="px-2 py-1 text-[10px] font-mono text-muted-foreground hover:text-destructive border border-border rounded"
+                    className="px-2.5 py-1 text-xs font-mono text-muted-foreground hover:text-destructive border border-border/60 rounded hover:border-destructive/50 transition-colors"
                     title="Clear override"
                     onClick={() => set('dcOverride', null)}
                   >✕</button>
@@ -97,8 +97,8 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
             </div>
             {node.successes_required !== undefined && (
               <div>
-                <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Successes</Label>
-                <Input type="number" className="font-mono text-xs mt-1 bg-muted border-border"
+                <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-2">Successes</Label>
+                <Input type="number" className="font-mono text-sm mt-1 bg-muted border-border/60 h-9"
                   value={node.successes_required}
                   onChange={e => set('successes_required', parseInt(e.target.value) || 1)} />
               </div>
@@ -107,16 +107,16 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
 
           {node.dc_reduction !== undefined && (
             <div>
-              <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">DC Reduction</Label>
-              <Input type="number" className="font-mono text-xs mt-1 bg-muted border-border w-24"
+              <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-2">DC Reduction</Label>
+              <Input type="number" className="font-mono text-sm mt-1 bg-muted border-border/60 h-9 w-24"
                 value={node.dc_reduction}
                 onChange={e => set('dc_reduction', parseInt(e.target.value) || 0)} />
             </div>
           )}
           {node.file_content !== undefined && (
             <div>
-              <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">File Contents</Label>
-              <Textarea className="font-mono text-xs mt-1 bg-muted border-border h-28 resize-none"
+              <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-2">File Contents</Label>
+              <Textarea className="font-mono text-sm mt-1 bg-muted border-border/60 h-32 resize-none"
                 placeholder="Enter secret data file contents..."
                 value={node.file_content || ''}
                 onChange={e => set('file_content', e.target.value)} />
@@ -125,17 +125,17 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
 
           {node.tier !== undefined && (
             <div>
-              <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Tier</Label>
-              <div className="flex gap-1 mt-1">
+              <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-3">Tier</Label>
+              <div className="flex gap-2 mt-2">
                 {[1, 2, 3, 4].map(t => (
                   <button
                     key={t}
                     onClick={() => set('tier', t)}
                     className={cn(
-                      'flex-1 py-2 rounded border font-mono text-xs font-semibold transition-colors',
+                      'flex-1 py-2.5 rounded border font-mono text-sm font-bold transition-colors',
                       node.tier === t
                         ? 'bg-primary/20 border-primary text-primary'
-                        : 'border-border text-muted-foreground hover:border-primary/50'
+                        : 'border-border/60 text-muted-foreground hover:border-primary/50'
                     )}
                   >
                     {t}
@@ -148,15 +148,15 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
         </div>
 
         {/* Countermeasures section */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-              Countermeasures {(node.countermeasures || []).filter(c => c.resolved).length > 0 && `(${(node.countermeasures || []).filter(c => c.resolved).length} resolved)`}
+        <div className="border-t border-border/50 pt-5">
+          <div className="flex items-center justify-between mb-4">
+            <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80">
+              Countermeasures {(node.countermeasures || []).filter(c => c.resolved).length > 0 && <span className="text-muted-foreground text-[10px]">({(node.countermeasures || []).filter(c => c.resolved).length} resolved)</span>}
             </Label>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="ghost" className="h-6 px-2 font-mono text-[10px] gap-1 text-primary hover:text-primary">
-                  <Plus className="w-3 h-3" /> Add
+                <Button size="sm" variant="ghost" className="h-7 px-3 font-mono text-xs gap-1.5 text-primary hover:text-primary hover:bg-primary/10">
+                  <Plus className="w-4 h-4" /> Add
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-44">
@@ -317,8 +317,8 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
 
         {/* Fake Shell node tagging */}
         {!node.isEntry && !node.isRootAccess && (
-          <div className="space-y-2 border-t border-border pt-3">
-            <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Fake Shell</Label>
+          <div className="space-y-4 border-t border-border/50 pt-5">
+            <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block">Fake Shell</Label>
             <button
               onClick={() => set('fake', !node.fake)}
               className={cn(
@@ -332,27 +332,27 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
             </button>
             {node.fake && (
               <>
-                <p className="font-mono text-[9px] text-chart-3/70 mt-1">This node is a decoy. It will vanish when a fake shell is detected.</p>
-                <div className="mt-2">
-                  <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Reveals Real Node</Label>
+                <p className="font-mono text-xs text-chart-3/70 mt-2">This node is a decoy. It will vanish when a fake shell is detected.</p>
+                <div className="mt-4">
+                  <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-2">Reveals Real Node</Label>
                   <Select
                     value={node.realNodeId || 'none'}
                     onValueChange={v => set('realNodeId', v === 'none' ? null : v)}
                   >
-                    <SelectTrigger className="mt-1 font-mono text-xs bg-muted border-border h-8">
+                    <SelectTrigger className="font-mono text-sm bg-muted border-border/60 h-9">
                       <SelectValue placeholder="None (just vanishes)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none" className="font-mono text-xs">None (just vanishes)</SelectItem>
+                      <SelectItem value="none" className="font-mono text-sm">None (just vanishes)</SelectItem>
                       {allNodes
                         .filter(n => n.id !== node.id && !n.fake && !n.isEntry && !n.isRootAccess)
                         .map(n => (
-                          <SelectItem key={n.id} value={n.id} className="font-mono text-xs">{n.name}</SelectItem>
+                          <SelectItem key={n.id} value={n.id} className="font-mono text-sm">{n.name}</SelectItem>
                         ))
                       }
                     </SelectContent>
                   </Select>
-                  {node.realNodeId && <p className="font-mono text-[9px] text-primary/60 mt-1">Linked real node will be hidden until this fake is detected.</p>}
+                  {node.realNodeId && <p className="font-mono text-xs text-primary/60 mt-2">Linked real node will be hidden until this fake is detected.</p>}
                 </div>
               </>
             )}
@@ -360,10 +360,12 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
         )}
 
         {/* Mark resolved */}
-        <Button size="sm" variant="outline" className="font-mono text-xs w-full"
-          onClick={() => set('resolved', !node.resolved)}>
-          {node.resolved ? 'Unresolve' : 'Mark Resolved'}
-        </Button>
+        <div className="border-t border-border/50 pt-5">
+          <Button size="sm" variant="outline" className="font-mono text-sm w-full h-9 font-semibold"
+            onClick={() => set('resolved', !node.resolved)}>
+            {node.resolved ? 'Unresolve' : 'Mark Resolved'}
+          </Button>
+        </div>
       </div>
     </div>
   );
