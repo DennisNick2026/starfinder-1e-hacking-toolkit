@@ -215,15 +215,10 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <Label className="font-mono text-[9px] uppercase tracking-wider text-current opacity-60">
-                        DC {cm.dcOverride !== undefined && cm.dcOverride !== null ? <span className="text-chart-4 ml-1">override</span> : ''}
-                      </Label>
+                      <Label className="font-mono text-[9px] uppercase tracking-wider text-current opacity-60">DC</Label>
                       <Input type="number" className="font-mono text-xs mt-0.5 bg-background/20 border-current/20 h-7"
-                        value={cm.dcOverride ?? cm.dc}
-                        onChange={e => {
-                          const val = e.target.value === '' ? null : (parseInt(e.target.value) || 0);
-                          onUpdateCm(node.id, cm.id, { dcOverride: val });
-                        }} />
+                        value={cm.dc}
+                        onChange={e => onUpdateCm(node.id, cm.id, { dc: parseInt(e.target.value) || 0 })} />
                     </div>
                     {cm.successes_required !== undefined && (
                       <div>
