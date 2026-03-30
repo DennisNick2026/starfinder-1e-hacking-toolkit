@@ -380,6 +380,17 @@ export default function NodeCard({
             <span>File</span>
           </button>
         )}
+        {/* Fake shell scan button — visible in play mode when node is resolved and fake_shell CM is present but unresolved */}
+        {mode === 'play' && node.resolved && allCms.some(cm => cm.type === 'fake_shell' && !cm.resolved) && (
+          <button
+            className="flex-1 py-2 text-[10px] font-mono text-chart-3/70 hover:text-chart-3 hover:bg-chart-3/10 transition-colors flex items-center justify-center gap-1.5 border-l border-border/50"
+            onClick={(e) => { e.stopPropagation(); onHack?.(node, allCms.find(cm => cm.type === 'fake_shell' && !cm.resolved)?.id); }}
+            title="Scan for fake shell"
+          >
+            <EyeOff className="w-3 h-3" />
+            <span>Scan</span>
+          </button>
+        )}
         {mode === 'create' && (
           <>
             <button
