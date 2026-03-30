@@ -496,13 +496,14 @@ export function useHackingState() {
       }
       // alarm, feedback, lockout, wipe all use nodeHackDC
       
-      const cm = { ...template, id: `cm_${nextCmId++}`, dc: cmDC };
+      const cm = { ...template, id: `cm_${nextCmId++}`, dc: cmDC, originalDC: cmDC };
       
       // For shock_grid, set level-based DC
       if (cmType === 'shock_grid') {
         const tierDCs = [20, 22, 24, 27, 30];
         cm.level = 1;
         cm.dc = tierDCs[0];
+        cm.originalDC = tierDCs[0];
       }
       
       return prev.map(n =>
