@@ -286,7 +286,7 @@ export default function HackingBoard() {
             getNodeDC={state.getNodeDC}
           />
 
-          <BottomLog log={state.log} selectedNode={selectedNode} activeCategory={activeCategory} onDragStart={() => {}} />
+          <BottomLog log={state.log} selectedNode={selectedNode} activeCategory={activeCategory} onDragStart={() => {}} getNodeDC={state.getNodeDC} effectiveBaseDC={state.effectiveBaseDC} />
           <BottomToolbar mode={mode} onDragStart={() => {}} rootMode={rootMode} activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
         </div>
 

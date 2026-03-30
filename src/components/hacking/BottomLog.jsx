@@ -9,7 +9,7 @@ const TYPE_COLOR = {
   info: 'text-primary/70',
 };
 
-export default function BottomLog({ log, selectedNode, activeCategory, onDragStart }) {
+export default function BottomLog({ log, selectedNode, activeCategory, onDragStart, getNodeDC, effectiveBaseDC }) {
   const activeCat = CATEGORIES.find(c => c.key === activeCategory);
 
   return (
@@ -66,7 +66,7 @@ export default function BottomLog({ log, selectedNode, activeCategory, onDragSta
           <div className="space-y-1">
             <p className="font-mono text-[10px] text-primary/50 uppercase tracking-widest">&gt; NODE SELECTED</p>
             <p className="font-mono text-sm font-bold text-primary">{selectedNode.name}</p>
-            <p className="font-mono text-[11px] text-primary/60">DC {selectedNode.dc} · {selectedNode.successes_current || 0}/{selectedNode.successes_required || 0} successes</p>
+            <p className="font-mono text-[11px] text-primary/60">DC {getNodeDC ? getNodeDC(selectedNode, effectiveBaseDC) : selectedNode.dc} · {selectedNode.successes_current || 0}/{selectedNode.successes_required || 0} successes</p>
           </div>
         ) : (
           <p className="font-mono text-[10px] text-primary/40">&gt; NO NODE SELECTED</p>
