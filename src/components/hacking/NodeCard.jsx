@@ -51,7 +51,10 @@ export default function NodeCard({
   // Special compact rendering for entry and root access nodes
   if (node.isEntry || node.isRootAccess) {
     const Icon = node.isRootAccess ? ShieldCheck : LogIn;
-    const colors = node.isRootAccess ? COLOR_MAP.purple : COLOR_MAP.cyan;
+    const hacked = !!node.resolved;
+    const hackedColors = node.isRootAccess ? COLOR_MAP.purple : { border: 'border-accent/70', bg: 'bg-accent/10', text: 'text-accent', glow: 'glow-yellow' };
+    const baseColors = node.isRootAccess ? COLOR_MAP.purple : COLOR_MAP.cyan;
+    const colors = hacked ? hackedColors : baseColors;
     const showHack = !node.noHack;
     const showConfigure = mode === 'create' && node.isEntry;
 
@@ -59,15 +62,26 @@ export default function NodeCard({
       <div
         className={cn(
           'select-none cursor-grab active:cursor-grabbing',
-          'w-32 rounded-lg border-2 transition-shadow duration-200 flex flex-col items-center justify-center gap-1.5 pt-3 pb-1',
+          'w-32 rounded-lg border-2 transition-all duration-300 flex flex-col items-center justify-center gap-1.5 pt-3 pb-1',
           colors.border, colors.bg,
-          isSelected && colors.glow,
+          (isSelected || hacked) && colors.glow,
           isDragging && 'opacity-70 scale-105',
         )}
         onClick={(e) => { e.stopPropagation(); onSelect(node.id); }}
       >
         <Icon className={cn('w-8 h-8', colors.text)} />
         <span className="font-mono text-xs font-bold text-foreground text-center">{node.label}</span>
+        {/* Hacked status */}
+        {node.isEntry && (
+          <span className={cn(
+            'font-mono text-[9px] font-bold tracking-widest px-1.5 py-0.5 rounded border',
+            hacked
+              ? 'text-accent border-accent/40 bg-accent/10'
+              : 'text-muted-foreground border-border/50 bg-muted/30'
+          )}>
+            {hacked ? '✓ BREACHED' : 'LOCKED'}
+          </span>
+        )}
         {/* Countermeasures */}
         {(node.countermeasures || []).filter(cm => !cm.resolved).length > 0 && (
           <div className="flex flex-wrap justify-center gap-0.5 px-1">
