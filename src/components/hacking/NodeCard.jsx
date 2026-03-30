@@ -53,7 +53,7 @@ export default function NodeCard({
     const Icon = node.isRootAccess ? ShieldCheck : LogIn;
     const colors = node.isRootAccess ? COLOR_MAP.purple : COLOR_MAP.cyan;
     const showHack = !node.noHack;
-    const showConfigure = mode === 'create';
+    const showConfigure = mode === 'create' && node.isEntry;
 
     return (
       <div
