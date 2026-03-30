@@ -159,7 +159,7 @@ export default function NodeCard({
     <div
       className={cn(
         'select-none cursor-grab active:cursor-grabbing',
-        'w-72 rounded-lg border-2 transition-shadow duration-200',
+        'w-64 rounded-lg border-2 transition-shadow duration-200',
         colors.border, colors.bg,
         isSelected && colors.glow,
         isDragging && 'opacity-70 scale-105',
