@@ -21,7 +21,7 @@ function garbleText(text) {
 export default function DataFileModal({ node, onClose, onSave, canEdit }) {
   const [content, setContent] = useState(node.file_content || '');
   const [saved, setSaved] = useState(false);
-  const isFake = !!node.fake;
+  const isFake = !!node.fake && !node.fake_shell_hidden;
 
   const handleSave = () => {
     onSave(node.id, content);
