@@ -32,6 +32,7 @@ export default function SaveEncounterDialog({ isOpen, onClose, shareCode, encoun
       };
       
       await base44.entities.Encounter.create(encounter);
+      await navigator.clipboard.writeText(shareCode);
       setSaved(true);
     } catch (err) {
       console.error('Failed to save encounter:', err);
