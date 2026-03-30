@@ -178,13 +178,13 @@ export default function HackingBoard() {
               onClick={handleExportJSON}
               className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
             >
-              <FileJson className="w-3.5 h-3.5" /> EXPORT
+              <FileJson className="w-3.5 h-3.5" /> SAVE TO FILE
             </button>
             <button
               onClick={() => setShowImportDialog(true)}
               className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
             >
-              <FileJson className="w-3.5 h-3.5" /> IMPORT
+              <FileJson className="w-3.5 h-3.5" /> LOAD FROM FILE
             </button>
           </div>
         )}
