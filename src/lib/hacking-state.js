@@ -610,26 +610,24 @@ export function useHackingState() {
 
       if (!fakeShellJustResolved) return updated;
 
-      // When fake shell is detected: fake nodes get replaced by their linked real node (if set), otherwise hidden
+      // Find all fake nodes that are directly connected to the node with the fake shell CM
+      const connectedNodeIds = new Set(
+        connections
+          .filter(c => c.from === nodeId || c.to === nodeId)
+          .map(c => c.from === nodeId ? c.to : c.from)
+      );
+
+      // Hide connected fake nodes and reveal their linked real nodes
+      const fakeNodesToHide = updated.filter(n => n.fake && connectedNodeIds.has(n.id));
+      const realNodeIdsToReveal = new Set(fakeNodesToHide.map(n => n.realNodeId).filter(Boolean));
+
       return updated.map(n => {
-        if (!n.fake) return n;
-        // If this fake node has a linked real node id, reveal the real node
-        if (n.realNodeId) {
-          const realNode = updated.find(r => r.id === n.realNodeId);
-          if (realNode) {
-            // Reveal the real node (remove hidden flag) and hide this fake
-            return { ...n, fake_shell_hidden: true };
-          }
-        }
-        return { ...n, fake_shell_hidden: true };
-      }).map(n => {
-        // Reveal any real nodes that are linked to a now-hidden fake
-        const linkedFake = updated.find(f => f.fake && f.realNodeId === n.id);
-        if (linkedFake) return { ...n, real_hidden: false };
+        if (n.fake && connectedNodeIds.has(n.id)) return { ...n, fake_shell_hidden: true };
+        if (realNodeIdsToReveal.has(n.id)) return { ...n, real_hidden: false };
         return n;
       });
     });
-  }, []);
+  }, [connections]);
 
   const advancePhase = useCallback(() => {
     setPhase(p => p + 1);
