@@ -10,7 +10,8 @@ import DataFileModal from '@/components/hacking/DataFileModal';
 import SaveEncounterDialog from '@/components/hacking/SaveEncounterDialog';
 import LoadEncounterDialog from '@/components/hacking/LoadEncounterDialog';
 import ImportEncounterDialog from '@/components/hacking/ImportEncounterDialog';
-import { Cpu, ShieldCheck, Play, SkipForward, RotateCcw, Settings, Shield, Pencil, Trash2, Upload, Download, FileJson } from 'lucide-react';
+import { Cpu, ShieldCheck, Play, SkipForward, RotateCcw, Settings, Shield, Pencil, Trash2, Upload, Download, FileJson, Database } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
 export default function HackingBoard() {
@@ -160,18 +161,23 @@ export default function HackingBoard() {
                 >
                   <Pencil className="w-3.5 h-3.5" /> NEW
                 </button>
-                <button
-                  onClick={() => setShowSaveDialog(true)}
-                  className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
-                >
-                  <Upload className="w-3.5 h-3.5" /> SAVE
-                </button>
-                <button
-                  onClick={() => setShowLoadDialog(true)}
-                  className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
-                >
-                  <Download className="w-3.5 h-3.5" /> LOAD
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
+                      <Database className="w-3.5 h-3.5" /> CLOUD
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="font-mono">
+                    <DropdownMenuLabel className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Cloud Storage</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setShowSaveDialog(true)} className="gap-2 cursor-pointer">
+                      <Upload className="w-3.5 h-3.5" /> Save to Cloud
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowLoadDialog(true)} className="gap-2 cursor-pointer">
+                      <Download className="w-3.5 h-3.5" /> Load from Cloud
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             )}
             <button
