@@ -10,6 +10,7 @@ import DataFileModal from '@/components/hacking/DataFileModal';
 import SaveEncounterDialog from '@/components/hacking/SaveEncounterDialog';
 import LoadEncounterDialog from '@/components/hacking/LoadEncounterDialog';
 import ImportEncounterDialog from '@/components/hacking/ImportEncounterDialog';
+import ExportConfirmDialog from '@/components/hacking/ExportConfirmDialog';
 import { Cpu, ShieldCheck, Play, SkipForward, RotateCcw, Settings, Shield, Pencil, Trash2, Upload, Download, FileJson, Database } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
@@ -31,6 +32,7 @@ export default function HackingBoard() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showExportConfirm, setShowExportConfirm] = useState(false);
   const [sharedEncounter, setSharedEncounter] = useState(null);
   const [currentShareCode, setCurrentShareCode] = useState(() => Math.random().toString(36).substring(2, 8).toUpperCase());
 
@@ -181,7 +183,7 @@ export default function HackingBoard() {
               </>
             )}
             <button
-              onClick={handleExportJSON}
+              onClick={() => setShowExportConfirm(true)}
               className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
             >
               <FileJson className="w-3.5 h-3.5" /> SAVE TO FILE
@@ -364,6 +366,12 @@ export default function HackingBoard() {
         isOpen={showImportDialog}
         onClose={() => setShowImportDialog(false)}
         onImport={handleImportJSON}
+      />
+
+      <ExportConfirmDialog
+        isOpen={showExportConfirm}
+        onClose={() => setShowExportConfirm(false)}
+        onConfirm={handleExportJSON}
       />
 
       <ComputerSettingsModal
