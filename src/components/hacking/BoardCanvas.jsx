@@ -340,10 +340,12 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
             let tFromX = halfW, tFromY = halfH;
             if (Math.abs(unitX) > Math.abs(unitY)) {
               tFromX = unitX > 0 ? halfW : -halfW;
-              tFromY = (tFromX * unitY) / unitX;
+              tFromY = unitX !== 0 ? (tFromX * unitY) / unitX : 0;
+              tFromY = Math.max(-halfH, Math.min(halfH, tFromY));
             } else {
               tFromY = unitY > 0 ? halfH : -halfH;
-              tFromX = (tFromY * unitX) / unitY;
+              tFromX = unitY !== 0 ? (tFromY * unitX) / unitY : 0;
+              tFromX = Math.max(-halfW, Math.min(halfW, tFromX));
             }
             const fx = fromCenterX + tFromX;
             const fy = fromCenterY + tFromY;
@@ -353,11 +355,13 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
             const toHalfH = toH / 2;
             let tToX = toHalfW, tToY = toHalfH;
             if (Math.abs(unitX) > Math.abs(unitY)) {
-              tToX = unitX > 0 ? -halfW : halfW;
-              tToY = (tToX * unitY) / unitX;
+              tToX = unitX > 0 ? -toHalfW : toHalfW;
+              tToY = unitX !== 0 ? (tToX * unitY) / unitX : 0;
+              tToY = Math.max(-toHalfH, Math.min(toHalfH, tToY));
             } else {
-              tToY = unitY > 0 ? -halfH : halfH;
-              tToX = (tToY * unitX) / unitY;
+              tToY = unitY > 0 ? -toHalfH : toHalfH;
+              tToX = unitY !== 0 ? (tToY * unitX) / unitY : 0;
+              tToX = Math.max(-toHalfW, Math.min(toHalfW, tToX));
             }
             const tx = toCenterX + tToX;
             const ty = toCenterY + tToY;
