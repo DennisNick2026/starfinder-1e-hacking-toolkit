@@ -384,7 +384,12 @@ export function useHackingState() {
   // If the node has a manually overridden dc (stored as node.dcOverride),
   // use that + security bonus. Otherwise derive from baseDC + type modifier.
   const getNodeDC = useCallback((node, effectiveDC) => {
-    if (node.id === 'entry') return effectiveDC;
+    if (node.id === 'entry') {
+      if (node.dcOverride !== undefined && node.dcOverride !== null) {
+        return node.dcOverride + securityBonus;
+      }
+      return effectiveDC;
+    }
     if (node.id === 'root_access') return effectiveDC + 20;
     
     // If entry node is unsecured (DC 10), all nodes are 10
