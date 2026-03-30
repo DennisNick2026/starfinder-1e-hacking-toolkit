@@ -193,6 +193,16 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
   // Compute which nodes are hidden (play mode)
   const hiddenNodeIds = useMemo(() => {
     const hidden = new Set();
+
+    // Entry node hides connected nodes until resolved
+    const entryNode = nodes.find(n => n.id === 'entry');
+    if (entryNode && !entryNode.resolved) {
+      connections.forEach(c => {
+        if (c.from === 'entry' && c.to !== 'root_access') hidden.add(c.to);
+        if (c.to === 'entry' && c.from !== 'root_access') hidden.add(c.from);
+      });
+    }
+
     const lockedDirs = nodes.filter(n => n.type === 'directory' && n.locked);
     lockedDirs.forEach(dir => {
       connections.forEach(c => {

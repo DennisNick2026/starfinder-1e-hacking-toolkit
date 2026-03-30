@@ -68,6 +68,23 @@ export default function NodeCard({
       >
         <Icon className={cn('w-8 h-8', colors.text)} />
         <span className="font-mono text-xs font-bold text-foreground text-center">{node.label}</span>
+        {/* Countermeasures */}
+        {(node.countermeasures || []).filter(cm => !cm.resolved).length > 0 && (
+          <div className="flex flex-wrap justify-center gap-0.5 px-1">
+            {(node.countermeasures || []).filter(cm => !cm.resolved).map(cm => {
+              const CmIcon = CM_ICONS[cm.icon];
+              return (
+                <span key={cm.id} className={cn(
+                  'inline-flex items-center gap-0.5 px-1 py-0.5 rounded border text-[8px] font-mono font-semibold',
+                  CM_BADGE[cm.color] || CM_BADGE.red,
+                  cm.triggered && 'animate-pulse'
+                )}>
+                  {CmIcon && <CmIcon className="w-2 h-2" />}
+                </span>
+              );
+            })}
+          </div>
+        )}
         {(showHack || showConfigure) && (
           <div className="flex w-full border-t border-border/50 mt-1">
             {showHack && (
