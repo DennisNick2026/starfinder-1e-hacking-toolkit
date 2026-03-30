@@ -601,11 +601,9 @@ export function useHackingState() {
 
       if (!fakeShellJustResolved) return updated;
 
-      // Find all connections from this node to identify its direct neighbours
-      // Fake nodes become hidden; real_hidden nodes become visible
+      // Fake nodes become hidden when fake shell is detected
       return updated.map(n => {
         if (n.fake) return { ...n, fake_shell_hidden: true };
-        if (n.real_hidden) return { ...n, real_hidden: false };
         return n;
       });
     });

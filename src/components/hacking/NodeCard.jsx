@@ -167,8 +167,6 @@ export default function NodeCard({
         node.isEntry && 'border-primary glow-cyan',
         // Fake nodes get a subtle purple tint in create mode
         node.fake && mode === 'create' && 'border-chart-3/60 bg-chart-3/5',
-        // Real-hidden nodes get a subtle muted look in create mode
-        node.real_hidden && mode === 'create' && 'opacity-60',
       )}
       style={{  }}
       onClick={(e) => { e.stopPropagation(); onSelect(node.id); }}
@@ -188,9 +186,7 @@ export default function NodeCard({
             {node.fake && mode === 'create' && (
               <span className="font-mono text-[8px] font-bold px-1 py-0.5 rounded border border-chart-3/50 bg-chart-3/10 text-chart-3 shrink-0">FAKE</span>
             )}
-            {node.real_hidden && mode === 'create' && (
-              <span className="font-mono text-[8px] font-bold px-1 py-0.5 rounded border border-muted-foreground/30 bg-muted/30 text-muted-foreground shrink-0">HIDDEN</span>
-            )}
+
             <span className="font-mono text-[10px] text-muted-foreground shrink-0">DC {nodeDC}</span>
           </>
         )}
