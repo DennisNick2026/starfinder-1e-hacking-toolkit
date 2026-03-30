@@ -141,7 +141,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
       : effectiveTargetDC - 5;                              // margin = -5 (fail by >= 5)
     onSubmit(node.id, total, effectiveTarget || null);
     setClosing(true);
-    setTimeout(onClose, 400);
+    setTimeout(onClose, 200);
   };
 
   const scanResultMsg = result ? getFakeShellResultMessage(result) : null;
