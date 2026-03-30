@@ -123,7 +123,7 @@ export default function HackingBoard() {
       {/* Top bar */}
       <header className="h-20 bg-background border-b border-primary/30 flex items-center px-5 gap-4 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
-          <Cpu className="w-5 h-5 text-primary shrink-0 cursor-default" onClick={(e) => { if (e.shiftKey) setShowSecretButtons(v => !v); }} />
+          <Cpu className="w-5 h-5 text-primary shrink-0 cursor-default" onClick={(e) => { if (e.ctrlKey) setShowSecretButtons(v => !v); }} />
           <span className="font-mono text-sm font-bold text-primary tracking-widest uppercase truncate">
             {state.computerName}
           </span>
