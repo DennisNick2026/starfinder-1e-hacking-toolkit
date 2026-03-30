@@ -104,13 +104,13 @@ export default function NodeCard({
             {showHack && (
               <button
                 className={cn(
-                  'flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex items-center justify-center gap-1',
+                  'flex-1 py-2 text-xs font-mono font-bold text-primary bg-primary/10 hover:bg-primary/20 transition-colors flex items-center justify-center gap-1.5 group',
                   showConfigure && 'border-r border-border/50'
                 )}
                 onClick={(e) => { e.stopPropagation(); onHack(node); }}
                 title="Hack this node"
               >
-                <Zap className="w-3 h-3" />
+                <Zap className="w-3.5 h-3.5 group-hover:animate-pulse" />
               </button>
             )}
             {showConfigure && (
