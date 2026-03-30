@@ -229,11 +229,24 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <Label className="font-mono text-[9px] uppercase tracking-wider text-current opacity-60">
-                        DC {cm.dc !== getExpectedCmDC(cm) ? <span className="text-chart-4 ml-1">override</span> : ''}
+                        DC {cm.dcOverride !== undefined && cm.dcOverride !== null ? <span className="text-chart-4 ml-1">override</span> : ''}
                       </Label>
-                      <Input type="number" className="font-mono text-xs mt-0.5 bg-background/20 border-current/20 h-7"
-                        value={cm.dc}
-                        onChange={e => onUpdateCm(node.id, cm.id, { dc: parseInt(e.target.value) || 0 })} />
+                      <div className="flex gap-1 mt-0.5">
+                        <Input type="number" className="font-mono text-xs bg-background/20 border-current/20 h-7"
+                          placeholder="Auto"
+                          value={cm.dcOverride ?? ''}
+                          onChange={e => {
+                            const val = e.target.value === '' ? null : (parseInt(e.target.value) || 0);
+                            onUpdateCm(node.id, cm.id, { dcOverride: val, dc: val ?? getExpectedCmDC(cm) });
+                          }} />
+                        {cm.dcOverride !== undefined && cm.dcOverride !== null && (
+                          <button
+                            className="px-2 py-0.5 text-[10px] font-mono text-current/50 hover:text-current border border-current/20 rounded"
+                            title="Clear override"
+                            onClick={() => onUpdateCm(node.id, cm.id, { dcOverride: null, dc: getExpectedCmDC(cm) })}
+                          >✕</button>
+                        )}
+                      </div>
                     </div>
                     {cm.successes_required !== undefined && (
                       <div>
