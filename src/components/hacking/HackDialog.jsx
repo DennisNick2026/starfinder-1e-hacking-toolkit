@@ -210,17 +210,6 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
               <div className="space-y-1.5">
                 <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Target:</p>
                 <div className="flex flex-wrap gap-1.5">
-                  <button
-                    className={cn(
-                      'font-mono text-xs px-2.5 py-1 rounded border transition-colors',
-                      effectiveTarget === null
-                        ? 'border-primary bg-primary/20 text-primary'
-                        : 'border-border text-muted-foreground hover:border-primary/50'
-                    )}
-                    onClick={() => { setTarget(null); setResult(null); }}
-                  >
-                    {node.name}
-                  </button>
                   {activeCms.map(cm => {
                     return (
                       <button
