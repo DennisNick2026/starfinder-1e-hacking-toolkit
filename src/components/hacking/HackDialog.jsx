@@ -219,7 +219,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
                     )}
                     onClick={() => { setTarget(null); setResult(null); }}
                   >
-                    {node.name} (DC {rootMode ? 10 : nodeDC})
+                    {node.name}
                   </button>
                   {activeCms.map(cm => {
                     const Icon = CM_ICONS[cm.icon];
@@ -235,7 +235,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
                         onClick={() => { setTarget(cm.id); setResult(null); }}
                       >
                         {Icon && <Icon className="w-3 h-3" />}
-                        {cm.label} (DC {rootMode ? 10 : cm.dc})
+                        {cm.label}
                       </button>
                     );
                   })}
