@@ -85,7 +85,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
 
   // Detect if this is a fake shell scan
   const fakeShellCm = (node.countermeasures || []).find(cm => cm.type === 'fake_shell' && !cm.resolved);
-  const isFakeShellScan = initialTarget !== null && (node.countermeasures || []).find(cm => cm.id === initialTarget)?.type === 'fake_shell';
+  const isFakeShellScan = initialTarget === 'fake_shell_scan' || (initialTarget !== null && (node.countermeasures || []).find(cm => cm.id === initialTarget)?.type === 'fake_shell');
   // Node actually has a fake shell CM (whether or not it was the initialTarget)
   const nodeHasFakeShell = !!fakeShellCm;
 
@@ -127,13 +127,11 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
     setResult(outcome);
 
     if (isFakeShellScan) {
-      // Only submit if there's actually a fake shell CM to resolve
+      // Only submit if there's actually a fake shell CM to resolve on success
       if (nodeHasFakeShell && outcome === 'success') {
         onSubmit(node.id, scanDC, fakeShellCm.id);
-        setClosing(true);
-        setTimeout(onClose, 1800);
       }
-      // For failures or no-fake-shell cases, don't submit anything (no state change needed)
+      // Never auto-close — let players read the result
       return;
     }
 
@@ -142,10 +140,6 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
       : outcome === 'fail_minor' ? effectiveTargetDC - 1   // margin = -1 (fail by < 5)
       : effectiveTargetDC - 5;                              // margin = -5 (fail by >= 5)
     onSubmit(node.id, total, effectiveTarget || null);
-    if (outcome === 'success') {
-      setClosing(true);
-      setTimeout(onClose, 400);
-    }
   };
 
   const scanResultMsg = result ? getFakeShellResultMessage(result) : null;
