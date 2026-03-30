@@ -222,19 +222,17 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
                     {node.name}
                   </button>
                   {activeCms.map(cm => {
-                    const Icon = CM_ICONS[cm.icon];
                     return (
                       <button
                         key={cm.id}
                         className={cn(
-                          'font-mono text-xs px-2.5 py-1 rounded border transition-colors flex items-center gap-1',
+                          'font-mono text-xs px-2.5 py-1 rounded border transition-colors',
                           effectiveTarget === cm.id
                             ? CM_COLOR[cm.color]
                             : 'border-border text-muted-foreground hover:border-destructive/50'
                         )}
                         onClick={() => { setTarget(cm.id); setResult(null); }}
                       >
-                        {Icon && <Icon className="w-3 h-3" />}
                         {cm.label}
                       </button>
                     );
