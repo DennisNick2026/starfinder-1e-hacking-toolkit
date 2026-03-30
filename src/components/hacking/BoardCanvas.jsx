@@ -337,15 +337,15 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
             // Find intersection with from node boundary
             const halfW = fromW / 2;
             const halfH = fromH / 2;
-            let tFromX = halfW, tFromY = halfH;
+            let tFromX, tFromY;
             if (Math.abs(unitX) > Math.abs(unitY)) {
+              // Hit left or right edge
               tFromX = unitX > 0 ? halfW : -halfW;
               tFromY = unitX !== 0 ? (tFromX * unitY) / unitX : 0;
-              tFromY = Math.max(-halfH, Math.min(halfH, tFromY));
             } else {
+              // Hit top or bottom edge
               tFromY = unitY > 0 ? halfH : -halfH;
               tFromX = unitY !== 0 ? (tFromY * unitX) / unitY : 0;
-              tFromX = Math.max(-halfW, Math.min(halfW, tFromX));
             }
             const fx = fromCenterX + tFromX;
             const fy = fromCenterY + tFromY;
@@ -353,15 +353,15 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
             // Find intersection with to node boundary
             const toHalfW = toW / 2;
             const toHalfH = toH / 2;
-            let tToX = toHalfW, tToY = toHalfH;
+            let tToX, tToY;
             if (Math.abs(unitX) > Math.abs(unitY)) {
+              // Hit left or right edge
               tToX = unitX > 0 ? -toHalfW : toHalfW;
               tToY = unitX !== 0 ? (tToX * unitY) / unitX : 0;
-              tToY = Math.max(-toHalfH, Math.min(toHalfH, tToY));
             } else {
+              // Hit top or bottom edge
               tToY = unitY > 0 ? -toHalfH : toHalfH;
               tToX = unitY !== 0 ? (tToY * unitX) / unitY : 0;
-              tToX = Math.max(-toHalfW, Math.min(toHalfW, tToX));
             }
             const tx = toCenterX + tToX;
             const ty = toCenterY + tToY;
