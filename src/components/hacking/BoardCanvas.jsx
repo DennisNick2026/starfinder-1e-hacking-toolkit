@@ -460,6 +460,7 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
               onToggleDirectoryLocked={onToggleDirectoryLocked}
               effectiveBaseDC={effectiveBaseDC}
               getNodeDC={getNodeDC}
+              connectingFrom={connectingFrom}
             />
           </div>
         );

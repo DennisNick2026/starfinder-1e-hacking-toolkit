@@ -33,7 +33,7 @@ export default function NodeCard({
   node, isSelected, isDragging,
   onSelect, onStartConnect, onDelete, onHack, onUnhack, onConfigure, onOpenFile, mode = 'create',
   hiddenByDirectory = false, onUnresolveCm = null, onResolveCm = null, onToggleDirectoryLocked = null,
-  effectiveBaseDC = 25, getNodeDC = null,
+  effectiveBaseDC = 25, getNodeDC = null, connectingFrom = null,
 }) {
   // In play mode, nodes hidden inside a locked directory are invisible
   if (hiddenByDirectory && mode === 'play') return null;
@@ -313,7 +313,7 @@ export default function NodeCard({
 
       {/* Action buttons */}
       <div className="grid grid-cols-2 gap-px border-t border-border/50">
-        {!node.noHack && (
+        {!connectingFrom && !node.noHack && (
           node.resolved ? (
             <>
               {mode === 'play' && allCms.some(cm => cm.type === 'alarm' && cm.triggered && !cm.resolved) && (
@@ -358,7 +358,7 @@ export default function NodeCard({
             </button>
           )
         )}
-        {node.type === 'directory' && node.resolved && (
+        {!connectingFrom && node.type === 'directory' && node.resolved && (
           <button
             className={cn(
               'py-2 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 border-r border-b border-border/50',
@@ -371,7 +371,7 @@ export default function NodeCard({
             <span>{node.locked ? 'Open' : 'Close'}</span>
           </button>
         )}
-        {DATA_NODE_TYPES.includes(node.type) && (mode === 'create' || node.resolved) && (
+        {!connectingFrom && DATA_NODE_TYPES.includes(node.type) && (mode === 'create' || node.resolved) && (
           <button
             className="py-2 text-[10px] font-mono text-muted-foreground hover:text-accent hover:bg-accent/10 transition-colors flex items-center justify-center gap-1.5 border-b border-border/50"
             onClick={(e) => { e.stopPropagation(); onOpenFile?.(node); }}
@@ -382,7 +382,7 @@ export default function NodeCard({
           </button>
         )}
         {/* Fake shell scan button — visible in play mode on ALL resolved nodes (to avoid revealing which nodes have the CM) */}
-        {mode === 'play' && node.resolved && !node.isEntry && !node.isRootAccess && (
+        {!connectingFrom && mode === 'play' && node.resolved && !node.isEntry && !node.isRootAccess && (
           <button
             className="py-2 text-[10px] font-mono text-chart-3/70 hover:text-chart-3 hover:bg-chart-3/10 transition-colors flex items-center justify-center gap-1.5 border-b border-border/50"
             onClick={(e) => { e.stopPropagation(); onHack?.(node, allCms.find(cm => cm.type === 'fake_shell' && !cm.resolved)?.id ?? 'fake_shell_scan'); }}
@@ -392,7 +392,7 @@ export default function NodeCard({
             <span>Scan</span>
           </button>
         )}
-        {mode === 'create' && (
+        {!connectingFrom && mode === 'create' && (
           <>
             <button
               className={cn(
