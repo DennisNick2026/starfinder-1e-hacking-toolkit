@@ -35,6 +35,7 @@ export default function HackingBoard() {
   const [showExportConfirm, setShowExportConfirm] = useState(false);
   const [sharedEncounter, setSharedEncounter] = useState(null);
   const [currentShareCode, setCurrentShareCode] = useState(() => Math.random().toString(36).substring(2, 8).toUpperCase());
+  const [pendingCmDrop, setPendingCmDrop] = useState(null); // { cmType, nodeId }
 
   const configuringNode = state.nodes.find(n => n.id === configuringNodeId) || null;
   const selectedNode = configuringNode || state.nodes.find(n => n.id === state.selectedNodeId) || null;
@@ -42,8 +43,13 @@ export default function HackingBoard() {
   const handleDropNode = (templateKey, x, y) => {
     // If second arg is undefined and third is a string, it's a CM drop on a node
     if (x === undefined && typeof y === 'string') {
-      state.addCountermeasure(y, templateKey);
-      setConfiguringNodeId(y);
+      const nodeId = y;
+      if (state.totalCountermeasures >= state.tier) {
+        setPendingCmDrop({ cmType: templateKey, nodeId });
+      } else {
+        state.addCountermeasure(nodeId, templateKey);
+        setConfiguringNodeId(nodeId);
+      }
       return;
     }
     // Otherwise it's a node type with x,y coordinates
@@ -455,6 +461,38 @@ export default function HackingBoard() {
         onClose={() => setShowExportConfirm(false)}
         onConfirm={handleExportJSON}
       />
+
+      {/* CM drop override confirmation */}
+      {pendingCmDrop && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setPendingCmDrop(null)}>
+          <div className="bg-card border border-destructive/50 rounded-xl p-6 w-80 space-y-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-start gap-3">
+              <span className="text-destructive text-lg">⚠</span>
+              <p className="font-mono text-xs text-destructive leading-relaxed">
+                Already at countermeasure limit ({state.totalCountermeasures}/{state.tier} for Tier {state.tier}). Override as admin and add anyway?
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                className="flex-1 py-2 rounded font-mono text-xs bg-destructive/80 text-destructive-foreground hover:bg-destructive transition-colors"
+                onClick={() => {
+                  state.addCountermeasure(pendingCmDrop.nodeId, pendingCmDrop.cmType);
+                  setConfiguringNodeId(pendingCmDrop.nodeId);
+                  setPendingCmDrop(null);
+                }}
+              >
+                Override &amp; Add
+              </button>
+              <button
+                className="flex-1 py-2 rounded font-mono text-xs border border-border text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setPendingCmDrop(null)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ComputerSettingsModal
         isOpen={showSettings}

@@ -51,15 +51,15 @@ export default function NodeCard({
   // Special compact rendering for entry and root access nodes
   if (node.isEntry || node.isRootAccess) {
     const Icon = node.isRootAccess ? ShieldCheck : LogIn;
-    const colors = node.isRootAccess 
-      ? COLOR_MAP.purple 
-      : COLOR_MAP.cyan;
-    
+    const colors = node.isRootAccess ? COLOR_MAP.purple : COLOR_MAP.cyan;
+    const showHack = !node.noHack;
+    const showConfigure = mode === 'create';
+
     return (
       <div
         className={cn(
           'select-none cursor-grab active:cursor-grabbing',
-          'w-32 h-32 rounded-lg border-2 transition-shadow duration-200 flex flex-col items-center justify-center gap-2',
+          'w-32 rounded-lg border-2 transition-shadow duration-200 flex flex-col items-center justify-center gap-1.5 pt-3 pb-1',
           colors.border, colors.bg,
           isSelected && colors.glow,
           isDragging && 'opacity-70 scale-105',
@@ -68,15 +68,30 @@ export default function NodeCard({
       >
         <Icon className={cn('w-8 h-8', colors.text)} />
         <span className="font-mono text-xs font-bold text-foreground text-center">{node.label}</span>
-        {node.isRootAccess && !node.noHack && (
-          <button
-            className="mt-1 px-2 py-1 text-[10px] font-mono text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors rounded border border-primary/30 flex items-center gap-1"
-            onClick={(e) => { e.stopPropagation(); onHack(node); }}
-            title="Hack root access"
-          >
-            <Zap className="w-3 h-3" />
-            <span>Hack</span>
-          </button>
+        {(showHack || showConfigure) && (
+          <div className="flex w-full border-t border-border/50 mt-1">
+            {showHack && (
+              <button
+                className={cn(
+                  'flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex items-center justify-center gap-1',
+                  showConfigure && 'border-r border-border/50'
+                )}
+                onClick={(e) => { e.stopPropagation(); onHack(node); }}
+                title="Hack this node"
+              >
+                <Zap className="w-3 h-3" />
+              </button>
+            )}
+            {showConfigure && (
+              <button
+                className="flex-1 py-1.5 text-[10px] font-mono text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center justify-center"
+                onClick={(e) => { e.stopPropagation(); onConfigure(node.id); }}
+                title="Configure node"
+              >
+                <Settings className="w-3 h-3" />
+              </button>
+            )}
+          </div>
         )}
       </div>
     );

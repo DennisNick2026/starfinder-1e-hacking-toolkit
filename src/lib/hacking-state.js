@@ -331,7 +331,6 @@ const ENTRY_NODE = {
   successes_current: 0,
   resolved: false,
   isEntry: true,
-  noHack: true,
   countermeasures: [],
   x: 400,
   y: 160,
