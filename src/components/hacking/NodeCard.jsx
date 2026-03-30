@@ -145,12 +145,15 @@ export default function NodeCard({
   // What to show on the card face
   const activeCms = mode === 'play'
     ? allActiveCms.filter(cm => {
-        if (cm.type === 'fake_shell') return false;
+        if (cm.type === 'fake_shell') return false; // only show once resolved (via resolved list)
         if (cm.type === 'alarm' && !cm.revealed && !cm.triggered) return false;
         if (hasUnresolvedFirewall && cm.type !== 'firewall') return false;
         return true;
       })
     : allActiveCms;
+
+  // In play mode, show fake_shell only after it's resolved (detected)
+  const resolvedFakeShell = mode === 'play' && allCms.some(cm => cm.type === 'fake_shell' && cm.resolved);
 
   return (
     <div
@@ -162,6 +165,10 @@ export default function NodeCard({
         isDragging && 'opacity-70 scale-105',
         node.resolved && 'opacity-50 border-dashed',
         node.isEntry && 'border-primary glow-cyan',
+        // Fake nodes get a subtle purple tint in create mode
+        node.fake && mode === 'create' && 'border-chart-3/60 bg-chart-3/5',
+        // Real-hidden nodes get a subtle muted look in create mode
+        node.real_hidden && mode === 'create' && 'opacity-60',
       )}
       style={{  }}
       onClick={(e) => { e.stopPropagation(); onSelect(node.id); }}
@@ -177,6 +184,13 @@ export default function NodeCard({
           <>
             <Icon className={cn('w-4 h-4 shrink-0', colors.text)} />
             <span className="font-mono text-xs font-semibold text-foreground flex-1 break-words">{node.name}</span>
+            {/* Admin-only labels for fake shell setup */}
+            {node.fake && mode === 'create' && (
+              <span className="font-mono text-[8px] font-bold px-1 py-0.5 rounded border border-chart-3/50 bg-chart-3/10 text-chart-3 shrink-0">FAKE</span>
+            )}
+            {node.real_hidden && mode === 'create' && (
+              <span className="font-mono text-[8px] font-bold px-1 py-0.5 rounded border border-muted-foreground/30 bg-muted/30 text-muted-foreground shrink-0">HIDDEN</span>
+            )}
             <span className="font-mono text-[10px] text-muted-foreground shrink-0">DC {nodeDC}</span>
           </>
         )}
@@ -187,6 +201,11 @@ export default function NodeCard({
         {node.resolved && (
           <span className="font-mono text-[10px] text-accent font-bold">
             {node.type === 'directory' ? '✓ UNLOCKED' : '✓ RESOLVED'}
+          </span>
+        )}
+        {resolvedFakeShell && (
+          <span className="font-mono text-[10px] text-chart-3 font-bold flex items-center gap-1">
+            <EyeOff className="w-3 h-3" /> FAKE SHELL DETECTED
           </span>
         )}
 

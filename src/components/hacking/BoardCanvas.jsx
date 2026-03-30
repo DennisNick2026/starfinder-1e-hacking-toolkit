@@ -219,6 +219,13 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
         if (c.to === node.id && c.from !== 'entry' && c.from !== 'root_access') hidden.add(c.from);
       });
     });
+
+    // Fake shell: hide fake nodes once shell is detected (fake_shell_hidden), hide real_hidden nodes until then
+    nodes.forEach(n => {
+      if (n.fake_shell_hidden) hidden.add(n.id);
+      if (n.real_hidden) hidden.add(n.id);
+    });
+
     return hidden;
   }, [nodes, connections]);
 

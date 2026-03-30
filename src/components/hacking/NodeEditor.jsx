@@ -270,6 +270,39 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
           </div>
         </div>
 
+        {/* Fake Shell node tagging */}
+        {!node.isEntry && !node.isRootAccess && (
+          <div className="space-y-2 border-t border-border pt-3">
+            <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Fake Shell Role</Label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { set('fake', !node.fake); if (!node.fake) set('real_hidden', false); }}
+                className={cn(
+                  'flex-1 py-2 rounded border font-mono text-xs font-semibold transition-colors',
+                  node.fake
+                    ? 'bg-chart-3/20 border-chart-3 text-chart-3'
+                    : 'border-border text-muted-foreground hover:border-chart-3/50'
+                )}
+              >
+                Fake Node
+              </button>
+              <button
+                onClick={() => { set('real_hidden', !node.real_hidden); if (!node.real_hidden) set('fake', false); }}
+                className={cn(
+                  'flex-1 py-2 rounded border font-mono text-xs font-semibold transition-colors',
+                  node.real_hidden
+                    ? 'bg-muted border-muted-foreground text-foreground'
+                    : 'border-border text-muted-foreground hover:border-muted-foreground/50'
+                )}
+              >
+                Real (Hidden)
+              </button>
+            </div>
+            {node.fake && <p className="font-mono text-[9px] text-chart-3/70">Visible while fake shell is active. Disappears when detected.</p>}
+            {node.real_hidden && <p className="font-mono text-[9px] text-muted-foreground/70">Hidden until fake shell is detected. Then becomes visible.</p>}
+          </div>
+        )}
+
         {/* Mark resolved */}
         <Button size="sm" variant="outline" className="font-mono text-xs w-full"
           onClick={() => set('resolved', !node.resolved)}>

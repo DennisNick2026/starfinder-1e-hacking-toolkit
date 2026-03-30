@@ -11,13 +11,15 @@ const CM_COLOR = {
   purple: 'text-chart-3 border-chart-3/50 bg-chart-3/10',
 };
 
-// In play mode: fake_shell always hidden; alarms hidden until revealed; firewall blocks everything else
+// In play mode: fake_shell hidden until node is resolved (then player can roll to detect it);
+// alarms hidden until revealed; firewall blocks everything else
 function getVisibleCms(node, mode) {
   const all = (node.countermeasures || []).filter(cm => !cm.resolved);
   if (mode !== 'play') return all;
   const hasUnresolvedFirewall = all.some(cm => cm.type === 'firewall');
   return all.filter(cm => {
-    if (cm.type === 'fake_shell') return false;
+    // Fake shell only becomes a rollable target after the node itself is hacked
+    if (cm.type === 'fake_shell') return !!node.resolved;
     if (cm.type === 'alarm' && !cm.revealed && !cm.triggered) return false;
     if (hasUnresolvedFirewall && cm.type !== 'firewall') return false;
     return true;

@@ -15,12 +15,12 @@ export const COUNTERMEASURE_TEMPLATES = {
   },
   fake_shell: {
     type: 'fake_shell',
-    label: 'Fake Shell',
-    color: 'red',
+    label: 'Detect Fake Shell',
+    color: 'purple',
     icon: 'EyeOff',
     dc: 0,
     resolved: false,
-    note: 'Hackers must succeed or waste actions on fake data',
+    note: 'Player rolls to detect the fake shell after hacking the node. On success, fake nodes vanish and real ones appear.',
   },
   feedback: {
     type: 'feedback',
@@ -540,26 +540,28 @@ export function useHackingState() {
   // Submit a manual roll total against a node or countermeasure DC
   // target: { nodeId, cmId? } — if cmId present, rolling against a countermeasure
   const submitRoll = useCallback((nodeId, total, cmId = null, rootMode = false) => {
-    setNodes(prev => prev.map(n => {
-      if (n.id !== nodeId) return n;
+    setNodes(prev => {
+      // First pass: resolve the CM or node
+      const updated = prev.map(n => {
+        if (n.id !== nodeId) return n;
 
-      if (cmId) {
-        // Rolling against a countermeasure
-        const cms = (n.countermeasures || []).map(cm => {
-          if (cm.id !== cmId) return cm;
-          if (cm.resolved) return cm;
-          const effectiveDC = rootMode ? 10 : cm.dc;
-          const success = total >= effectiveDC;
-          if (!success) return cm;
-          if (cm.successes_required !== undefined) {
-            const newSuccesses = Math.min((cm.successes_current || 0) + 1, cm.successes_required);
-            const resolved = newSuccesses >= cm.successes_required;
-            return { ...cm, successes_current: newSuccesses, resolved, triggered: false };
-          }
-          return { ...cm, resolved: true, triggered: false };
-        });
-        return { ...n, countermeasures: cms };
-      }
+        if (cmId) {
+          // Rolling against a countermeasure
+          const cms = (n.countermeasures || []).map(cm => {
+            if (cm.id !== cmId) return cm;
+            if (cm.resolved) return cm;
+            const effectiveDC = rootMode ? 10 : cm.dc;
+            const success = total >= effectiveDC;
+            if (!success) return cm;
+            if (cm.successes_required !== undefined) {
+              const newSuccesses = Math.min((cm.successes_current || 0) + 1, cm.successes_required);
+              const resolved = newSuccesses >= cm.successes_required;
+              return { ...cm, successes_current: newSuccesses, resolved, triggered: false };
+            }
+            return { ...cm, resolved: true, triggered: false };
+          });
+          return { ...n, countermeasures: cms };
+        }
 
       // Rolling against the node itself
       if (n.resolved) return n;
@@ -580,17 +582,33 @@ export function useHackingState() {
       });
 
       if (!success) {
-        return { ...n, countermeasures: updatedCms };
-      }
-      if (n.successes_required !== undefined) {
-        const newSuccesses = Math.min((n.successes_current || 0) + 1, n.successes_required);
-        const resolved = newSuccesses >= n.successes_required;
-        const unlocked = resolved && n.type === 'directory' ? { locked: false } : {};
-        return { ...n, successes_current: newSuccesses, resolved, ...unlocked, countermeasures: updatedCms };
-      }
-      const unlocked = n.type === 'directory' ? { locked: false } : {};
-      return { ...n, resolved: true, ...unlocked, countermeasures: updatedCms };
-    }));
+          return { ...n, countermeasures: updatedCms };
+        }
+        if (n.successes_required !== undefined) {
+          const newSuccesses = Math.min((n.successes_current || 0) + 1, n.successes_required);
+          const resolved = newSuccesses >= n.successes_required;
+          const unlocked = resolved && n.type === 'directory' ? { locked: false } : {};
+          return { ...n, successes_current: newSuccesses, resolved, ...unlocked, countermeasures: updatedCms };
+        }
+        const unlocked = n.type === 'directory' ? { locked: false } : {};
+        return { ...n, resolved: true, ...unlocked, countermeasures: updatedCms };
+      });
+
+      // Second pass: if a fake_shell CM was just resolved on nodeId, flip fake/real_hidden nodes
+      const hackedNode = updated.find(n => n.id === nodeId);
+      const fakeShellJustResolved = cmId && hackedNode &&
+        (hackedNode.countermeasures || []).some(cm => cm.id === cmId && cm.type === 'fake_shell' && cm.resolved);
+
+      if (!fakeShellJustResolved) return updated;
+
+      // Find all connections from this node to identify its direct neighbours
+      // Fake nodes become hidden; real_hidden nodes become visible
+      return updated.map(n => {
+        if (n.fake) return { ...n, fake_shell_hidden: true };
+        if (n.real_hidden) return { ...n, real_hidden: false };
+        return n;
+      });
+    });
   }, []);
 
   const advancePhase = useCallback(() => {
@@ -626,6 +644,7 @@ export function useHackingState() {
       successes_current: 0,
       resolved: false,
       triggered: false,
+      fake_shell_hidden: false,
       ...(n.type === 'directory' ? { locked: true } : {}),
       countermeasures: (n.countermeasures || []).map(cm => ({
         ...cm,
