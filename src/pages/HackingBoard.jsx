@@ -124,10 +124,10 @@ export default function HackingBoard() {
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Top bar */}
-      <header className="h-20 bg-background border-b border-primary/30 flex items-center px-5 shrink-0">
+      <header className="h-20 bg-background border-b border-primary/30 flex items-center px-5 gap-4 shrink-0">
 
-        {/* Left section */}
-        <div className="flex items-center gap-3 min-w-0 flex-1">
+        {/* Left: computer info */}
+        <div className="flex items-center gap-3 min-w-0 shrink-0">
           <Cpu className="w-5 h-5 text-primary shrink-0 cursor-default" onClick={(e) => { if (e.ctrlKey) setShowSecretButtons(v => !v); }} />
           <span className="font-mono text-sm font-bold text-primary tracking-widest uppercase truncate">
             {state.computerName}
@@ -153,148 +153,198 @@ export default function HackingBoard() {
           )}
         </div>
 
-        {/* Center section */}
-        <div className="flex items-center gap-3 shrink-0">
-          {mode === 'create' && (
-            <div className="flex items-center gap-2">
-              {showSecretButtons && (
-                <>
-                  <button
-                    onClick={handleNewEncounter}
-                    className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
-                  >
-                    <Pencil className="w-3.5 h-3.5" /> NEW
-                  </button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
-                        <Database className="w-3.5 h-3.5" /> CLOUD
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="font-mono">
-                      <DropdownMenuLabel className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Cloud Storage</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => setShowSaveDialog(true)} className="gap-2 cursor-pointer">
-                        <Upload className="w-3.5 h-3.5" /> Save to Cloud
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setShowLoadDialog(true)} className="gap-2 cursor-pointer">
-                        <Download className="w-3.5 h-3.5" /> Load from Cloud
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </>
-              )}
+        {/* Spacer — pushes center content to true center in play mode */}
+        <div className="flex-1" />
+
+        {/* Center: mode-dependent controls */}
+        {mode === 'create' ? (
+          <div className="flex items-center gap-2 shrink-0">
+            {showSecretButtons && (
+              <>
+                <button
+                  onClick={handleNewEncounter}
+                  className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
+                >
+                  <Pencil className="w-3.5 h-3.5" /> NEW
+                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
+                      <Database className="w-3.5 h-3.5" /> CLOUD
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="font-mono">
+                    <DropdownMenuLabel className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Cloud Storage</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setShowSaveDialog(true)} className="gap-2 cursor-pointer">
+                      <Upload className="w-3.5 h-3.5" /> Save to Cloud
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowLoadDialog(true)} className="gap-2 cursor-pointer">
+                      <Download className="w-3.5 h-3.5" /> Load from Cloud
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            )}
+            <button
+              onClick={() => setShowExportConfirm(true)}
+              className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
+            >
+              <FileJson className="w-3.5 h-3.5" /> SAVE TO FILE
+            </button>
+            <button
+              onClick={() => setShowImportDialog(true)}
+              className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
+            >
+              <FileJson className="w-3.5 h-3.5" /> LOAD FROM FILE
+            </button>
+
+            <div className="flex items-center border border-primary/30 rounded overflow-hidden">
               <button
-                onClick={() => setShowExportConfirm(true)}
-                className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
+                className="flex items-center gap-1.5 px-4 py-2 font-mono text-xs tracking-widest transition-colors bg-primary text-primary-foreground"
+                onClick={() => handleSwitchMode('create')}
+                disabled={sharedEncounter}
               >
-                <FileJson className="w-3.5 h-3.5" /> SAVE TO FILE
+                <Pencil className="w-3.5 h-3.5" /> ADMIN
               </button>
               <button
-                onClick={() => setShowImportDialog(true)}
-                className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
+                className="flex items-center gap-1.5 px-4 py-2 font-mono text-xs tracking-widest transition-colors border-l border-primary/30 text-primary/50 hover:text-primary"
+                onClick={() => handleSwitchMode('play')}
               >
-                <FileJson className="w-3.5 h-3.5" /> LOAD FROM FILE
+                <Play className="w-3.5 h-3.5" /> PLAY
               </button>
             </div>
-          )}
 
-          <div className="flex items-center border border-primary/30 rounded overflow-hidden">
-            <button
-              className={cn(
-                'flex items-center gap-1.5 font-mono tracking-widest transition-colors',
-                mode === 'play' ? 'px-5 py-2.5 text-sm' : 'px-4 py-2 text-xs',
-                mode === 'create' ? 'bg-primary text-primary-foreground' : 'text-primary/50 hover:text-primary'
-              )}
-              onClick={() => handleSwitchMode('create')}
-              disabled={sharedEncounter}
-            >
-              <Pencil className={mode === 'play' ? 'w-4 h-4' : 'w-3.5 h-3.5'} /> ADMIN
-            </button>
-            <button
-              className={cn(
-                'flex items-center gap-1.5 font-mono tracking-widest transition-colors border-l border-primary/30',
-                mode === 'play' ? 'px-5 py-2.5 text-sm' : 'px-4 py-2 text-xs',
-                mode === 'play' ? 'bg-primary text-primary-foreground' : 'text-primary/50 hover:text-primary'
-              )}
-              onClick={() => handleSwitchMode('play')}
-            >
-              <Play className={mode === 'play' ? 'w-4 h-4' : 'w-3.5 h-3.5'} /> PLAY
-            </button>
+            {canToggleRoot && (
+              <button
+                onClick={() => setRootModeOverride(v => !v)}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border rounded transition-colors',
+                  rootModeOverride
+                    ? 'border-chart-3 bg-chart-3/20 text-chart-3'
+                    : 'border-primary/30 text-primary/50 hover:text-primary/80 hover:border-primary/50'
+                )}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                ROOT {rootModeOverride ? 'ON' : 'OFF'}
+              </button>
+            )}
           </div>
+        ) : (
+          /* Play mode: fully centered controls */
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center border border-primary/30 rounded overflow-hidden">
+              <button
+                className="flex items-center gap-1.5 px-5 py-2.5 font-mono text-sm tracking-widest transition-colors text-primary/50 hover:text-primary"
+                onClick={() => handleSwitchMode('create')}
+                disabled={sharedEncounter}
+              >
+                <Pencil className="w-4 h-4" /> ADMIN
+              </button>
+              <button
+                className="flex items-center gap-1.5 px-5 py-2.5 font-mono text-sm tracking-widest transition-colors border-l border-primary/30 bg-primary text-primary-foreground"
+                onClick={() => handleSwitchMode('play')}
+              >
+                <Play className="w-4 h-4" /> PLAY
+              </button>
+            </div>
 
-          {/* Root Access toggle — always in Admin, only after earned in Play */}
-          {canToggleRoot && (
-            <button
-              onClick={() => setRootModeOverride(v => !v)}
-              className={cn(
-                'flex items-center gap-1.5 font-mono tracking-widest border rounded transition-colors',
-                mode === 'play' ? 'px-4 py-2.5 text-sm' : 'px-3 py-2 text-xs',
-                rootModeOverride
-                  ? 'border-chart-3 bg-chart-3/20 text-chart-3'
-                  : 'border-primary/30 text-primary/50 hover:text-primary/80 hover:border-primary/50'
-              )}
-            >
-              <ShieldCheck className={mode === 'play' ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
-              ROOT {rootModeOverride ? 'ON' : 'OFF'}
-            </button>
-          )}
+            {canToggleRoot && (
+              <button
+                onClick={() => setRootModeOverride(v => !v)}
+                className={cn(
+                  'flex items-center gap-1.5 px-4 py-2.5 font-mono text-sm tracking-widest border rounded transition-colors',
+                  rootModeOverride
+                    ? 'border-chart-3 bg-chart-3/20 text-chart-3'
+                    : 'border-primary/30 text-primary/50 hover:text-primary/80 hover:border-primary/50'
+                )}
+              >
+                <ShieldCheck className="w-4 h-4" />
+                ROOT {rootModeOverride ? 'ON' : 'OFF'}
+              </button>
+            )}
 
-          <div className={cn('flex items-center', mode === 'play' ? 'gap-3' : 'gap-2')}>
-            <span className={cn('font-mono text-primary/50 tracking-widest', mode === 'play' ? 'text-sm' : 'text-xs')}>PHASE</span>
-            <span className={cn('font-mono text-primary font-bold text-center', mode === 'play' ? 'text-xl w-9' : 'text-sm w-7')}>{state.phase}</span>
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-sm text-primary/50 tracking-widest">PHASE</span>
+              <span className="font-mono text-xl text-primary font-bold w-9 text-center">{state.phase}</span>
+              <button
+                onClick={() => state.setPhase(p => Math.max(1, p - 1))}
+                disabled={state.phase <= 1}
+                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <SkipBack className="w-4 h-4" /> PREV
+              </button>
+              <button
+                onClick={state.advancePhase}
+                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
+              >
+                <SkipForward className="w-4 h-4" /> NEXT
+              </button>
+              <button
+                onClick={state.resetEncounter}
+                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded"
+              >
+                <RotateCcw className="w-4 h-4" /> RESET
+              </button>
+              <button
+                onClick={state.clearNodes}
+                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded"
+              >
+                <Trash2 className="w-4 h-4" /> CLEAR
+              </button>
+              <button
+                onClick={() => setShowSettings(true)}
+                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-primary/30 text-primary/50 hover:text-primary hover:border-primary rounded transition-colors"
+                title="Computer settings"
+              >
+                <Settings className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Spacer — balances left side so center is truly centered in play mode */}
+        <div className="flex-1" />
+
+        {/* Right: phase controls (admin mode only) */}
+        {mode === 'create' && (
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="font-mono text-xs text-primary/50 tracking-widest">PHASE</span>
+            <span className="font-mono text-sm text-primary font-bold w-7 text-center">{state.phase}</span>
             <button
               onClick={() => state.setPhase(p => Math.max(1, p - 1))}
               disabled={state.phase <= 1}
-              className={cn(
-                'flex items-center gap-1.5 font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded disabled:opacity-30 disabled:cursor-not-allowed',
-                mode === 'play' ? 'px-4 py-2.5 text-sm' : 'px-3 py-2 text-xs'
-              )}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded disabled:opacity-30 disabled:cursor-not-allowed"
             >
-              <SkipBack className={mode === 'play' ? 'w-4 h-4' : 'w-3.5 h-3.5'} /> PREV
+              <SkipBack className="w-3.5 h-3.5" /> PREV
             </button>
             <button
               onClick={state.advancePhase}
-              className={cn(
-                'flex items-center gap-1.5 font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded',
-                mode === 'play' ? 'px-4 py-2.5 text-sm' : 'px-3 py-2 text-xs'
-              )}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
             >
-              <SkipForward className={mode === 'play' ? 'w-4 h-4' : 'w-3.5 h-3.5'} /> NEXT
+              <SkipForward className="w-3.5 h-3.5" /> NEXT
             </button>
             <button
               onClick={state.resetEncounter}
-              className={cn(
-                'flex items-center gap-1.5 font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded',
-                mode === 'play' ? 'px-4 py-2.5 text-sm' : 'px-3 py-2 text-xs'
-              )}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded"
             >
-              <RotateCcw className={mode === 'play' ? 'w-4 h-4' : 'w-3.5 h-3.5'} /> RESET
+              <RotateCcw className="w-3.5 h-3.5" /> RESET
             </button>
             <button
               onClick={state.clearNodes}
-              className={cn(
-                'flex items-center gap-1.5 font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded',
-                mode === 'play' ? 'px-4 py-2.5 text-sm' : 'px-3 py-2 text-xs'
-              )}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded"
             >
-              <Trash2 className={mode === 'play' ? 'w-4 h-4' : 'w-3.5 h-3.5'} /> CLEAR
+              <Trash2 className="w-3.5 h-3.5" /> CLEAR
             </button>
             <button
               onClick={() => setShowSettings(true)}
-              className={cn(
-                'flex items-center gap-1.5 font-mono border border-primary/30 text-primary/50 hover:text-primary hover:border-primary rounded transition-colors',
-                mode === 'play' ? 'px-4 py-2.5 text-sm' : 'px-3 py-2 text-xs'
-              )}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/50 hover:text-primary hover:border-primary rounded transition-colors"
               title="Computer settings"
             >
-              <Settings className={mode === 'play' ? 'w-5 h-5' : 'w-4 h-4'} />
+              <Settings className="w-4 h-4" />
             </button>
           </div>
-        </div>
-
-        {/* Right section (spacer to balance left) */}
-        <div className="flex-1" />
+        )}
       </header>
 
       {/* Main area */}
