@@ -99,7 +99,7 @@ export default function NodeCard({
             })}
           </div>
         )}
-        {(showHack || showConfigure) && (
+        {!connectingFrom && (showHack || showConfigure) && (
           <div className="flex w-full border-t border-border/50 mt-1">
             {showHack && (
               <button
@@ -284,7 +284,7 @@ export default function NodeCard({
             )}
 
             {/* Resolved countermeasures (play mode) */}
-            {mode === 'play' && allCms.filter(cm => cm.resolved).length > 0 && (
+            {!connectingFrom && mode === 'play' && allCms.filter(cm => cm.resolved).length > 0 && (
               <div className="flex flex-wrap gap-1 pt-0.5 border-t border-border/30 mt-1.5 pt-1">
                 {allCms.filter(cm => cm.resolved).map(cm => {
                   const CmIcon = CM_ICONS[cm.icon];
