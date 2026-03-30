@@ -11,7 +11,7 @@ import SaveEncounterDialog from '@/components/hacking/SaveEncounterDialog';
 import LoadEncounterDialog from '@/components/hacking/LoadEncounterDialog';
 import ImportEncounterDialog from '@/components/hacking/ImportEncounterDialog';
 import ExportConfirmDialog from '@/components/hacking/ExportConfirmDialog';
-import { Cpu, ShieldCheck, Play, SkipForward, RotateCcw, Settings, Shield, Pencil, Trash2, Upload, Download, FileJson, Database } from 'lucide-react';
+import { Cpu, ShieldCheck, Play, SkipForward, SkipBack, RotateCcw, Settings, Shield, Pencil, Trash2, Upload, Download, FileJson, Database } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
@@ -240,6 +240,13 @@ export default function HackingBoard() {
         <div className="flex items-center gap-2">
           <span className="font-mono text-xs text-primary/50 tracking-widest">PHASE</span>
           <span className="font-mono text-sm text-primary font-bold w-7 text-center">{state.phase}</span>
+          <button
+            onClick={() => state.setPhase(p => Math.max(1, p - 1))}
+            disabled={state.phase <= 1}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <SkipBack className="w-3.5 h-3.5" /> PREV
+          </button>
           <button
             onClick={state.advancePhase}
             className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
