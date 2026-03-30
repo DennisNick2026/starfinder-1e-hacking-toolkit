@@ -28,7 +28,7 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
   // Calculate the "expected" DC for a CM based on node DC and CM type
   const getExpectedCmDC = (cm) => {
     if (!cm) return cm.dc;
-    const nodeHackDC = node.dc ?? 25;
+    const nodeHackDC = node.dcOverride !== undefined && node.dcOverride !== null ? node.dcOverride : node.dc ?? 25;
     if (cm.type === 'firewall') return nodeHackDC + 2;
     if (cm.type === 'fake_shell') return nodeHackDC + 5;
     if (cm.type === 'shock_grid') {
