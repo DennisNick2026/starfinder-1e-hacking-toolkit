@@ -139,7 +139,7 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
     const canvas = toCanvas(e.clientX, e.clientY);
     setDragOffset({ x: canvas.x - node.x, y: canvas.y - node.y });
     setDraggingNode(nodeId);
-  }, [pendingPlacement, connectingFrom, nodes, onAddConnection, setConnectingFrom, toCanvas, onCanvasClick]);
+  }, [connectingFrom, nodes, onAddConnection, setConnectingFrom, toCanvas]);
 
   const handleMouseMove = useCallback((e) => {
     if (isPanning && panStart.current) {
