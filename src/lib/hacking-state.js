@@ -96,6 +96,7 @@ export const NODE_DC_MODIFIERS = {
   ctrl_life_support:  +4,
   ctrl_sensor:         0,
   ctrl_power_core:    +4,
+  ctrl_lights:         0,
   security_module:   0,
 };
 
@@ -279,6 +280,11 @@ const NODE_TEMPLATES = {
   ctrl_power_core: {
     type: 'ctrl_power_core', label: 'Power Core', color: 'green', icon: 'SquareTerminal',
     description: 'Access and manipulate the main power core',
+    dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
+  },
+  ctrl_lights: {
+    type: 'ctrl_lights', label: 'Lights', color: 'green', icon: 'SquareTerminal',
+    description: 'Control lighting systems — dim, kill, or strobe area lights',
     dc: 0, successes_required: 1, successes_current: 0, resolved: false, countermeasures: [],
   },
   security_module: {

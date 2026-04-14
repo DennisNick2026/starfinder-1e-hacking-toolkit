@@ -3,7 +3,7 @@ import {
   Terminal, FolderLock, Database, SquareTerminal, Unlock, Sparkles,
   FolderOpen, Box, Hand, Cpu, Monitor,
   DoorOpen, Camera, Crosshair, Wind, Bomb, Zap, Gauge, Bot,
-  Shield, Rocket, Sword, Heart, Radio, Power,
+  Shield, Rocket, Sword, Heart, Radio, Power, Lightbulb,
   ShieldAlert, Siren, UserX, Lock, Bug, EyeOff, Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 const CATEGORIES = [
   {
     key: 'arch',
-    label: 'ARCH',
+    label: 'STRUCTURE',
     icon: FolderOpen,
     items: [
       { key: 'directory', label: 'Directory', icon: FolderLock },
@@ -51,6 +51,7 @@ const CATEGORIES = [
       { key: 'ctrl_life_support', label: 'Life Support', icon: Heart },
       { key: 'ctrl_sensor',       label: 'Sensor',       icon: Radio },
       { key: 'ctrl_power_core',   label: 'Power Core',   icon: Power },
+      { key: 'ctrl_lights',       label: 'Lights',       icon: Lightbulb },
     ],
   },
   {
