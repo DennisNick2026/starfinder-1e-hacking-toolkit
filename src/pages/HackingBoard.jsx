@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { base44 } from '@/api/base44Client';
 import { useHackingState } from '@/lib/hacking-state';
 import BoardCanvas from '@/components/hacking/BoardCanvas.jsx';
 import NodeEditor from '@/components/hacking/NodeEditor';
@@ -28,7 +29,13 @@ export default function HackingBoard() {
   const [showSettings, setShowSettings] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [fileNode, setFileNode] = useState(null);
-  const [showSecretButtons, setShowSecretButtons] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    base44.auth.me().then(user => {
+      if (user?.role === 'admin') setIsAdmin(true);
+    }).catch(() => {});
+  }, []);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
@@ -138,7 +145,7 @@ export default function HackingBoard() {
 
         {/* Left: computer info */}
         <div className="flex items-center gap-3 min-w-0 shrink-0">
-          <Cpu className="w-5 h-5 text-primary shrink-0 cursor-default" onClick={(e) => { if (e.ctrlKey) setShowSecretButtons(v => !v); }} />
+          <Cpu className="w-5 h-5 text-primary shrink-0 cursor-default" />
           <span className="font-mono text-sm font-bold text-primary tracking-widest uppercase truncate">
             {state.computerName}
           </span>
@@ -169,7 +176,7 @@ export default function HackingBoard() {
         {/* Center: mode-dependent controls */}
         {mode === 'create' ? (
           <div className="flex items-center gap-2 shrink-0">
-            {showSecretButtons && (
+            {isAdmin && (
               <>
                 <button
                   onClick={handleNewEncounter}
