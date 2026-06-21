@@ -1,0 +1,9 @@
+{
+  "name": "Starfinder 1e Hacking Toolkit",
+  "site": {
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "serveCommand": "npm run dev",
+    "outputDirectory": "./dist"
+  }
+}
