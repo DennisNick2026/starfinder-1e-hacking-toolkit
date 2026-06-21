@@ -44,7 +44,7 @@ export default function CloudPasswordGate({ isOpen, onSuccess, onClose }) {
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
-            type="password"
+            type="text"
             autoFocus
             value={value}
             onChange={(e) => { setValue(e.target.value); setError(false); }}

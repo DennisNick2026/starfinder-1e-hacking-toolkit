@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { base44 } from '@/api/base44Client';
 import { useHackingState } from '@/lib/hacking-state';
 import BoardCanvas from '@/components/hacking/BoardCanvas.jsx';
 import NodeEditor from '@/components/hacking/NodeEditor';
@@ -33,6 +34,13 @@ export default function HackingBoard() {
   const [cloudVerified, setCloudVerified] = useState(false);
   const [showPasswordGate, setShowPasswordGate] = useState(false);
   const [pendingCloudAction, setPendingCloudAction] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    base44.auth.me().then(user => {
+      if (user?.role === 'admin') { setIsAdmin(true); setCloudVerified(true); }
+    }).catch(() => {});
+  }, []);
 
   const requestCloudAction = (action) => {
     if (cloudVerified) {
