@@ -38,7 +38,7 @@ export default function HackingBoard() {
 
   useEffect(() => {
     base44.auth.me().then(user => {
-      if (user?.role === 'admin') { setIsAdmin(true); setCloudVerified(true); }
+      if (user?.role === 'admin') { setIsAdmin(true); setCloudVerified(true); setCloudUnlocked(true); }
     }).catch(() => {});
   }, []);
 
