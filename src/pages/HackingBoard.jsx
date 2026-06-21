@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { base44 } from '@/api/base44Client';
 import { useHackingState } from '@/lib/hacking-state';
 import BoardCanvas from '@/components/hacking/BoardCanvas.jsx';
 import NodeEditor from '@/components/hacking/NodeEditor';
@@ -12,6 +11,7 @@ import SaveEncounterDialog from '@/components/hacking/SaveEncounterDialog';
 import LoadEncounterDialog from '@/components/hacking/LoadEncounterDialog';
 import ImportEncounterDialog from '@/components/hacking/ImportEncounterDialog';
 import ExportConfirmDialog from '@/components/hacking/ExportConfirmDialog';
+import CloudPasswordGate from '@/components/hacking/CloudPasswordGate';
 import { Cpu, ShieldCheck, Play, SkipForward, SkipBack, RotateCcw, Settings, Shield, Pencil, Trash2, Upload, Download, FileJson, Database } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
@@ -29,13 +29,28 @@ export default function HackingBoard() {
   const [showSettings, setShowSettings] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [fileNode, setFileNode] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [cloudUnlocked, setCloudUnlocked] = useState(false);
+  const [cloudVerified, setCloudVerified] = useState(false);
+  const [showPasswordGate, setShowPasswordGate] = useState(false);
+  const [pendingCloudAction, setPendingCloudAction] = useState(null);
 
-  useEffect(() => {
-    base44.auth.me().then(user => {
-      if (user?.role === 'admin') setIsAdmin(true);
-    }).catch(() => {});
-  }, []);
+  const requestCloudAction = (action) => {
+    if (cloudVerified) {
+      if (action === 'save') setShowSaveDialog(true);
+      if (action === 'load') setShowLoadDialog(true);
+    } else {
+      setPendingCloudAction(action);
+      setShowPasswordGate(true);
+    }
+  };
+
+  const handlePasswordSuccess = () => {
+    setCloudVerified(true);
+    setShowPasswordGate(false);
+    if (pendingCloudAction === 'save') setShowSaveDialog(true);
+    if (pendingCloudAction === 'load') setShowLoadDialog(true);
+    setPendingCloudAction(null);
+  };
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
@@ -145,7 +160,15 @@ export default function HackingBoard() {
 
         {/* Left: computer info */}
         <div className="flex items-center gap-3 min-w-0 shrink-0">
-          <Cpu className="w-5 h-5 text-primary shrink-0 cursor-default" />
+          <Cpu
+            className="w-5 h-5 text-primary shrink-0 cursor-default select-none"
+            onClick={(e) => {
+              if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                setCloudUnlocked(v => !v);
+              }
+            }}
+          />
           <span className="font-mono text-sm font-bold text-primary tracking-widest uppercase truncate">
             {state.computerName}
           </span>
@@ -176,7 +199,7 @@ export default function HackingBoard() {
         {/* Center: mode-dependent controls */}
         {mode === 'create' ? (
           <div className="flex items-center gap-2 shrink-0">
-            {isAdmin && (
+            {cloudUnlocked && (
               <>
                 <button
                   onClick={handleNewEncounter}
@@ -193,10 +216,10 @@ export default function HackingBoard() {
                   <DropdownMenuContent align="end" className="font-mono">
                     <DropdownMenuLabel className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Cloud Storage</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setShowSaveDialog(true)} className="gap-2 cursor-pointer">
+                    <DropdownMenuItem onClick={() => requestCloudAction('save')} className="gap-2 cursor-pointer">
                       <Upload className="w-3.5 h-3.5" /> Save to Cloud
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setShowLoadDialog(true)} className="gap-2 cursor-pointer">
+                    <DropdownMenuItem onClick={() => requestCloudAction('load')} className="gap-2 cursor-pointer">
                       <Download className="w-3.5 h-3.5" /> Load from Cloud
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -506,6 +529,12 @@ export default function HackingBoard() {
           </div>
         </div>
       )}
+
+      <CloudPasswordGate
+        isOpen={showPasswordGate}
+        onSuccess={handlePasswordSuccess}
+        onClose={() => { setShowPasswordGate(false); setPendingCloudAction(null); }}
+      />
 
       <ComputerSettingsModal
         isOpen={showSettings}
