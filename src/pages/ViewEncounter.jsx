@@ -12,6 +12,8 @@ export default function ViewEncounter() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [connected, setConnected] = useState(false);
+  const [cursorPos, setCursorPos] = useState(null);
+  const lastBoardVersionRef = useRef(null);
   const boardCanvasRef = useRef(null);
 
   // Initial load
@@ -22,6 +24,8 @@ export default function ViewEncounter() {
       .then(enc => {
         if (cancelled) return;
         state.loadEncounter(enc);
+        lastBoardVersionRef.current = enc.boardVersion ?? 0;
+        if (enc.cursor) setCursorPos(enc.cursor);
         setLoading(false);
         setConnected(true);
         setTimeout(() => boardCanvasRef.current?.fitAll?.(), 200);
@@ -41,7 +45,12 @@ export default function ViewEncounter() {
     const unsubscribe = base44.entities.Encounter.subscribe((event) => {
       if (event.id !== id) return;
       if (event.type === 'update') {
-        state.loadEncounter(event.data);
+        if (event.data.cursor) setCursorPos(event.data.cursor);
+        const bv = event.data.boardVersion ?? 0;
+        if (bv !== lastBoardVersionRef.current) {
+          state.loadEncounter(event.data);
+          lastBoardVersionRef.current = bv;
+        }
         setConnected(true);
       } else if (event.type === 'delete') {
         setError('The host ended the session and deleted this encounter.');
@@ -127,6 +136,7 @@ export default function ViewEncounter() {
         onToggleDirectoryLocked={() => {}}
         effectiveBaseDC={state.effectiveBaseDC}
         getNodeDC={state.getNodeDC}
+        spectatorCursor={cursorPos}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useHackingState } from '@/lib/hacking-state';
 import BoardCanvas from '@/components/hacking/BoardCanvas.jsx';
@@ -16,6 +16,7 @@ import CloudPasswordGate from '@/components/hacking/CloudPasswordGate';
 import { Cpu, ShieldCheck, Play, SkipForward, SkipBack, RotateCcw, Settings, Shield, Pencil, Trash2, Upload, Download, FileJson, Database, Radio, Link as LinkIcon } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { toast } from '@/components/ui/use-toast';
 
 export default function HackingBoard() {
   const state = useHackingState();
@@ -116,9 +117,13 @@ export default function HackingBoard() {
   }, [state.rootAccessGranted]);
 
   // Live sync: debounced auto-save so spectators see updates in real time
+  const boardVersionRef = useRef(0);
+  const lastCursorSendRef = useRef(0);
+
   useEffect(() => {
     if (!liveSyncEnabled || !liveEncounterId) return;
     const timeout = setTimeout(() => {
+      boardVersionRef.current += 1;
       base44.entities.Encounter.update(liveEncounterId, {
         computerName: state.computerName,
         tier: state.tier,
@@ -128,10 +133,22 @@ export default function HackingBoard() {
         connections: state.connections,
         phase: state.phase,
         log: state.log,
+        boardVersion: boardVersionRef.current,
       }).catch(err => console.error('Live sync failed:', err));
     }, 800);
     return () => clearTimeout(timeout);
   }, [liveSyncEnabled, liveEncounterId, state.nodes, state.connections, state.phase, state.log, state.computerName, state.tier, state.baseDC, state.upgrades]);
+
+  // Throttled cursor broadcast for spectators (~8 updates/sec)
+  const handleCursorMove = useCallback((x, y) => {
+    if (!liveSyncEnabled || !liveEncounterId) return;
+    const now = Date.now();
+    if (now - lastCursorSendRef.current < 120) return;
+    lastCursorSendRef.current = now;
+    base44.entities.Encounter.update(liveEncounterId, {
+      cursor: { x, y },
+    }).catch(() => {});
+  }, [liveSyncEnabled, liveEncounterId]);
 
 
 
@@ -143,6 +160,7 @@ export default function HackingBoard() {
     state.loadEncounter(encounter);
     setSharedEncounter(encounter);
     setLiveEncounterId(encounter.id);
+    boardVersionRef.current = encounter.boardVersion ?? 0;
     setMode('play');
     setShowLoadDialog(false);
     setTimeout(() => boardCanvasRef.current?.center?.(), 100);
@@ -155,6 +173,7 @@ export default function HackingBoard() {
     setSharedEncounter(null);
     setLiveEncounterId(null);
     setLiveSyncEnabled(false);
+    boardVersionRef.current = 0;
   };
 
   const handleExportJSON = () => {
@@ -241,6 +260,7 @@ export default function HackingBoard() {
                 onClick={() => {
                   const url = `${window.location.origin}/view/${liveEncounterId}`;
                   navigator.clipboard.writeText(url);
+                  toast({ title: 'Spectator link copied!', description: 'Share it so others can watch live.' });
                 }}
                 className="flex items-center gap-1.5 px-2 py-1 font-mono text-xs tracking-widest border border-primary/30 text-primary/50 hover:text-primary hover:border-primary rounded transition-colors"
                 title="Copy spectator link"
@@ -478,6 +498,7 @@ export default function HackingBoard() {
             onToggleDirectoryLocked={state.toggleDirectoryLocked}
             effectiveBaseDC={state.effectiveBaseDC}
             getNodeDC={state.getNodeDC}
+            onCursorMove={handleCursorMove}
           />
 
           <BottomLog log={state.log} selectedNode={selectedNode} activeCategory={activeCategory} getNodeDC={state.getNodeDC} effectiveBaseDC={state.effectiveBaseDC} />

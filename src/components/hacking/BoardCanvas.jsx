@@ -16,6 +16,7 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
   onAddConnection, onDeleteConnection, onHack, onUnhack, onConfigure, onDropNode,
   mode = 'create', onUnresolveCm = null, onResolveCm = null, onOpenFile = null, onToggleDirectoryLocked = null,
   effectiveBaseDC = 25, getNodeDC = null,
+  onCursorMove = null, spectatorCursor = null,
 }, ref) {
   const outerRef = useRef(null);
   const [draggingNode, setDraggingNode] = useState(null);
@@ -153,7 +154,11 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
       const canvas = toCanvas(e.clientX, e.clientY);
       onMoveNode(draggingNode, canvas.x - dragOffset.x, canvas.y - dragOffset.y);
     }
-  }, [isPanning, draggingNode, dragOffset, onMoveNode, connectingFrom, toCanvas]);
+    if (onCursorMove) {
+      const canvas = toCanvas(e.clientX, e.clientY);
+      onCursorMove(canvas.x, canvas.y);
+    }
+  }, [isPanning, draggingNode, dragOffset, onMoveNode, connectingFrom, toCanvas, onCursorMove]);
 
   const handleMouseUp = useCallback(() => {
     setDraggingNode(null);
@@ -469,6 +474,33 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
           </div>
         );
         })}
+        {spectatorCursor && (
+          <div
+            style={{
+              position: 'absolute',
+              left: spectatorCursor.x,
+              top: spectatorCursor.y,
+              zIndex: 100,
+              pointerEvents: 'none',
+            }}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              style={{ filter: 'drop-shadow(0 0 6px hsl(160 100% 55% / 0.9))' }}
+            >
+              <path
+                d="M5 3L19 12L12 13L9 19L5 3Z"
+                fill="hsl(160 100% 55%)"
+                stroke="hsl(220 30% 3%)"
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+        )}
       </div>
 
       {nodes.length === 0 && (
