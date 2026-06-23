@@ -242,32 +242,31 @@ export default function HackingBoard() {
             </span>
           )}
           {liveEncounterId && (
-            <>
-              <button
-                onClick={() => setLiveSyncEnabled(v => !v)}
-                className={cn(
-                  'flex items-center gap-1.5 px-2 py-1 font-mono text-xs tracking-widest border rounded transition-colors',
-                  liveSyncEnabled
-                    ? 'border-chart-1 bg-chart-1/20 text-chart-1'
-                    : 'border-primary/30 text-primary/50 hover:text-primary hover:border-primary'
-                )}
-                title="Toggle real-time sync for spectators"
-              >
-                <Radio className="w-3 h-3" />
-                {liveSyncEnabled ? 'LIVE' : 'SYNC'}
-              </button>
-              <button
-                onClick={() => {
+            <button
+              onClick={() => {
+                if (liveSyncEnabled) {
+                  setLiveSyncEnabled(false);
+                  const { dismiss } = toast({ title: 'Live sharing stopped' });
+                  setTimeout(dismiss, 2000);
+                } else {
                   const url = `${window.location.origin}/view/${liveEncounterId}`;
                   navigator.clipboard.writeText(url);
-                  toast({ title: 'Spectator link copied!', description: 'Share it so others can watch live.' });
-                }}
-                className="flex items-center gap-1.5 px-2 py-1 font-mono text-xs tracking-widest border border-primary/30 text-primary/50 hover:text-primary hover:border-primary rounded transition-colors"
-                title="Copy spectator link"
-              >
-                <LinkIcon className="w-3 h-3" /> SPECTATE
-              </button>
-            </>
+                  setLiveSyncEnabled(true);
+                  const { dismiss } = toast({ title: 'Sharing live!', description: 'Spectator link copied to clipboard.' });
+                  setTimeout(dismiss, 3000);
+                }
+              }}
+              className={cn(
+                'flex items-center gap-1.5 px-2 py-1 font-mono text-xs tracking-widest border rounded transition-colors',
+                liveSyncEnabled
+                  ? 'border-chart-1 bg-chart-1/20 text-chart-1'
+                  : 'border-primary/30 text-primary/50 hover:text-primary hover:border-primary'
+              )}
+              title={liveSyncEnabled ? 'Stop live sharing' : 'Copy spectator link and start broadcasting live'}
+            >
+              {liveSyncEnabled ? <Radio className="w-3 h-3 animate-pulse" /> : <LinkIcon className="w-3 h-3" />}
+              {liveSyncEnabled ? 'LIVE' : 'SHARE'}
+            </button>
           )}
         </div>
 

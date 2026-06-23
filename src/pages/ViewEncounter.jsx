@@ -47,7 +47,7 @@ export default function ViewEncounter() {
       if (event.type === 'update') {
         if (event.data.cursor) setCursorPos(event.data.cursor);
         const bv = event.data.boardVersion ?? 0;
-        if (bv !== lastBoardVersionRef.current) {
+        if (bv > lastBoardVersionRef.current) {
           state.loadEncounter(event.data);
           lastBoardVersionRef.current = bv;
         }
