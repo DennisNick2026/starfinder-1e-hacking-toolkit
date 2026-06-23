@@ -46,6 +46,18 @@
       },
       "description": "Connections between nodes"
     },
+    "phase": {
+      "type": "integer",
+      "default": 1,
+      "description": "Current encounter phase"
+    },
+    "log": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Activity log entries"
+    },
     "isPublic": {
       "type": "boolean",
       "default": false,

@@ -743,8 +743,8 @@ export function useHackingState() {
     });
     setNodes(nodes);
     setConnections(encounterData.connections || []);
-    setPhase(1);
-    setLog([]);
+    setPhase(encounterData.phase ?? 1);
+    setLog(encounterData.log || []);
   }, []);
 
   return {

@@ -13,7 +13,7 @@ import LoadEncounterDialog from '@/components/hacking/LoadEncounterDialog';
 import ImportEncounterDialog from '@/components/hacking/ImportEncounterDialog';
 import ExportConfirmDialog from '@/components/hacking/ExportConfirmDialog';
 import CloudPasswordGate from '@/components/hacking/CloudPasswordGate';
-import { Cpu, ShieldCheck, Play, SkipForward, SkipBack, RotateCcw, Settings, Shield, Pencil, Trash2, Upload, Download, FileJson, Database } from 'lucide-react';
+import { Cpu, ShieldCheck, Play, SkipForward, SkipBack, RotateCcw, Settings, Shield, Pencil, Trash2, Upload, Download, FileJson, Database, Radio, Link as LinkIcon } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
@@ -66,6 +66,8 @@ export default function HackingBoard() {
   const [sharedEncounter, setSharedEncounter] = useState(null);
   const [currentShareCode, setCurrentShareCode] = useState(() => Math.random().toString(36).substring(2, 8).toUpperCase());
   const [pendingCmDrop, setPendingCmDrop] = useState(null); // { cmType, nodeId }
+  const [liveEncounterId, setLiveEncounterId] = useState(null);
+  const [liveSyncEnabled, setLiveSyncEnabled] = useState(false);
 
   const configuringNode = state.nodes.find(n => n.id === configuringNodeId) || null;
   const selectedNode = configuringNode || state.nodes.find(n => n.id === state.selectedNodeId) || null;
@@ -113,6 +115,24 @@ export default function HackingBoard() {
     if (state.rootAccessGranted) setRootModeOverride(true);
   }, [state.rootAccessGranted]);
 
+  // Live sync: debounced auto-save so spectators see updates in real time
+  useEffect(() => {
+    if (!liveSyncEnabled || !liveEncounterId) return;
+    const timeout = setTimeout(() => {
+      base44.entities.Encounter.update(liveEncounterId, {
+        computerName: state.computerName,
+        tier: state.tier,
+        baseDC: state.baseDC,
+        upgrades: state.upgrades,
+        nodes: state.nodes,
+        connections: state.connections,
+        phase: state.phase,
+        log: state.log,
+      }).catch(err => console.error('Live sync failed:', err));
+    }, 800);
+    return () => clearTimeout(timeout);
+  }, [liveSyncEnabled, liveEncounterId, state.nodes, state.connections, state.phase, state.log, state.computerName, state.tier, state.baseDC, state.upgrades]);
+
 
 
   const handleSubmitRoll = (nodeId, total, cmId) => {
@@ -122,6 +142,7 @@ export default function HackingBoard() {
   const handleLoadEncounter = (encounter) => {
     state.loadEncounter(encounter);
     setSharedEncounter(encounter);
+    setLiveEncounterId(encounter.id);
     setMode('play');
     setShowLoadDialog(false);
     setTimeout(() => boardCanvasRef.current?.center?.(), 100);
@@ -132,6 +153,8 @@ export default function HackingBoard() {
     state.resetEncounter();
     setCurrentShareCode(Math.random().toString(36).substring(2, 8).toUpperCase());
     setSharedEncounter(null);
+    setLiveEncounterId(null);
+    setLiveSyncEnabled(false);
   };
 
   const handleExportJSON = () => {
@@ -198,6 +221,33 @@ export default function HackingBoard() {
                 <span className="ml-1.5 text-destructive font-bold">⚠ Over Limit</span>
               )}
             </span>
+          )}
+          {liveEncounterId && (
+            <>
+              <button
+                onClick={() => setLiveSyncEnabled(v => !v)}
+                className={cn(
+                  'flex items-center gap-1.5 px-2 py-1 font-mono text-xs tracking-widest border rounded transition-colors',
+                  liveSyncEnabled
+                    ? 'border-chart-1 bg-chart-1/20 text-chart-1'
+                    : 'border-primary/30 text-primary/50 hover:text-primary hover:border-primary'
+                )}
+                title="Toggle real-time sync for spectators"
+              >
+                <Radio className="w-3 h-3" />
+                {liveSyncEnabled ? 'LIVE' : 'SYNC'}
+              </button>
+              <button
+                onClick={() => {
+                  const url = `${window.location.origin}/view/${liveEncounterId}`;
+                  navigator.clipboard.writeText(url);
+                }}
+                className="flex items-center gap-1.5 px-2 py-1 font-mono text-xs tracking-widest border border-primary/30 text-primary/50 hover:text-primary hover:border-primary rounded transition-colors"
+                title="Copy spectator link"
+              >
+                <LinkIcon className="w-3 h-3" /> SPECTATE
+              </button>
+            </>
           )}
         </div>
 
@@ -477,6 +527,7 @@ export default function HackingBoard() {
         isOpen={showSaveDialog}
         onClose={() => setShowSaveDialog(false)}
         shareCode={currentShareCode}
+        onSaved={(id) => setLiveEncounterId(id)}
         encounterData={{
           computerName: state.computerName,
           tier: state.tier,
