@@ -428,6 +428,8 @@ export default function HackingBoard() {
             onToggleDirectoryLocked={state.toggleDirectoryLocked}
             effectiveBaseDC={state.effectiveBaseDC}
             getNodeDC={state.getNodeDC}
+            rootMode={rootMode}
+            onToggleRequiresHack={state.toggleRequiresHack}
           />
 
           <BottomLog log={state.log} selectedNode={selectedNode} activeCategory={activeCategory} getNodeDC={state.getNodeDC} effectiveBaseDC={state.effectiveBaseDC} />

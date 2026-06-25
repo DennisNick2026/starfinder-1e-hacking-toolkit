@@ -78,8 +78,8 @@ export const NODE_DC_MODIFIERS = {
   directory:           0,
   control_complex:    +2,
   secure_data_average: 0,
-  secure_data_large:  +2,
-  secure_data_specific:+4,
+  secure_data_large:  0,
+  secure_data_specific:0,
   spell_chip:          0,
   vulnerability:      -4,
   ctrl_door:           0,
@@ -137,7 +137,7 @@ const NODE_TEMPLATES = {
     successes_current: 0,
     resolved: false,
     locked: true,
-    requiresHack: true,
+    requiresHack: false,
     countermeasures: [],
   },
   control_complex: {
@@ -163,6 +163,7 @@ const NODE_TEMPLATES = {
     successes_current: 0,
     resolved: false,
     file_content: '',
+    password: '',
     countermeasures: [],
   },
   secure_data_large: {
@@ -176,6 +177,7 @@ const NODE_TEMPLATES = {
     successes_current: 0,
     resolved: false,
     file_content: '',
+    password: '',
     countermeasures: [],
   },
   secure_data_specific: {
@@ -189,6 +191,7 @@ const NODE_TEMPLATES = {
     successes_current: 0,
     resolved: false,
     file_content: '',
+    password: '',
     countermeasures: [],
   },
   spell_chip: {
@@ -630,6 +633,12 @@ export function useHackingState() {
     }));
   }, []);
 
+  const toggleRequiresHack = useCallback((nodeId) => {
+    setNodes(prev => prev.map(n =>
+      n.id === nodeId ? { ...n, requiresHack: !n.requiresHack } : n
+    ));
+  }, []);
+
   // Submit a manual roll total against a node or countermeasure DC
   // target: { nodeId, cmId? } — if cmId present, rolling against a countermeasure
   const submitRoll = useCallback((nodeId, total, cmId = null, rootMode = false) => {
@@ -809,7 +818,7 @@ export function useHackingState() {
     addConnection, removeConnection,
     addCountermeasure, updateCountermeasure, removeCountermeasure, unresolveCountermeasure,
     submitRoll, advancePhase,
-    resetEncounter, clearNodes, addLogEntry, unhackNode, loadEncounter, toggleDirectoryLocked,
+    resetEncounter, clearNodes, addLogEntry, unhackNode, loadEncounter, toggleDirectoryLocked, toggleRequiresHack,
     rootAccessGranted,
     getNodeDC,
     NODE_TEMPLATES,

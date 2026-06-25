@@ -11,6 +11,8 @@ const CM_COLOR = {
   purple: 'text-chart-3 border-chart-3/50 bg-chart-3/10',
 };
 
+const DATA_NODE_TYPES = ['secure_data_average', 'secure_data_large', 'secure_data_specific'];
+
 // In play mode: fake_shell hidden until node is resolved (then player can roll to detect it);
 // alarms hidden until revealed; firewall blocks everything else
 function getVisibleCms(node, mode) {
@@ -67,6 +69,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
   const [result, setResult] = useState(null); // 'success' | 'fail_minor' | 'fail_major'
   const [target, setTarget] = useState(initialTarget);
   const [closing, setClosing] = useState(false);
+  const [passwordBypassed, setPasswordBypassed] = useState(false);
 
   if (!node) return null;
   
@@ -82,6 +85,10 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
   const hasUnresolvedFirewall = (node.countermeasures || []).some(cm => cm.type === 'firewall' && !cm.resolved);
   const firewallCm = (node.countermeasures || []).find(cm => cm.type === 'firewall' && !cm.resolved);
   const hasFirewallPassword = !!firewallCm?.password;
+
+  // Secure data nodes require root access (or a password) to interact
+  const isSecureData = DATA_NODE_TYPES.includes(node.type);
+  const requiresRoot = isSecureData && !rootMode && !passwordBypassed && !node.resolved && !hasUnresolvedFirewall;
 
   // Detect if this is a fake shell scan
   const fakeShellCm = (node.countermeasures || []).find(cm => cm.type === 'fake_shell' && !cm.resolved);
@@ -246,8 +253,28 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
               />
             )}
 
+            {/* Root access requirement for secure data nodes */}
+            {requiresRoot && (
+              <div className="space-y-3">
+                <div className="text-center space-y-1">
+                  <p className="font-mono text-xs text-chart-3 font-bold">ROOT ACCESS REQUIRED</p>
+                  <p className="font-mono text-[10px] text-muted-foreground">
+                    {node.password ? 'Enter password to bypass:' : 'No password set — root access required to interact.'}
+                  </p>
+                </div>
+                {node.password && (
+                  <PasswordEntry
+                    label="Secure data password:"
+                    password={node.password}
+                    disabled={closing}
+                    onSuccess={() => setPasswordBypassed(true)}
+                  />
+                )}
+              </div>
+            )}
+
             {/* Outcome buttons */}
-            {(!node.resolved || activeCms.length > 0) && (
+            {!requiresRoot && (!node.resolved || activeCms.length > 0) && (
               <div className="space-y-2">
                 <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground text-center">Roll outcome:</p>
                 <div className="grid grid-cols-1 gap-2">

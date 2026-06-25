@@ -33,7 +33,7 @@ export default function NodeCard({
   node, isSelected, isDragging,
   onSelect, onStartConnect, onDelete, onHack, onUnhack, onConfigure, onOpenFile, mode = 'create',
   hiddenByDirectory = false, onUnresolveCm = null, onResolveCm = null, onToggleDirectoryLocked = null,
-  effectiveBaseDC = 25, getNodeDC = null, connectingFrom = null,
+  effectiveBaseDC = 25, getNodeDC = null, connectingFrom = null, rootMode = false, onToggleRequiresHack = null,
 }) {
   // In play mode, nodes hidden inside a locked directory are invisible
   if (hiddenByDirectory && mode === 'play') return null;
@@ -218,6 +218,14 @@ export default function NodeCard({
             {node.password && mode !== 'play' && (
               <span className="font-mono text-[9px] text-muted-foreground ml-1">pw: {node.password}</span>
             )}
+          </div>
+        )}
+
+        {/* Root access requirement for secure data nodes */}
+        {DATA_NODE_TYPES.includes(node.type) && !node.resolved && !firewallBlocked && mode === 'play' && !rootMode && (
+          <div className="flex items-center gap-1">
+            <Lock className="w-2.5 h-2.5 text-chart-3" />
+            <span className="font-mono text-[10px] text-chart-3">ROOT REQUIRED</span>
           </div>
         )}
 
@@ -419,6 +427,15 @@ export default function NodeCard({
             >
               <Link className="w-3.5 h-3.5" />
             </button>
+            {node.type === 'directory' && (
+              <button
+                className="py-2 text-[10px] font-mono text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex items-center justify-center border-r border-b border-border/50"
+                onClick={(e) => { e.stopPropagation(); onToggleRequiresHack?.(node.id); }}
+                title={node.requiresHack === false ? 'Unsecure — click to require hack' : 'Hackable — click to make unsecure'}
+              >
+                {node.requiresHack === false ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+              </button>
+            )}
             {!node.isEntry && !node.isRootAccess && (
               <button
                 className="py-2 text-[10px] font-mono text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex items-center justify-center border-r border-b border-border/50"

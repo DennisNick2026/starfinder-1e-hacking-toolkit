@@ -15,7 +15,7 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
   onSelectNode, onMoveNode, onDeleteNode,
   onAddConnection, onDeleteConnection, onHack, onUnhack, onConfigure, onDropNode,
   mode = 'create', onUnresolveCm = null, onResolveCm = null, onOpenFile = null, onToggleDirectoryLocked = null,
-  effectiveBaseDC = 25, getNodeDC = null,
+  effectiveBaseDC = 25, getNodeDC = null, rootMode = false, onToggleRequiresHack = null,
 }, ref) {
   const outerRef = useRef(null);
   const [draggingNode, setDraggingNode] = useState(null);
@@ -494,6 +494,8 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
               effectiveBaseDC={effectiveBaseDC}
               getNodeDC={getNodeDC}
               connectingFrom={connectingFrom}
+              rootMode={rootMode}
+              onToggleRequiresHack={onToggleRequiresHack}
             />
           </div>
         );

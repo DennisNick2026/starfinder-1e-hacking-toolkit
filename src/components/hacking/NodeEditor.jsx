@@ -123,6 +123,16 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
             </div>
           )}
 
+          {(node.type === 'secure_data_average' || node.type === 'secure_data_large' || node.type === 'secure_data_specific') && (
+            <div>
+              <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-2">Password (optional — bypasses root access)</Label>
+              <Input className="font-mono text-sm mt-1 bg-muted border-border/60 h-9"
+                placeholder="Leave blank for root access only"
+                value={node.password || ''}
+                onChange={e => set('password', e.target.value)} />
+            </div>
+          )}
+
           {node.tier !== undefined && (
             <div>
               <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-3">Tier</Label>
