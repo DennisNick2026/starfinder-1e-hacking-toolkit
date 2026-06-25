@@ -148,13 +148,13 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
           {node.type === 'computer' && (
             <div>
               <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-3">Computer Tier</Label>
-              <div className="flex gap-2 mt-2">
-                {[1, 2, 3, 4].map(t => (
+              <div className="grid grid-cols-5 gap-2 mt-2">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(t => (
                   <button
                     key={t}
                     onClick={() => set('computerTier', t)}
                     className={cn(
-                      'flex-1 py-2.5 rounded border font-mono text-sm font-bold transition-colors',
+                      'py-2 rounded border font-mono text-sm font-bold transition-colors',
                       (node.computerTier || 3) === t
                         ? 'bg-primary/20 border-primary text-primary'
                         : 'border-border/60 text-muted-foreground hover:border-primary/50'

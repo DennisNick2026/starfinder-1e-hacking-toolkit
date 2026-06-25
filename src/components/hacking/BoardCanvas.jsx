@@ -373,6 +373,21 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
                 <line x1={fx} y1={fy} x2={tx} y2={ty}
                   stroke="hsl(175 80% 50% / 0.5)" strokeWidth="1.5" strokeLinecap="round"
                   strokeDasharray="8 4" filter="url(#glow)" style={{ pointerEvents: 'auto' }} />
+                {mode === 'create' && conn.id !== 'conn_root' && (() => {
+                  const midX = (fx + tx) / 2;
+                  const midY = (fy + ty) / 2;
+                  return (
+                    <g
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDeleteConnection?.(conn.id); }}
+                      onMouseDown={(e) => { e.stopPropagation(); }}
+                      style={{ cursor: 'pointer', pointerEvents: 'auto' }}
+                    >
+                      <circle cx={midX} cy={midY} r="10" fill="hsl(220 25% 8%)" stroke="hsl(10 100% 55% / 0.7)" strokeWidth="1.5" />
+                      <line x1={midX - 4} y1={midY - 4} x2={midX + 4} y2={midY + 4} stroke="hsl(10 100% 55%)" strokeWidth="2" strokeLinecap="round" />
+                      <line x1={midX - 4} y1={midY + 4} x2={midX + 4} y2={midY - 4} stroke="hsl(10 100% 55%)" strokeWidth="2" strokeLinecap="round" />
+                    </g>
+                  );
+                })()}
               </g>
             );
           })}
