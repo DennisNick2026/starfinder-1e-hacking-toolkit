@@ -145,6 +145,39 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
             </div>
           )}
 
+          {node.type === 'directory' && (
+            <div>
+              <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-3">Access Type</Label>
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={() => set('requiresHack', true)}
+                  className={cn(
+                    'flex-1 py-2.5 rounded border font-mono text-xs font-bold transition-colors',
+                    node.requiresHack !== false
+                      ? 'bg-primary/20 border-primary text-primary'
+                      : 'border-border/60 text-muted-foreground hover:border-primary/50'
+                  )}
+                >
+                  Hackable
+                </button>
+                <button
+                  onClick={() => set('requiresHack', false)}
+                  className={cn(
+                    'flex-1 py-2.5 rounded border font-mono text-xs font-bold transition-colors',
+                    node.requiresHack === false
+                      ? 'bg-chart-4/20 border-chart-4 text-chart-4'
+                      : 'border-border/60 text-muted-foreground hover:border-chart-4/50'
+                  )}
+                >
+                  Unsecure
+                </button>
+              </div>
+              <p className="font-mono text-[10px] text-muted-foreground mt-2">
+                {node.requiresHack === false ? 'No hack required — open and close freely.' : 'Requires a successful hack to unlock.'}
+              </p>
+            </div>
+          )}
+
           {node.type === 'computer' && (
             <div>
               <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-3">Computer Tier</Label>

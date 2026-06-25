@@ -208,10 +208,24 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
 
     const lockedDirs = nodes.filter(n => n.type === 'directory' && n.locked);
     lockedDirs.forEach(dir => {
-      connections.forEach(c => {
-        if (c.from === dir.id && c.to !== 'entry' && c.to !== 'root_access') hidden.add(c.to);
-        if (c.to === dir.id && c.from !== 'entry' && c.from !== 'root_access') hidden.add(c.from);
-      });
+      // BFS from the locked directory to hide ALL nodes behind it (not just directly connected)
+      const visited = new Set([dir.id]);
+      const queue = [dir.id];
+      while (queue.length > 0) {
+        const current = queue.shift();
+        connections.forEach(c => {
+          let neighbor = null;
+          if (c.from === current) neighbor = c.to;
+          else if (c.to === current) neighbor = c.from;
+          if (neighbor && !visited.has(neighbor)) {
+            visited.add(neighbor);
+            if (neighbor !== 'entry' && neighbor !== 'root_access') {
+              hidden.add(neighbor);
+              queue.push(neighbor);
+            }
+          }
+        });
+      }
     });
     const firewalled = nodes.filter(n =>
       (n.countermeasures || []).some(cm => cm.type === 'firewall' && !cm.resolved)

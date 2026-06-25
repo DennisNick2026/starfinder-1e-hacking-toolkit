@@ -211,10 +211,10 @@ export default function NodeCard({
         )}
 
         {/* Directory lock status — hidden in play mode when firewalled (would reveal node type) */}
-        {node.type === 'directory' && !node.resolved && !firewallBlocked && (
+        {node.type === 'directory' && (node.requiresHack === false ? node.locked : !node.resolved) && !firewallBlocked && (
           <div className="flex items-center gap-1">
             <Lock className="w-2.5 h-2.5 text-chart-4" />
-            <span className="font-mono text-[10px] text-chart-4">LOCKED</span>
+            <span className="font-mono text-[10px] text-chart-4">{node.requiresHack === false ? 'CLOSED' : 'LOCKED'}</span>
             {node.password && mode !== 'play' && (
               <span className="font-mono text-[9px] text-muted-foreground ml-1">pw: {node.password}</span>
             )}
@@ -314,7 +314,16 @@ export default function NodeCard({
       {/* Action buttons */}
       <div className="grid grid-cols-2 gap-px border-t border-border/50">
         {!connectingFrom && !node.noHack && (
-          node.resolved ? (
+          node.type === 'directory' && node.requiresHack === false ? (
+            <button
+              className="col-span-2 py-3 text-xs font-mono font-bold text-primary hover:bg-primary/20 transition-colors flex items-center justify-center gap-2 bg-primary/10"
+              onClick={(e) => { e.stopPropagation(); onToggleDirectoryLocked?.(node.id); }}
+              title={node.locked ? 'Open folder' : 'Close folder'}
+            >
+              {node.locked ? <FolderLock className="w-4 h-4" /> : <FolderOpen className="w-4 h-4" />}
+              <span>{node.locked ? 'OPEN' : 'CLOSE'}</span>
+            </button>
+          ) : node.resolved ? (
             <>
               {mode === 'play' && allCms.some(cm => cm.type === 'alarm' && cm.triggered && !cm.resolved) && (
                 <button
@@ -358,7 +367,7 @@ export default function NodeCard({
             </button>
           )
         )}
-        {!connectingFrom && node.type === 'directory' && node.resolved && (
+        {!connectingFrom && node.type === 'directory' && node.resolved && node.requiresHack !== false && (
           <button
             className={cn(
               'py-2 text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 border-r border-b border-border/50',

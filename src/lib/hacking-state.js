@@ -137,6 +137,7 @@ const NODE_TEMPLATES = {
     successes_current: 0,
     resolved: false,
     locked: true,
+    requiresHack: true,
     countermeasures: [],
   },
   control_complex: {
