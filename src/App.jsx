@@ -6,7 +6,6 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import HackingBoard from './pages/HackingBoard';
-import ViewEncounter from './pages/ViewEncounter';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -36,7 +35,6 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/" element={<HackingBoard />} />
-      <Route path="/view/:id" element={<ViewEncounter />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

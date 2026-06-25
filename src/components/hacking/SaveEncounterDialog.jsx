@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { base44 } from '@/api/base44Client';
 
-export default function SaveEncounterDialog({ isOpen, onClose, shareCode, encounterData, onSaved }) {
+export default function SaveEncounterDialog({ isOpen, onClose, shareCode, encounterData }) {
   const [title, setTitle] = useState('');
   const [isPublic, setIsPublic] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -31,10 +31,9 @@ export default function SaveEncounterDialog({ isOpen, onClose, shareCode, encoun
         shareCode,
       };
       
-      const result = await base44.entities.Encounter.create(encounter);
+      await base44.entities.Encounter.create(encounter);
       await navigator.clipboard.writeText(shareCode);
       setSaved(true);
-      if (onSaved && result?.id) onSaved(result.id);
     } catch (err) {
       console.error('Failed to save encounter:', err);
       alert(`Error: ${err.message || 'Unknown error'}`);

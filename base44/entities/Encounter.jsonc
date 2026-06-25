@@ -46,35 +46,6 @@
       },
       "description": "Connections between nodes"
     },
-    "phase": {
-      "type": "integer",
-      "default": 1,
-      "description": "Current encounter phase"
-    },
-    "log": {
-      "type": "array",
-      "items": {
-        "type": "object"
-      },
-      "description": "Activity log entries"
-    },
-    "boardVersion": {
-      "type": "integer",
-      "default": 0,
-      "description": "Incremented on board state changes so spectators can detect updates vs cursor-only movement"
-    },
-    "cursor": {
-      "type": "object",
-      "properties": {
-        "x": {
-          "type": "number"
-        },
-        "y": {
-          "type": "number"
-        }
-      },
-      "description": "Hacker cursor position in canvas coordinates for spectator view"
-    },
     "isPublic": {
       "type": "boolean",
       "default": false,

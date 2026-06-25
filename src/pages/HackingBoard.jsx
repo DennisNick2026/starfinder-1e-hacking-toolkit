@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useHackingState } from '@/lib/hacking-state';
 import BoardCanvas from '@/components/hacking/BoardCanvas.jsx';
@@ -13,10 +13,9 @@ import LoadEncounterDialog from '@/components/hacking/LoadEncounterDialog';
 import ImportEncounterDialog from '@/components/hacking/ImportEncounterDialog';
 import ExportConfirmDialog from '@/components/hacking/ExportConfirmDialog';
 import CloudPasswordGate from '@/components/hacking/CloudPasswordGate';
-import { Cpu, ShieldCheck, Play, SkipForward, SkipBack, RotateCcw, Settings, Shield, Pencil, Trash2, Upload, Download, FileJson, Database, Radio, Link as LinkIcon } from 'lucide-react';
+import { Cpu, ShieldCheck, Play, SkipForward, SkipBack, RotateCcw, Settings, Shield, Pencil, Trash2, Upload, Download, FileJson, Database } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { toast } from '@/components/ui/use-toast';
 
 export default function HackingBoard() {
   const state = useHackingState();
@@ -67,8 +66,6 @@ export default function HackingBoard() {
   const [sharedEncounter, setSharedEncounter] = useState(null);
   const [currentShareCode, setCurrentShareCode] = useState(() => Math.random().toString(36).substring(2, 8).toUpperCase());
   const [pendingCmDrop, setPendingCmDrop] = useState(null); // { cmType, nodeId }
-  const [liveEncounterId, setLiveEncounterId] = useState(null);
-  const [liveSyncEnabled, setLiveSyncEnabled] = useState(false);
 
   const configuringNode = state.nodes.find(n => n.id === configuringNodeId) || null;
   const selectedNode = configuringNode || state.nodes.find(n => n.id === state.selectedNodeId) || null;
@@ -116,40 +113,6 @@ export default function HackingBoard() {
     if (state.rootAccessGranted) setRootModeOverride(true);
   }, [state.rootAccessGranted]);
 
-  // Live sync: debounced auto-save so spectators see updates in real time
-  const boardVersionRef = useRef(0);
-  const lastCursorSendRef = useRef(0);
-
-  useEffect(() => {
-    if (!liveSyncEnabled || !liveEncounterId) return;
-    const timeout = setTimeout(() => {
-      boardVersionRef.current += 1;
-      base44.entities.Encounter.update(liveEncounterId, {
-        computerName: state.computerName,
-        tier: state.tier,
-        baseDC: state.baseDC,
-        upgrades: state.upgrades,
-        nodes: state.nodes,
-        connections: state.connections,
-        phase: state.phase,
-        log: state.log,
-        boardVersion: boardVersionRef.current,
-      }).catch(err => console.error('Live sync failed:', err));
-    }, 800);
-    return () => clearTimeout(timeout);
-  }, [liveSyncEnabled, liveEncounterId, state.nodes, state.connections, state.phase, state.log, state.computerName, state.tier, state.baseDC, state.upgrades]);
-
-  // Throttled cursor broadcast for spectators (~8 updates/sec)
-  const handleCursorMove = useCallback((x, y) => {
-    if (!liveSyncEnabled || !liveEncounterId) return;
-    const now = Date.now();
-    if (now - lastCursorSendRef.current < 120) return;
-    lastCursorSendRef.current = now;
-    base44.entities.Encounter.update(liveEncounterId, {
-      cursor: { x, y },
-    }).catch(() => {});
-  }, [liveSyncEnabled, liveEncounterId]);
-
 
 
   const handleSubmitRoll = (nodeId, total, cmId) => {
@@ -159,8 +122,6 @@ export default function HackingBoard() {
   const handleLoadEncounter = (encounter) => {
     state.loadEncounter(encounter);
     setSharedEncounter(encounter);
-    setLiveEncounterId(encounter.id);
-    boardVersionRef.current = encounter.boardVersion ?? 0;
     setMode('play');
     setShowLoadDialog(false);
     setTimeout(() => boardCanvasRef.current?.center?.(), 100);
@@ -171,9 +132,6 @@ export default function HackingBoard() {
     state.resetEncounter();
     setCurrentShareCode(Math.random().toString(36).substring(2, 8).toUpperCase());
     setSharedEncounter(null);
-    setLiveEncounterId(null);
-    setLiveSyncEnabled(false);
-    boardVersionRef.current = 0;
   };
 
   const handleExportJSON = () => {
@@ -240,33 +198,6 @@ export default function HackingBoard() {
                 <span className="ml-1.5 text-destructive font-bold">⚠ Over Limit</span>
               )}
             </span>
-          )}
-          {liveEncounterId && (
-            <button
-              onClick={() => {
-                if (liveSyncEnabled) {
-                  setLiveSyncEnabled(false);
-                  const { dismiss } = toast({ title: 'Live sharing stopped' });
-                  setTimeout(dismiss, 2000);
-                } else {
-                  const url = `${window.location.origin}/view/${liveEncounterId}`;
-                  navigator.clipboard.writeText(url);
-                  setLiveSyncEnabled(true);
-                  const { dismiss } = toast({ title: 'Sharing live!', description: 'Spectator link copied to clipboard.' });
-                  setTimeout(dismiss, 3000);
-                }
-              }}
-              className={cn(
-                'flex items-center gap-1.5 px-2 py-1 font-mono text-xs tracking-widest border rounded transition-colors',
-                liveSyncEnabled
-                  ? 'border-chart-1 bg-chart-1/20 text-chart-1'
-                  : 'border-primary/30 text-primary/50 hover:text-primary hover:border-primary'
-              )}
-              title={liveSyncEnabled ? 'Stop live sharing' : 'Copy spectator link and start broadcasting live'}
-            >
-              {liveSyncEnabled ? <Radio className="w-3 h-3 animate-pulse" /> : <LinkIcon className="w-3 h-3" />}
-              {liveSyncEnabled ? 'LIVE' : 'SHARE'}
-            </button>
           )}
         </div>
 
@@ -497,7 +428,6 @@ export default function HackingBoard() {
             onToggleDirectoryLocked={state.toggleDirectoryLocked}
             effectiveBaseDC={state.effectiveBaseDC}
             getNodeDC={state.getNodeDC}
-            onCursorMove={handleCursorMove}
           />
 
           <BottomLog log={state.log} selectedNode={selectedNode} activeCategory={activeCategory} getNodeDC={state.getNodeDC} effectiveBaseDC={state.effectiveBaseDC} />
@@ -547,7 +477,6 @@ export default function HackingBoard() {
         isOpen={showSaveDialog}
         onClose={() => setShowSaveDialog(false)}
         shareCode={currentShareCode}
-        onSaved={(id) => setLiveEncounterId(id)}
         encounterData={{
           computerName: state.computerName,
           tier: state.tier,
