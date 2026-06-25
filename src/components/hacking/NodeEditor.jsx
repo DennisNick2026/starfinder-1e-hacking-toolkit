@@ -145,6 +145,29 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
             </div>
           )}
 
+          {node.type === 'computer' && (
+            <div>
+              <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-3">Computer Tier</Label>
+              <div className="flex gap-2 mt-2">
+                {[1, 2, 3, 4].map(t => (
+                  <button
+                    key={t}
+                    onClick={() => set('computerTier', t)}
+                    className={cn(
+                      'flex-1 py-2.5 rounded border font-mono text-sm font-bold transition-colors',
+                      (node.computerTier || 3) === t
+                        ? 'bg-primary/20 border-primary text-primary'
+                        : 'border-border/60 text-muted-foreground hover:border-primary/50'
+                    )}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+              <p className="font-mono text-[10px] text-muted-foreground mt-2">DC: {13 + 4 * (node.computerTier || 3)}</p>
+            </div>
+          )}
+
         </div>
 
         {/* Countermeasures section */}

@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Terminal, GitBranch, Database, SquareTerminal,
   ShieldAlert, Siren, UserX, Bug, Unlock, Link, Trash2, Settings, Zap,
-  Sparkles, EyeOff, Lock, LogIn, ShieldCheck, FolderLock, FolderOpen, FileText
+  Sparkles, EyeOff, Lock, LogIn, ShieldCheck, FolderLock, FolderOpen, FileText, Cpu
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -10,7 +10,7 @@ const DATA_NODE_TYPES = ['secure_data_average', 'secure_data_large', 'secure_dat
 
 const ICONS = {
   Terminal, GitBranch, Database, SquareTerminal,
-  ShieldAlert, Siren, UserX, Bug, Unlock, Sparkles, LogIn, ShieldCheck, FolderLock, FolderOpen,
+  ShieldAlert, Siren, UserX, Bug, Unlock, Sparkles, LogIn, ShieldCheck, FolderLock, FolderOpen, Cpu,
 };
 
 const CM_ICONS = { ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 };

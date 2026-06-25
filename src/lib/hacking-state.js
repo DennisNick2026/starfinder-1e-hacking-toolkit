@@ -98,6 +98,7 @@ export const NODE_DC_MODIFIERS = {
   ctrl_power_core:    +4,
   ctrl_lights:         0,
   security_module:   0,
+  computer:           0,
 };
 
 const NODE_TEMPLATES = {
@@ -300,6 +301,31 @@ const NODE_TEMPLATES = {
     resolved: false,
     countermeasures: [],
   },
+  root_access_node: {
+    type: 'root_access_node',
+    label: 'Root Access',
+    color: 'purple',
+    icon: 'ShieldCheck',
+    description: 'A separate root access instance — hacking this grants root mode',
+    dc: 0,
+    successes_required: 1,
+    successes_current: 0,
+    resolved: false,
+    countermeasures: [],
+  },
+  computer: {
+    type: 'computer',
+    label: 'Computer',
+    color: 'cyan',
+    icon: 'Cpu',
+    description: 'A linked computer — its tier determines the hack DC',
+    dc: 0,
+    computerTier: 3,
+    successes_required: 1,
+    successes_current: 0,
+    resolved: false,
+    countermeasures: [],
+  },
 };
 
 let nextId = 2;  // Start at 2 since entry and root_access take slots
@@ -396,7 +422,15 @@ export function useHackingState() {
       }
       return effectiveDC;
     }
-    if (node.id === 'root_access') return effectiveDC + 20;
+    if (node.id === 'root_access' || node.type === 'root_access_node') return effectiveDC + 20;
+
+    // Computer nodes represent a separate computer — DC based on their own tier (13 + 4*tier)
+    if (node.type === 'computer') {
+      if (node.dcOverride !== undefined && node.dcOverride !== null) {
+        return Math.max(1, node.dcOverride);
+      }
+      return Math.max(1, 13 + 4 * (node.computerTier || 3));
+    }
     
     // If entry node is unsecured (DC 10), all nodes are 10
     const entryNode = nodes.find(n => n.id === 'entry');
@@ -427,6 +461,13 @@ export function useHackingState() {
         const dirCount = prev.filter(n => n.type === 'directory').length + 1;
         const numbered = { ...node, name: `DIR-${String(dirCount).padStart(2, '0')}`, locked: true };
         addLogEntry(`Added Directory: "${numbered.name}"`, 'system');
+        return [...prev, numbered];
+      });
+    } else if (templateKey === 'computer') {
+      setNodes(prev => {
+        const compCount = prev.filter(n => n.type === 'computer').length + 1;
+        const numbered = { ...node, name: `Computer ${compCount}` };
+        addLogEntry(`Added Computer: "${numbered.name}"`, 'system');
         return [...prev, numbered];
       });
     } else {
@@ -601,7 +642,8 @@ export function useHackingState() {
           const cms = (n.countermeasures || []).map(cm => {
             if (cm.id !== cmId) return cm;
             if (cm.resolved) return cm;
-            const effectiveDC = rootMode ? 10 : cm.dc;
+            const cmNodeHasFirewall = (n.countermeasures || []).some(c => c.type === 'firewall' && !c.resolved);
+            const effectiveDC = (rootMode && !cmNodeHasFirewall) ? 10 : cm.dc;
             const success = total >= effectiveDC;
             if (!success) return cm;
             if (cm.successes_required !== undefined) {
@@ -616,7 +658,9 @@ export function useHackingState() {
 
       // Rolling against the node itself
       if (n.resolved) return n;
-      const effectiveNodeDC = rootMode ? 10 : n.dc;
+      const nodeHasFirewall = (n.countermeasures || []).some(cm => cm.type === 'firewall' && !cm.resolved);
+      const computedNodeDC = getNodeDC(n, effectiveBaseDC);
+      const effectiveNodeDC = (rootMode && !nodeHasFirewall) ? 10 : computedNodeDC;
       const margin = total - effectiveNodeDC; // positive = success, negative = failure
       const success = margin >= 0;
 
@@ -669,7 +713,7 @@ export function useHackingState() {
         return n;
       });
     });
-  }, [connections]);
+  }, [connections, getNodeDC, effectiveBaseDC]);
 
   const advancePhase = useCallback(() => {
     setPhase(p => p + 1);
@@ -720,8 +764,8 @@ export function useHackingState() {
     addLogEntry('Encounter reset', 'system');
   }, [addLogEntry]);
 
-  // Whether root access has been granted
-  const rootAccessGranted = nodes.find(n => n.id === 'root_access')?.resolved ?? false;
+  // Whether root access has been granted (built-in or any placeable root access node)
+  const rootAccessGranted = nodes.some(n => (n.isRootAccess || n.type === 'root_access_node') && n.resolved);
 
   const selectedNode = nodes.find(n => n.id === selectedNodeId);
 

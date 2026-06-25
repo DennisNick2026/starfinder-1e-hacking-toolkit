@@ -4,7 +4,7 @@ import {
   FolderOpen, Box, Hand, Cpu, Monitor,
   DoorOpen, Camera, Crosshair, Wind, Bomb, Zap, Gauge, Bot,
   Shield, Rocket, Sword, Heart, Radio, Power, Lightbulb,
-  ShieldAlert, Siren, UserX, Lock, Bug, EyeOff, Trash2,
+  ShieldAlert, Siren, UserX, Lock, Bug, EyeOff, Trash2, ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +17,8 @@ const CATEGORIES = [
       { key: 'directory', label: 'Directory', icon: FolderLock },
       { key: 'access_point', label: 'Access Point', icon: Terminal },
       { key: 'user_interface', label: 'User Interface', icon: Monitor },
+      { key: 'root_access_node', label: 'Root Access', icon: ShieldCheck },
+      { key: 'computer', label: 'Computer', icon: Cpu },
     ],
   },
   {

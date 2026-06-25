@@ -105,10 +105,11 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
   const rawTargetDC = activeTarget ? activeTarget.dc : nodeDC;
   const targetDC = rawTargetDC;
   const targetLabel = activeTarget ? activeTarget.label : node.name;
-  const effectiveTargetDC = rootMode ? 10 : targetDC;
+  const rootApplies = rootMode && !hasUnresolvedFirewall;
+  const effectiveTargetDC = rootApplies ? 10 : targetDC;
 
   // For fake shell scan, use the fake shell CM's DC (or nodeDC if no CM, for a "clean" scan)
-  const scanDC = fakeShellCm ? (rootMode ? 10 : fakeShellCm.dc) : (rootMode ? 10 : nodeDC);
+  const scanDC = fakeShellCm ? (rootApplies ? 10 : fakeShellCm.dc) : (rootApplies ? 10 : nodeDC);
 
   const getFakeShellResultMessage = (outcome) => {
     if (nodeHasFakeShell) {
