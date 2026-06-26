@@ -357,12 +357,12 @@ export default function HackingBoard() {
         {/* Right: phase controls (admin mode only) */}
         {mode === 'create' &&
         <div className="flex items-center gap-2 shrink-0">
-            <span className="font-mono text-xs text-primary/50 tracking-widest"></span>
+            <span className="font-mono text-xs text-primary/50 tracking-widest">Action
+</span>
             <span className="font-mono text-sm text-primary font-bold w-7 text-center">{state.phase}</span>
-            <button
-            onClick={() => state.setPhase((p) => Math.max(1, p - 1))}
-            disabled={state.phase <= 1}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded disabled:opacity-30 disabled:cursor-not-allowed">
+            <button onClick={() => state.setPhase((p) => Math.max(1, p - 1))}
+          disabled={state.phase <= 1}
+          className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded disabled:opacity-30 disabled:cursor-not-allowed">
             
               <SkipBack className="w-3.5 h-3.5" /> PREV
             </button>
