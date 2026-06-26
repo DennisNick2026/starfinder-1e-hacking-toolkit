@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Terminal, GitBranch, Database, SquareTerminal,
   ShieldAlert, Siren, UserX, Bug, Unlock, Link, Trash2, Settings, Zap,
-  Sparkles, EyeOff, Lock, LogIn, ShieldCheck, FolderLock, FolderOpen, FileText, Cpu
+  Sparkles, Lock, LogIn, ShieldCheck, FolderLock, FolderOpen, FileText, Cpu
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -13,7 +13,7 @@ const ICONS = {
   ShieldAlert, Siren, UserX, Bug, Unlock, Sparkles, LogIn, ShieldCheck, FolderLock, FolderOpen, Cpu,
 };
 
-const CM_ICONS = { ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 };
+const CM_ICONS = { ShieldAlert, Siren, UserX, Bug, Zap, Lock, Trash2 };
 
 const COLOR_MAP = {
   cyan:   { border: 'border-primary/60',     bg: 'bg-primary/5',     text: 'text-primary',     glow: 'glow-cyan'   },
@@ -145,15 +145,11 @@ export default function NodeCard({
   // What to show on the card face
   const activeCms = mode === 'play'
     ? allActiveCms.filter(cm => {
-        if (cm.type === 'fake_shell') return false; // only show once resolved (via resolved list)
         if (cm.type === 'alarm' && !cm.revealed && !cm.triggered) return false;
         if (hasUnresolvedFirewall && cm.type !== 'firewall') return false;
         return true;
       })
     : allActiveCms;
-
-  // In play mode, show fake_shell only after it's resolved (detected)
-  const resolvedFakeShell = mode === 'play' && allCms.some(cm => cm.type === 'fake_shell' && cm.resolved);
 
   return (
     <div
@@ -165,10 +161,6 @@ export default function NodeCard({
         isDragging && 'opacity-70 scale-105',
         node.resolved && 'opacity-50 border-dashed',
         node.isEntry && 'border-primary glow-cyan',
-        // Fake nodes get a subtle purple tint in create mode
-        node.fake && mode === 'create' && 'border-chart-3/60 bg-chart-3/5',
-        // Real-hidden nodes get a muted dashed look in create mode so GM can see them
-        node.real_hidden && mode === 'create' && 'opacity-60 border-dashed',
       )}
       style={{  }}
       onClick={(e) => { e.stopPropagation(); onSelect(node.id); }}
@@ -184,14 +176,6 @@ export default function NodeCard({
           <>
             <Icon className={cn('w-4 h-4 shrink-0', colors.text)} />
             <span className="font-mono text-xs font-semibold text-foreground flex-1 break-words">{node.name}</span>
-            {/* Admin-only labels for fake shell setup */}
-            {node.fake && mode === 'create' && (
-              <span className="font-mono text-[8px] font-bold px-1 py-0.5 rounded border border-chart-3/50 bg-chart-3/10 text-chart-3 shrink-0">FAKE</span>
-            )}
-            {node.real_hidden && mode === 'create' && (
-              <span className="font-mono text-[8px] font-bold px-1 py-0.5 rounded border border-muted-foreground/30 bg-muted/30 text-muted-foreground shrink-0">HIDDEN</span>
-            )}
-
             <span className="font-mono text-[10px] text-muted-foreground shrink-0">DC {nodeDC}</span>
           </>
         )}
@@ -204,12 +188,6 @@ export default function NodeCard({
             {node.type === 'directory' ? '✓ UNLOCKED' : '✓ RESOLVED'}
           </span>
         )}
-        {resolvedFakeShell && (
-          <span className="font-mono text-[10px] text-chart-3 font-bold flex items-center gap-1">
-            <EyeOff className="w-3 h-3" /> FAKE SHELL DETECTED
-          </span>
-        )}
-
         {/* Directory lock status — hidden in play mode when firewalled (would reveal node type) */}
         {node.type === 'directory' && (node.requiresHack === false ? node.locked : !node.resolved) && !firewallBlocked && (
           <div className="flex items-center gap-1">
@@ -396,17 +374,6 @@ export default function NodeCard({
           >
             <FileText className="w-3 h-3" />
             <span>File</span>
-          </button>
-        )}
-        {/* Fake shell scan button — visible in play mode on ALL resolved nodes (to avoid revealing which nodes have the CM) */}
-        {!connectingFrom && mode === 'play' && node.resolved && !node.isEntry && !node.isRootAccess && (
-          <button
-            className="py-2 text-[10px] font-mono text-chart-3/70 hover:text-chart-3 hover:bg-chart-3/10 transition-colors flex items-center justify-center gap-1.5 border-b border-border/50"
-            onClick={(e) => { e.stopPropagation(); onHack?.(node, allCms.find(cm => cm.type === 'fake_shell' && !cm.resolved)?.id ?? 'fake_shell_scan'); }}
-            title="Scan for fake shell"
-          >
-            <EyeOff className="w-3 h-3" />
-            <span>Scan</span>
           </button>
         )}
         {!connectingFrom && mode === 'create' && (

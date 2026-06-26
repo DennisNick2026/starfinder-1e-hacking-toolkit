@@ -3,22 +3,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { X, Plus, Trash2, ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, AlertTriangle } from 'lucide-react';
+import { X, Plus, Trash2, ShieldAlert, Siren, UserX, Bug, Zap, Lock, AlertTriangle } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuTrigger, DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { COUNTERMEASURE_TEMPLATES } from '@/lib/hacking-state';
 import { cn } from '@/lib/utils';
 
-const CM_ICONS = { ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 };
+const CM_ICONS = { ShieldAlert, Siren, UserX, Bug, Zap, Lock, Trash2 };
 const CM_COLOR = {
   red: 'border-destructive/40 bg-destructive/5 text-destructive',
   purple: 'border-chart-3/40 bg-chart-3/5 text-chart-3',
 };
 
-export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateCm, onRemoveCm, totalCountermeasures = 0, tier = 3, allNodes = [] }) {
+export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateCm, onRemoveCm, totalCountermeasures = 0, tier = 3 }) {
   const [pendingCm, setPendingCm] = useState(null); // { nodeId, cmType } waiting for override confirm
 
   if (!node) return null;
@@ -380,50 +379,6 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
             })}
           </div>
         </div>
-
-        {/* Fake Shell node tagging */}
-        {!node.isEntry && !node.isRootAccess && (
-          <div className="space-y-4 border-t border-border/50 pt-5">
-            <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block">Fake Shell</Label>
-            <button
-              onClick={() => set('fake', !node.fake)}
-              className={cn(
-                'w-full py-2 rounded border font-mono text-xs font-semibold transition-colors',
-                node.fake
-                  ? 'bg-chart-3/20 border-chart-3 text-chart-3'
-                  : 'border-border text-muted-foreground hover:border-chart-3/50'
-              )}
-            >
-              {node.fake ? 'Fake Node ✓' : 'Mark as Fake Node'}
-            </button>
-            {node.fake && (
-              <>
-                <p className="font-mono text-xs text-chart-3/70 mt-2">This node is a decoy. It will vanish when a fake shell is detected.</p>
-                <div className="mt-4">
-                  <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-2">Reveals Real Node</Label>
-                  <Select
-                    value={node.realNodeId || 'none'}
-                    onValueChange={v => set('realNodeId', v === 'none' ? null : v)}
-                  >
-                    <SelectTrigger className="font-mono text-sm bg-muted border-border/60 h-9">
-                      <SelectValue placeholder="None (just vanishes)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none" className="font-mono text-sm">None (just vanishes)</SelectItem>
-                      {allNodes
-                        .filter(n => n.id !== node.id && !n.fake && !n.isEntry && !n.isRootAccess)
-                        .map(n => (
-                          <SelectItem key={n.id} value={n.id} className="font-mono text-sm">{n.name}</SelectItem>
-                        ))
-                      }
-                    </SelectContent>
-                  </Select>
-                  {node.realNodeId && <p className="font-mono text-xs text-primary/60 mt-2">Linked real node will be hidden until this fake is detected.</p>}
-                </div>
-              </>
-            )}
-          </div>
-        )}
 
         {/* Mark resolved */}
         <div className="border-t border-border/50 pt-5">

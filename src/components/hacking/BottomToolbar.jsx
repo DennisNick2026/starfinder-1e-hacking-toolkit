@@ -62,7 +62,6 @@ const CATEGORIES = [
     icon: ShieldAlert,
     items: [
       { key: 'alarm', label: 'Alarm', icon: Siren },
-      { key: 'fake_shell', label: 'Fake Shell', icon: Terminal },
       { key: 'feedback', label: 'Feedback', icon: Zap },
       { key: 'firewall', label: 'Firewall', icon: ShieldAlert },
       { key: 'lockout', label: 'Lockout', icon: Lock },

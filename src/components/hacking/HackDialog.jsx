@@ -16,8 +16,6 @@ function getVisibleCms(node, mode) {
   if (mode !== 'play') return all;
   const hasUnresolvedFirewall = all.some(cm => cm.type === 'firewall');
   return all.filter(cm => {
-    // Fake shell only becomes a rollable target after the node itself is hacked
-    if (cm.type === 'fake_shell') return !!node.resolved;
     if (cm.type === 'alarm' && !cm.revealed && !cm.triggered) return false;
     if (hasUnresolvedFirewall && cm.type !== 'firewall') return false;
     return true;
@@ -86,12 +84,6 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
   const isSecureData = DATA_NODE_TYPES.includes(node.type);
   const requiresRoot = isSecureData && !rootMode && !passwordBypassed && !node.resolved && !hasUnresolvedFirewall;
 
-  // Detect if this is a fake shell scan
-  const fakeShellCm = (node.countermeasures || []).find(cm => cm.type === 'fake_shell' && !cm.resolved);
-  const isFakeShellScan = initialTarget === 'fake_shell_scan' || (initialTarget !== null && (node.countermeasures || []).find(cm => cm.id === initialTarget)?.type === 'fake_shell');
-  // Node actually has a fake shell CM (whether or not it was the initialTarget)
-  const nodeHasFakeShell = !!fakeShellCm;
-
   const targetStillValid = target === null || activeCms.some(cm => cm.id === target);
   const resolvedTarget = targetStillValid ? target : null;
 
@@ -111,33 +103,9 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
   const rootApplies = rootMode && !hasUnresolvedFirewall;
   const effectiveTargetDC = rootApplies ? 10 : targetDC;
 
-  // For fake shell scan, use the fake shell CM's DC (or nodeDC if no CM, for a "clean" scan)
-  const scanDC = fakeShellCm ? (rootApplies ? 10 : fakeShellCm.dc) : (rootApplies ? 10 : nodeDC);
-
-  const getFakeShellResultMessage = (outcome) => {
-    if (nodeHasFakeShell) {
-      if (outcome === 'success') return { text: 'Fake shell detected and neutralised — the decoy is gone.', color: 'text-primary' };
-      if (outcome === 'fail_minor') return { text: "You sense something's off but couldn't crack it. The fake shell is still active.", color: 'text-chart-4' };
-      if (outcome === 'fail_major') return { text: 'Scan inconclusive. You failed to detect anything definitive.', color: 'text-destructive' };
-    } else {
-      if (outcome === 'success') return { text: 'Thorough scan complete — no fake shell present. This node is legitimate.', color: 'text-primary' };
-      if (outcome === 'fail_minor') return { text: 'Scan inconclusive. You failed to detect anything definitive.', color: 'text-chart-4' };
-      if (outcome === 'fail_major') return { text: 'Scan complete — no fake shell detected. This node appears legitimate.', color: 'text-primary' };
-    }
-  };
-
   const handleOutcome = (outcome) => {
     if (closing) return;
     setResult(outcome);
-
-    if (isFakeShellScan) {
-      // Only submit if there's actually a fake shell CM to resolve on success
-      if (nodeHasFakeShell && outcome === 'success') {
-        onSubmit(node.id, scanDC, fakeShellCm.id);
-      }
-      // Never auto-close — let players read the result
-      return;
-    }
 
     // Map outcome to a total that drives the existing submitRoll logic
     const total = outcome === 'success' ? effectiveTargetDC
@@ -147,8 +115,6 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
     setClosing(true);
     setTimeout(onClose, 200);
   };
-
-  const scanResultMsg = result ? getFakeShellResultMessage(result) : null;
 
   return (
     <div
@@ -165,50 +131,12 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
         <div className="text-center space-y-1">
           <p className="font-mono text-xs text-muted-foreground uppercase tracking-widest">Hacking</p>
           <p className="font-mono text-lg font-bold text-foreground">
-            {isFakeShellScan ? 'Detect Fake Shell' : targetLabel}
+            {targetLabel}
           </p>
-          <p className="font-mono text-sm text-primary">DC {isFakeShellScan ? scanDC : targetDC}</p>
+          <p className="font-mono text-sm text-primary">DC {targetDC}</p>
         </div>
 
-        {/* Fake shell scan: simplified outcome UI */}
-        {isFakeShellScan ? (
-          <div className="space-y-2">
-            {!result && (
-              <>
-                <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground text-center">Roll outcome:</p>
-                <div className="grid grid-cols-1 gap-2">
-                  <button
-                    disabled={closing}
-                    onClick={() => handleOutcome('success')}
-                    className="w-full py-3 rounded-lg border-2 font-mono text-sm font-bold transition-all border-primary/40 bg-primary/5 text-primary/80 hover:border-primary hover:bg-primary/15"
-                  >
-                    ✓ Success
-                  </button>
-                  <button
-                    disabled={closing}
-                    onClick={() => handleOutcome('fail_minor')}
-                    className="w-full py-3 rounded-lg border-2 font-mono text-sm font-bold transition-all border-chart-4/40 bg-chart-4/5 text-chart-4/80 hover:border-chart-4 hover:bg-chart-4/15"
-                  >
-                    ~ Fail by less than 5
-                  </button>
-                  <button
-                    disabled={closing}
-                    onClick={() => handleOutcome('fail_major')}
-                    className="w-full py-3 rounded-lg border-2 font-mono text-sm font-bold transition-all border-destructive/40 bg-destructive/5 text-destructive/80 hover:border-destructive hover:bg-destructive/15"
-                  >
-                    ✗ Fail by 5 or more
-                  </button>
-                </div>
-              </>
-            )}
-            {scanResultMsg && (
-              <div className={cn('font-mono text-xs leading-relaxed p-3 rounded-lg border border-border bg-muted', scanResultMsg.color)}>
-                {scanResultMsg.text}
-              </div>
-            )}
-          </div>
-        ) : (
-          <>
+        <>
             {/* Target selector (CMs) */}
             {activeCms.length > 0 && (
               <div className="space-y-1.5">
@@ -317,14 +245,13 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
               </div>
             )}
           </>
-        )}
 
         {/* Actions */}
         <div className="flex gap-2">
           <Button variant="outline" className="flex-1 font-mono text-xs" onClick={onClose} disabled={closing}>
             Back
           </Button>
-          {node.resolved && !isFakeShellScan && (
+          {node.resolved && (
             <Button
               className="flex-1 font-mono text-xs bg-destructive/80 text-destructive-foreground hover:bg-destructive"
               onClick={() => { onUnhack(node.id); setResult(null); }}
