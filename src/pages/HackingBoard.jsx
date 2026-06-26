@@ -37,8 +37,8 @@ export default function HackingBoard() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    base44.auth.me().then(user => {
-      if (user?.role === 'admin') { setIsAdmin(true); setCloudVerified(true); setCloudUnlocked(true); }
+    base44.auth.me().then((user) => {
+      if (user?.role === 'admin') {setIsAdmin(true);setCloudVerified(true);setCloudUnlocked(true);}
     }).catch(() => {});
   }, []);
 
@@ -67,8 +67,8 @@ export default function HackingBoard() {
   const [currentShareCode, setCurrentShareCode] = useState(() => Math.random().toString(36).substring(2, 8).toUpperCase());
   const [pendingCmDrop, setPendingCmDrop] = useState(null); // { cmType, nodeId }
 
-  const configuringNode = state.nodes.find(n => n.id === configuringNodeId) || null;
-  const selectedNode = configuringNode || state.nodes.find(n => n.id === state.selectedNodeId) || null;
+  const configuringNode = state.nodes.find((n) => n.id === configuringNodeId) || null;
+  const selectedNode = configuringNode || state.nodes.find((n) => n.id === state.selectedNodeId) || null;
 
   const handleDropNode = (templateKey, x, y) => {
     // If second arg is undefined and third is a string, it's a CM drop on a node
@@ -141,7 +141,7 @@ export default function HackingBoard() {
       baseDC: state.baseDC,
       upgrades: state.upgrades,
       nodes: state.nodes,
-      connections: state.connections,
+      connections: state.connections
     };
     const jsonString = JSON.stringify(encounterData, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
@@ -173,10 +173,10 @@ export default function HackingBoard() {
             onClick={(e) => {
               if (e.ctrlKey || e.metaKey) {
                 e.preventDefault();
-                setCloudUnlocked(v => !v);
+                setCloudUnlocked((v) => !v);
               }
-            }}
-          />
+            }} />
+          
           <span className="font-mono text-sm font-bold text-primary tracking-widest uppercase truncate">
             {state.computerName}
           </span>
@@ -186,33 +186,33 @@ export default function HackingBoard() {
           <span className="font-mono text-xs text-primary/60 border border-primary/30 px-2 py-1 rounded">
             DC {state.effectiveBaseDC}
           </span>
-          {mode === 'create' && (
-            <span className={cn(
-              'font-mono text-xs border px-2 py-1 rounded',
-              state.totalCountermeasures > state.tier
-                ? 'text-destructive border-destructive/50 bg-destructive/10'
-                : 'text-primary/60 border-primary/30'
-            )}>
+          {mode === 'create' &&
+          <span className={cn(
+            'font-mono text-xs border px-2 py-1 rounded',
+            state.totalCountermeasures > state.tier ?
+            'text-destructive border-destructive/50 bg-destructive/10' :
+            'text-primary/60 border-primary/30'
+          )}>
               Countermeasures {state.totalCountermeasures}/{state.tier}
-              {state.totalCountermeasures > state.tier && (
-                <span className="ml-1.5 text-destructive font-bold">⚠ Over Limit</span>
-              )}
+              {state.totalCountermeasures > state.tier &&
+            <span className="ml-1.5 text-destructive font-bold">⚠ Over Limit</span>
+            }
             </span>
-          )}
+          }
         </div>
 
         {/* Spacer — pushes center content to true center in play mode */}
         <div className="flex-1" />
 
         {/* Center: mode-dependent controls */}
-        {mode === 'create' ? (
-          <div className="flex items-center gap-2 shrink-0">
-            {cloudUnlocked && (
-              <>
+        {mode === 'create' ?
+        <div className="flex items-center gap-2 shrink-0">
+            {cloudUnlocked &&
+          <>
                 <button
-                  onClick={handleNewEncounter}
-                  className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
-                >
+              onClick={handleNewEncounter}
+              className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
+              
                   <Pencil className="w-3.5 h-3.5" /> NEW
                 </button>
                 <DropdownMenu>
@@ -233,166 +233,166 @@ export default function HackingBoard() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
-            )}
+          }
             <button
-              onClick={() => setShowExportConfirm(true)}
-              className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
-            >
+            onClick={() => setShowExportConfirm(true)}
+            className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
+            
               <FileJson className="w-3.5 h-3.5" /> SAVE TO FILE
             </button>
             <button
-              onClick={() => setShowImportDialog(true)}
-              className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
-            >
+            onClick={() => setShowImportDialog(true)}
+            className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
+            
               <FileJson className="w-3.5 h-3.5" /> LOAD FROM FILE
             </button>
 
             <div className="flex items-center border border-primary/30 rounded overflow-hidden">
               <button
-                className="flex items-center gap-1.5 px-4 py-2 font-mono text-xs tracking-widest transition-colors bg-primary text-primary-foreground"
-                onClick={() => handleSwitchMode('create')}
-                disabled={sharedEncounter}
-              >
+              className="flex items-center gap-1.5 px-4 py-2 font-mono text-xs tracking-widest transition-colors bg-primary text-primary-foreground"
+              onClick={() => handleSwitchMode('create')}
+              disabled={sharedEncounter}>
+              
                 <Pencil className="w-3.5 h-3.5" /> ADMIN
               </button>
               <button
-                className="flex items-center gap-1.5 px-4 py-2 font-mono text-xs tracking-widest transition-colors border-l border-primary/30 text-primary/50 hover:text-primary"
-                onClick={() => handleSwitchMode('play')}
-              >
+              className="flex items-center gap-1.5 px-4 py-2 font-mono text-xs tracking-widest transition-colors border-l border-primary/30 text-primary/50 hover:text-primary"
+              onClick={() => handleSwitchMode('play')}>
+              
                 <Play className="w-3.5 h-3.5" /> PLAY
               </button>
             </div>
 
-            {canToggleRoot && (
-              <button
-                onClick={() => setRootModeOverride(v => !v)}
-                className={cn(
-                  'flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border rounded transition-colors',
-                  rootModeOverride
-                    ? 'border-chart-3 bg-chart-3/20 text-chart-3'
-                    : 'border-primary/30 text-primary/50 hover:text-primary/80 hover:border-primary/50'
-                )}
-              >
+            {canToggleRoot &&
+          <button
+            onClick={() => setRootModeOverride((v) => !v)}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border rounded transition-colors',
+              rootModeOverride ?
+              'border-chart-3 bg-chart-3/20 text-chart-3' :
+              'border-primary/30 text-primary/50 hover:text-primary/80 hover:border-primary/50'
+            )}>
+            
                 <ShieldCheck className="w-3.5 h-3.5" />
                 ROOT {rootModeOverride ? 'ON' : 'OFF'}
               </button>
-            )}
-          </div>
-        ) : (
-          /* Play mode: fully centered controls */
-          <div className="flex items-center gap-3 shrink-0">
+          }
+          </div> : (
+
+        /* Play mode: fully centered controls */
+        <div className="flex items-center gap-3 shrink-0">
             <div className="flex items-center border border-primary/30 rounded overflow-hidden">
               <button
-                className="flex items-center gap-1.5 px-5 py-2.5 font-mono text-sm tracking-widest transition-colors text-primary/50 hover:text-primary"
-                onClick={() => handleSwitchMode('create')}
-                disabled={sharedEncounter}
-              >
+              className="flex items-center gap-1.5 px-5 py-2.5 font-mono text-sm tracking-widest transition-colors text-primary/50 hover:text-primary"
+              onClick={() => handleSwitchMode('create')}
+              disabled={sharedEncounter}>
+              
                 <Pencil className="w-4 h-4" /> ADMIN
               </button>
               <button
-                className="flex items-center gap-1.5 px-5 py-2.5 font-mono text-sm tracking-widest transition-colors border-l border-primary/30 bg-primary text-primary-foreground"
-                onClick={() => handleSwitchMode('play')}
-              >
+              className="flex items-center gap-1.5 px-5 py-2.5 font-mono text-sm tracking-widest transition-colors border-l border-primary/30 bg-primary text-primary-foreground"
+              onClick={() => handleSwitchMode('play')}>
+              
                 <Play className="w-4 h-4" /> PLAY
               </button>
             </div>
 
-            {canToggleRoot && (
-              <button
-                onClick={() => setRootModeOverride(v => !v)}
-                className={cn(
-                  'flex items-center gap-1.5 px-4 py-2.5 font-mono text-sm tracking-widest border rounded transition-colors',
-                  rootModeOverride
-                    ? 'border-chart-3 bg-chart-3/20 text-chart-3'
-                    : 'border-primary/30 text-primary/50 hover:text-primary/80 hover:border-primary/50'
-                )}
-              >
+            {canToggleRoot &&
+          <button
+            onClick={() => setRootModeOverride((v) => !v)}
+            className={cn(
+              'flex items-center gap-1.5 px-4 py-2.5 font-mono text-sm tracking-widest border rounded transition-colors',
+              rootModeOverride ?
+              'border-chart-3 bg-chart-3/20 text-chart-3' :
+              'border-primary/30 text-primary/50 hover:text-primary/80 hover:border-primary/50'
+            )}>
+            
                 <ShieldCheck className="w-4 h-4" />
                 ROOT {rootModeOverride ? 'ON' : 'OFF'}
               </button>
-            )}
+          }
 
             <div className="flex items-center gap-3">
               <span className="font-mono text-sm text-primary/50 tracking-widest">PHASE</span>
               <span className="font-mono text-xl text-primary font-bold w-9 text-center">{state.phase}</span>
               <button
-                onClick={() => state.setPhase(p => Math.max(1, p - 1))}
-                disabled={state.phase <= 1}
-                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded disabled:opacity-30 disabled:cursor-not-allowed"
-              >
+              onClick={() => state.setPhase((p) => Math.max(1, p - 1))}
+              disabled={state.phase <= 1}
+              className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded disabled:opacity-30 disabled:cursor-not-allowed">
+              
                 <SkipBack className="w-4 h-4" /> PREV
               </button>
               <button
-                onClick={state.advancePhase}
-                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
-              >
+              onClick={state.advancePhase}
+              className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
+              
                 <SkipForward className="w-4 h-4" /> NEXT
               </button>
               <button
-                onClick={state.resetEncounter}
-                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded"
-              >
+              onClick={state.resetEncounter}
+              className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded">
+              
                 <RotateCcw className="w-4 h-4" /> RESET
               </button>
               <button
-                onClick={state.clearNodes}
-                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded"
-              >
+              onClick={state.clearNodes}
+              className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded">
+              
                 <Trash2 className="w-4 h-4" /> CLEAR
               </button>
               <button
-                onClick={() => setShowSettings(true)}
-                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-primary/30 text-primary/50 hover:text-primary hover:border-primary rounded transition-colors"
-                title="Computer settings"
-              >
+              onClick={() => setShowSettings(true)}
+              className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-primary/30 text-primary/50 hover:text-primary hover:border-primary rounded transition-colors"
+              title="Computer settings">
+              
                 <Settings className="w-5 h-5" />
               </button>
             </div>
-          </div>
-        )}
+          </div>)
+        }
 
         {/* Spacer — balances left side so center is truly centered in play mode */}
         <div className="flex-1" />
 
         {/* Right: phase controls (admin mode only) */}
-        {mode === 'create' && (
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="font-mono text-xs text-primary/50 tracking-widest">PHASE</span>
+        {mode === 'create' &&
+        <div className="flex items-center gap-2 shrink-0">
+            <span className="font-mono text-xs text-primary/50 tracking-widest"></span>
             <span className="font-mono text-sm text-primary font-bold w-7 text-center">{state.phase}</span>
             <button
-              onClick={() => state.setPhase(p => Math.max(1, p - 1))}
-              disabled={state.phase <= 1}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded disabled:opacity-30 disabled:cursor-not-allowed"
-            >
+            onClick={() => state.setPhase((p) => Math.max(1, p - 1))}
+            disabled={state.phase <= 1}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded disabled:opacity-30 disabled:cursor-not-allowed">
+            
               <SkipBack className="w-3.5 h-3.5" /> PREV
             </button>
             <button
-              onClick={state.advancePhase}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded"
-            >
+            onClick={state.advancePhase}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
+            
               <SkipForward className="w-3.5 h-3.5" /> NEXT
             </button>
             <button
-              onClick={state.resetEncounter}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded"
-            >
+            onClick={state.resetEncounter}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded">
+            
               <RotateCcw className="w-3.5 h-3.5" /> RESET
             </button>
             <button
-              onClick={state.clearNodes}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded"
-            >
+            onClick={state.clearNodes}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded">
+            
               <Trash2 className="w-3.5 h-3.5" /> CLEAR
             </button>
             <button
-              onClick={() => setShowSettings(true)}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/50 hover:text-primary hover:border-primary rounded transition-colors"
-              title="Computer settings"
-            >
+            onClick={() => setShowSettings(true)}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/50 hover:text-primary hover:border-primary rounded transition-colors"
+            title="Computer settings">
+            
               <Settings className="w-4 h-4" />
             </button>
           </div>
-        )}
+        }
       </header>
 
       {/* Main area */}
@@ -429,51 +429,51 @@ export default function HackingBoard() {
             effectiveBaseDC={state.effectiveBaseDC}
             getNodeDC={state.getNodeDC}
             rootMode={rootMode}
-            onToggleRequiresHack={state.toggleRequiresHack}
-          />
+            onToggleRequiresHack={state.toggleRequiresHack} />
+          
 
           <BottomLog log={state.log} selectedNode={selectedNode} activeCategory={activeCategory} getNodeDC={state.getNodeDC} effectiveBaseDC={state.effectiveBaseDC} />
           <BottomToolbar mode={mode} rootMode={rootMode} activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
         </div>
 
-        {mode === 'create' && configuringNode && (
-          <NodeEditor
-            node={configuringNode}
-            onUpdate={state.updateNode}
-            onClose={() => setConfiguringNodeId(null)}
-            onAddCm={state.addCountermeasure}
-            onUpdateCm={state.updateCountermeasure}
-            onRemoveCm={state.removeCountermeasure}
-            totalCountermeasures={state.totalCountermeasures}
-            tier={state.tier}
-            allNodes={state.nodes}
-          />
-        )}
+        {mode === 'create' && configuringNode &&
+        <NodeEditor
+          node={configuringNode}
+          onUpdate={state.updateNode}
+          onClose={() => setConfiguringNodeId(null)}
+          onAddCm={state.addCountermeasure}
+          onUpdateCm={state.updateCountermeasure}
+          onRemoveCm={state.removeCountermeasure}
+          totalCountermeasures={state.totalCountermeasures}
+          tier={state.tier}
+          allNodes={state.nodes} />
+
+        }
       </div>
 
-      {fileNode && (
-        <DataFileModal
-          node={state.nodes.find(n => n.id === fileNode.id) || fileNode}
-          canEdit={mode === 'create' || rootMode}
-          onClose={() => setFileNode(null)}
-          onSave={(nodeId, content) => state.updateNode(nodeId, { file_content: content })}
-        />
-      )}
+      {fileNode &&
+      <DataFileModal
+        node={state.nodes.find((n) => n.id === fileNode.id) || fileNode}
+        canEdit={mode === 'create' || rootMode}
+        onClose={() => setFileNode(null)}
+        onSave={(nodeId, content) => state.updateNode(nodeId, { file_content: content })} />
 
-      {hackingNode && (
-        <HackDialog
-          key={hackingNode.node.id + (hackingNode.cmId || '') + (rootMode ? '-root' : '')}
-          node={state.nodes.find(n => n.id === hackingNode.node.id) || hackingNode.node}
-          onSubmit={handleSubmitRoll}
-          onUnhack={(nodeId) => { state.unhackNode(nodeId); }}
-          onClose={() => setHackingNode(null)}
-          mode={mode}
-          rootMode={rootMode}
-          initialTarget={hackingNode.cmId}
-          effectiveBaseDC={state.effectiveBaseDC}
-          getNodeDC={state.getNodeDC}
-        />
-      )}
+      }
+
+      {hackingNode &&
+      <HackDialog
+        key={hackingNode.node.id + (hackingNode.cmId || '') + (rootMode ? '-root' : '')}
+        node={state.nodes.find((n) => n.id === hackingNode.node.id) || hackingNode.node}
+        onSubmit={handleSubmitRoll}
+        onUnhack={(nodeId) => {state.unhackNode(nodeId);}}
+        onClose={() => setHackingNode(null)}
+        mode={mode}
+        rootMode={rootMode}
+        initialTarget={hackingNode.cmId}
+        effectiveBaseDC={state.effectiveBaseDC}
+        getNodeDC={state.getNodeDC} />
+
+      }
 
       <SaveEncounterDialog
         isOpen={showSaveDialog}
@@ -485,32 +485,32 @@ export default function HackingBoard() {
           baseDC: state.baseDC,
           upgrades: state.upgrades,
           nodes: state.nodes,
-          connections: state.connections,
-        }}
-      />
+          connections: state.connections
+        }} />
+      
 
       <LoadEncounterDialog
         isOpen={showLoadDialog}
         onClose={() => setShowLoadDialog(false)}
-        onLoad={handleLoadEncounter}
-      />
+        onLoad={handleLoadEncounter} />
+      
 
       <ImportEncounterDialog
         isOpen={showImportDialog}
         onClose={() => setShowImportDialog(false)}
-        onImport={handleImportJSON}
-      />
+        onImport={handleImportJSON} />
+      
 
       <ExportConfirmDialog
         isOpen={showExportConfirm}
         onClose={() => setShowExportConfirm(false)}
-        onConfirm={handleExportJSON}
-      />
+        onConfirm={handleExportJSON} />
+      
 
       {/* CM drop override confirmation */}
-      {pendingCmDrop && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setPendingCmDrop(null)}>
-          <div className="bg-card border border-destructive/50 rounded-xl p-6 w-80 space-y-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+      {pendingCmDrop &&
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setPendingCmDrop(null)}>
+          <div className="bg-card border border-destructive/50 rounded-xl p-6 w-80 space-y-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start gap-3">
               <span className="text-destructive text-lg">⚠</span>
               <p className="font-mono text-xs text-destructive leading-relaxed">
@@ -519,31 +519,31 @@ export default function HackingBoard() {
             </div>
             <div className="flex gap-2">
               <button
-                className="flex-1 py-2 rounded font-mono text-xs bg-destructive/80 text-destructive-foreground hover:bg-destructive transition-colors"
-                onClick={() => {
-                  state.addCountermeasure(pendingCmDrop.nodeId, pendingCmDrop.cmType);
-                  setConfiguringNodeId(pendingCmDrop.nodeId);
-                  setPendingCmDrop(null);
-                }}
-              >
+              className="flex-1 py-2 rounded font-mono text-xs bg-destructive/80 text-destructive-foreground hover:bg-destructive transition-colors"
+              onClick={() => {
+                state.addCountermeasure(pendingCmDrop.nodeId, pendingCmDrop.cmType);
+                setConfiguringNodeId(pendingCmDrop.nodeId);
+                setPendingCmDrop(null);
+              }}>
+              
                 Override &amp; Add
               </button>
               <button
-                className="flex-1 py-2 rounded font-mono text-xs border border-border text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => setPendingCmDrop(null)}
-              >
+              className="flex-1 py-2 rounded font-mono text-xs border border-border text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => setPendingCmDrop(null)}>
+              
                 Cancel
               </button>
             </div>
           </div>
         </div>
-      )}
+      }
 
       <CloudPasswordGate
         isOpen={showPasswordGate}
         onSuccess={handlePasswordSuccess}
-        onClose={() => { setShowPasswordGate(false); setPendingCloudAction(null); }}
-      />
+        onClose={() => {setShowPasswordGate(false);setPendingCloudAction(null);}} />
+      
 
       <ComputerSettingsModal
         isOpen={showSettings}
@@ -555,8 +555,8 @@ export default function HackingBoard() {
         baseDC={state.baseDC}
         setBaseDC={state.setBaseDC}
         upgrades={state.upgrades}
-        setUpgrades={state.setUpgrades}
-      />
-    </div>
-  );
+        setUpgrades={state.setUpgrades} />
+      
+    </div>);
+
 }
