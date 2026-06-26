@@ -155,6 +155,7 @@ const NODE_TEMPLATES = {
     resolved: false,
     file_content: '',
     password: '',
+    media_url: '',
     countermeasures: [],
   },
   secure_data_large: {
@@ -169,6 +170,7 @@ const NODE_TEMPLATES = {
     resolved: false,
     file_content: '',
     password: '',
+    media_url: '',
     countermeasures: [],
   },
   secure_data_specific: {
@@ -183,6 +185,7 @@ const NODE_TEMPLATES = {
     resolved: false,
     file_content: '',
     password: '',
+    media_url: '',
     countermeasures: [],
   },
   spell_chip: {

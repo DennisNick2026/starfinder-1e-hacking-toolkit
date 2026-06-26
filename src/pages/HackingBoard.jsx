@@ -455,7 +455,7 @@ export default function HackingBoard() {
         node={state.nodes.find((n) => n.id === fileNode.id) || fileNode}
         canEdit={mode === 'create' || rootMode}
         onClose={() => setFileNode(null)}
-        onSave={(nodeId, content) => state.updateNode(nodeId, { file_content: content })} />
+        onSave={(nodeId, data) => state.updateNode(nodeId, data)} />
 
       }
 

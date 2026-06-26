@@ -8,23 +8,20 @@ const DATA_NODE_TYPES = ['secure_data_average', 'secure_data_large', 'secure_dat
 
 export { DATA_NODE_TYPES };
 
-// Deterministic garble: replace each char with a "random" symbol based on char code
-function garbleText(text) {
-  const glitch = '█▓▒░╬╫╪┼┤├╣╠╗╔╚╝║═╦╩╤╧╟╞╙╘╒╓╫░▒▓█@#$%&*!?~/\\^<>';
-  return text.split('').map((ch, i) => {
-    if (ch === '\n') return '\n';
-    if (ch === ' ') return ' ';
-    return glitch[(ch.charCodeAt(0) * 7 + i * 3) % glitch.length];
-  }).join('');
-}
-
 export default function DataFileModal({ node, onClose, onSave, canEdit }) {
   const [content, setContent] = useState(node.file_content || '');
+  const [mediaUrl, setMediaUrl] = useState(node.media_url || '');
   const [saved, setSaved] = useState(false);
-  const isFake = !!node.fake && !node.fake_shell_hidden;
+
+  const getMediaType = (url) => {
+    if (!url) return null;
+    const lower = url.toLowerCase();
+    if (lower.match(/\.(mp4|webm|mov|ogg|avi)(\?|$)/)) return 'video';
+    return 'image';
+  };
 
   const handleSave = () => {
-    onSave(node.id, content);
+    onSave(node.id, { file_content: content, media_url: mediaUrl });
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
   };
@@ -67,21 +64,46 @@ export default function DataFileModal({ node, onClose, onSave, canEdit }) {
         </div>
 
         {/* File content */}
-        <div className="flex-1 p-4 overflow-hidden flex flex-col">
+        <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-3">
+          {/* Media URL input (edit mode) */}
+          {canEdit && (
+            <div>
+              <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">Image / Video URL</label>
+              <input
+                type="text"
+                className="w-full font-mono text-xs bg-muted border border-border rounded-md px-3 py-2"
+                placeholder="https://example.com/image.jpg or video.mp4"
+                value={mediaUrl}
+                onChange={e => setMediaUrl(e.target.value)}
+              />
+            </div>
+          )}
+
+          {/* Media display */}
+          {mediaUrl && (() => {
+            const type = getMediaType(mediaUrl);
+            return (
+              <div className="rounded-md overflow-hidden border border-border bg-muted/30 flex items-center justify-center" style={{ maxHeight: 300 }}>
+                {type === 'video' ? (
+                  <video src={mediaUrl} controls className="max-w-full max-h-[300px]" />
+                ) : (
+                  <img src={mediaUrl} alt="File media" className="max-w-full max-h-[300px] object-contain" />
+                )}
+              </div>
+            );
+          })()}
+
+          {/* Text content */}
           {canEdit ? (
             <Textarea
-              className="flex-1 font-mono text-xs bg-muted border-border resize-none min-h-[300px]"
+              className="flex-1 font-mono text-xs bg-muted border-border resize-none min-h-[200px]"
               placeholder="Enter file contents here..."
               value={content}
               onChange={e => setContent(e.target.value)}
               autoFocus
             />
-          ) : isFake ? (
-            <div className="flex-1 font-mono text-xs bg-muted border border-border rounded-md p-3 overflow-y-auto min-h-[300px] whitespace-pre-wrap text-chart-3/60 select-none">
-              {content ? garbleText(content) : <span className="text-muted-foreground italic">[ empty file ]</span>}
-            </div>
           ) : (
-            <div className="flex-1 font-mono text-xs bg-muted border border-border rounded-md p-3 overflow-y-auto min-h-[300px] whitespace-pre-wrap text-foreground/80">
+            <div className="font-mono text-xs bg-muted border border-border rounded-md p-3 overflow-y-auto min-h-[100px] whitespace-pre-wrap text-foreground/80">
               {content || <span className="text-muted-foreground italic">[ empty file ]</span>}
             </div>
           )}

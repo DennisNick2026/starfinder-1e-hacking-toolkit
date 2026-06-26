@@ -82,7 +82,7 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
 
   // Secure data nodes require root access (or a password) to interact
   const isSecureData = DATA_NODE_TYPES.includes(node.type);
-  const requiresRoot = isSecureData && !rootMode && !passwordBypassed && !node.resolved && !hasUnresolvedFirewall;
+  const requiresRoot = isSecureData && mode === 'play' && !rootMode && !passwordBypassed && !node.resolved && !hasUnresolvedFirewall;
 
   const targetStillValid = target === null || activeCms.some(cm => cm.id === target);
   const resolvedTarget = targetStillValid ? target : null;

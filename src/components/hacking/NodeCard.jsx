@@ -368,12 +368,17 @@ export default function NodeCard({
         )}
         {!connectingFrom && DATA_NODE_TYPES.includes(node.type) && (mode === 'create' || node.resolved) && (
           <button
-            className="py-2 text-[10px] font-mono text-muted-foreground hover:text-accent hover:bg-accent/10 transition-colors flex items-center justify-center gap-1.5 border-b border-border/50"
+            className={cn(
+              'font-mono transition-colors flex items-center justify-center gap-2',
+              mode === 'play' && node.resolved
+                ? 'col-span-2 py-3 text-xs font-bold text-accent hover:bg-accent/20 bg-accent/10'
+                : 'py-2 text-[10px] text-muted-foreground hover:text-accent hover:bg-accent/10 border-b border-border/50'
+            )}
             onClick={(e) => { e.stopPropagation(); onOpenFile?.(node); }}
             title="Open data file"
           >
-            <FileText className="w-3 h-3" />
-            <span>File</span>
+            <FileText className={mode === 'play' && node.resolved ? 'w-4 h-4' : 'w-3 h-3'} />
+            <span>{mode === 'play' && node.resolved ? 'OPEN FILE' : 'File'}</span>
           </button>
         )}
         {!connectingFrom && mode === 'create' && (
