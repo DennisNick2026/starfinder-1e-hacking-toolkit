@@ -2,10 +2,6 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 } from 'lucide-react';
-
-const CM_ICONS = { ShieldAlert, Siren, UserX, Bug, EyeOff, Zap, Lock, Trash2 };
-
 const CM_COLOR = {
   red: 'text-destructive border-destructive/50 bg-destructive/10',
   purple: 'text-chart-3 border-chart-3/50 bg-chart-3/10',

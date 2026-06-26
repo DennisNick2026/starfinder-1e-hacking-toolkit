@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import {
-  Terminal, FolderLock, Database, SquareTerminal, Unlock, Sparkles,
+  Terminal, FolderLock, Database, SquareTerminal, Sparkles,
   FolderOpen, Box, Hand, Cpu, Monitor,
   DoorOpen, Camera, Crosshair, Wind, Bomb, Zap, Gauge, Bot,
   Shield, Rocket, Sword, Heart, Radio, Power, Lightbulb,
-  ShieldAlert, Siren, UserX, Lock, Bug, EyeOff, Trash2, ShieldCheck,
+  ShieldAlert, Siren, Lock, Trash2, ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

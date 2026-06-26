@@ -1,6 +1,5 @@
 import React, { useRef, useState, useCallback, useMemo, useEffect, useImperativeHandle } from 'react';
 import NodeCard from './NodeCard';
-import ConnectionLines from './ConnectionLines';
 import { cn } from '@/lib/utils';
 import { Maximize2, Home } from 'lucide-react';
 

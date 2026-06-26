@@ -13,7 +13,7 @@ import LoadEncounterDialog from '@/components/hacking/LoadEncounterDialog';
 import ImportEncounterDialog from '@/components/hacking/ImportEncounterDialog';
 import ExportConfirmDialog from '@/components/hacking/ExportConfirmDialog';
 import CloudPasswordGate from '@/components/hacking/CloudPasswordGate';
-import { Cpu, ShieldCheck, Play, SkipForward, SkipBack, RotateCcw, Settings, Shield, Pencil, Trash2, Upload, Download, FileJson, Database } from 'lucide-react';
+import { Cpu, ShieldCheck, Play, SkipForward, SkipBack, RotateCcw, Settings, Pencil, Trash2, Upload, Download, FileJson, Database } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
@@ -483,7 +483,6 @@ export default function HackingBoard() {
           computerName: state.computerName,
           tier: state.tier,
           baseDC: state.baseDC,
-          securityModule: state.securityModule,
           upgrades: state.upgrades,
           nodes: state.nodes,
           connections: state.connections,
