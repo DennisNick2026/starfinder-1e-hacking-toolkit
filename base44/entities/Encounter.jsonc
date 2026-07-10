@@ -65,8 +65,19 @@
     "connections"
   ],
   "rls": {
-    "create": null,
-    "read": null,
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.isPublic": true
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
     "update": {
       "created_by_id": "{{user.id}}"
     },
