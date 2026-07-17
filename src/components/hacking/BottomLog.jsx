@@ -27,7 +27,9 @@ export default function BottomLog({ log, selectedNode, activeCategory, getNodeDC
                   key={item.key}
                   draggable
                   onDragStart={e => {
-                    if (isCm) {
+                    if (item.isModuleUpgrade) {
+                      e.dataTransfer.setData('moduleUpgrade', item.key);
+                    } else if (isCm) {
                       e.dataTransfer.setData('cmType', item.key);
                     } else {
                       e.dataTransfer.setData('nodeType', item.key);

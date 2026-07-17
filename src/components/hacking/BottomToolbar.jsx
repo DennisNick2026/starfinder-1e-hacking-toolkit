@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Terminal, FolderLock, Database, SquareTerminal, Sparkles,
   FolderOpen, Box, Hand, Cpu, Monitor,
-  Zap, ShieldAlert, Siren, Lock, Trash2, ShieldCheck,
+  Zap, ShieldAlert, Siren, Lock, Trash2, ShieldCheck, Radio,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -51,6 +51,14 @@ const CATEGORIES = [
       { key: 'lockout', label: 'Lockout', icon: Lock },
       { key: 'shock_grid', label: 'Shock Grid', icon: Zap },
       { key: 'wipe', label: 'Wipe', icon: Trash2 },
+    ],
+  },
+  {
+    key: 'upgrades',
+    label: 'UPGRADES',
+    icon: Radio,
+    items: [
+      { key: 'range', label: 'Range', icon: Radio, isModuleUpgrade: true },
     ],
   },
 ];

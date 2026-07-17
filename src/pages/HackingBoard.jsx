@@ -70,10 +70,21 @@ export default function HackingBoard() {
   const configuringNode = state.nodes.find((n) => n.id === configuringNodeId) || null;
   const selectedNode = configuringNode || state.nodes.find((n) => n.id === state.selectedNodeId) || null;
 
-  const handleDropNode = (templateKey, x, y) => {
+  const handleDropNode = (templateKey, x, y, dropType) => {
     // If second arg is undefined and third is a string, it's a CM drop on a node
     if (x === undefined && typeof y === 'string') {
       const nodeId = y;
+      if (dropType === 'moduleUpgrade') {
+        // Dropping a module upgrade (e.g., Range) onto a control module
+        const node = state.nodes.find(n => n.id === nodeId);
+        if (node && (node.type === 'control_complex' || node.type === 'control_general')) {
+          if (!node.rangeUpgrade) {
+            state.updateNode(nodeId, { rangeUpgrade: 'range_1' });
+          }
+          setConfiguringNodeId(nodeId);
+        }
+        return;
+      }
       if (state.totalCountermeasures >= state.tier) {
         setPendingCmDrop({ cmType: templateKey, nodeId });
       } else {

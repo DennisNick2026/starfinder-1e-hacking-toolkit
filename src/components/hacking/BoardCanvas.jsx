@@ -170,7 +170,8 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
     e.stopPropagation();
     const nodeType = e.dataTransfer.getData('nodeType');
     const cmType = e.dataTransfer.getData('cmType');
-    
+    const moduleUpgrade = e.dataTransfer.getData('moduleUpgrade');
+
     if (cmType) {
       // Dropping a countermeasure onto the canvas
       const canvas = toCanvas(e.clientX, e.clientY);
@@ -186,7 +187,20 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
       }
       return;
     }
-    
+
+    if (moduleUpgrade) {
+      // Dropping a module upgrade onto a node
+      const canvas = toCanvas(e.clientX, e.clientY);
+      const targetNode = nodes.find(n => {
+        return canvas.x >= n.x && canvas.x <= n.x + NODE_W &&
+               canvas.y >= n.y && canvas.y <= n.y + NODE_H;
+      });
+      if (targetNode && onDropNode) {
+        onDropNode(moduleUpgrade, undefined, targetNode.id, 'moduleUpgrade');
+      }
+      return;
+    }
+
     if (!nodeType || !onDropNode) return;
     const canvas = toCanvas(e.clientX, e.clientY);
     onDropNode(nodeType, canvas.x - NODE_W / 2, canvas.y - 40);
@@ -454,9 +468,12 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
               e.preventDefault();
               e.stopPropagation();
               const cmType = e.dataTransfer.getData('cmType');
+              const moduleUpgrade = e.dataTransfer.getData('moduleUpgrade');
               if (cmType && onDropNode) {
                 // Pass nodeId as second param so it's recognized as a node target
                 onDropNode(cmType, undefined, node.id);
+              } else if (moduleUpgrade && onDropNode) {
+                onDropNode(moduleUpgrade, undefined, node.id, 'moduleUpgrade');
               }
             }}
             style={{
