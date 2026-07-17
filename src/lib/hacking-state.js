@@ -465,6 +465,15 @@ export function useHackingState() {
       
       const cm = { ...template, id: `cm_${nextCmId++}`, dc: cmDC, originalDC: cmDC };
       
+      // Auto-number firewalls: Firewall 1, Firewall 2, etc. (across all nodes)
+      if (cmType === 'firewall') {
+        let fwCount = 0;
+        for (const n of prev) {
+          fwCount += (n.countermeasures || []).filter(c => c.type === 'firewall').length;
+        }
+        cm.label = `Firewall ${fwCount + 1}`;
+      }
+      
       // For shock_grid, set level-based DC
       if (cmType === 'shock_grid') {
         const tierDCs = [20, 22, 24, 27, 30];

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Terminal, FolderLock, Database, SquareTerminal, Sparkles,
-  FolderOpen, Box, Hand, Cpu, Monitor,
+  FolderOpen, Box, Cpu, Monitor,
   Zap, ShieldAlert, Siren, Lock, Trash2, ShieldCheck, Radio,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -28,13 +28,6 @@ const CATEGORIES = [
       { key: 'secure_data_large', label: 'Data (Large)', icon: Database },
       { key: 'secure_data_specific', label: 'Data (Specific)', icon: Database },
       { key: 'spell_chip', label: 'Spell Chip', icon: Sparkles },
-    ],
-  },
-  {
-    key: 'control',
-    label: 'CONTROL',
-    icon: Hand,
-    items: [
       { key: 'control_complex', label: 'Control', icon: SquareTerminal },
       { key: 'control_general', label: 'General', icon: SquareTerminal },
     ],
