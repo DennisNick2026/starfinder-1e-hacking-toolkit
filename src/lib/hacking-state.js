@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { getUpgradeEffects } from '@/lib/upgrade-registry';
 
 // Countermeasure templates that can be embedded into modules
 export const COUNTERMEASURE_TEMPLATES = {
@@ -328,9 +329,10 @@ export function useHackingState() {
     return unresolved.length > 0 ? Math.max(...unresolved.map(n => n.tier || 0)) : 0;
   }, []);
 
-  // Calculate effective base DC with security bonus
+  // Calculate effective base DC with security bonus + upgrade effects
   const securityBonus = getSecurityDCBonus(nodes);
-  const effectiveBaseDC = baseDC + securityBonus;
+  const upgradeEffects = getUpgradeEffects(upgrades);
+  const effectiveBaseDC = baseDC + securityBonus + upgradeEffects.dcBonus;
 
   // Helper to calculate a node's DC based on effectiveBaseDC.
   // If the entry node has a DC of 10 (unsecured system), all other nodes are 10 too.
@@ -679,6 +681,7 @@ export function useHackingState() {
     baseDC, setBaseDC,
     upgrades, setUpgrades,
     effectiveBaseDC,
+    upgradeEffects,
     totalCountermeasures,
     phase, setPhase,
     nodes, connections,
