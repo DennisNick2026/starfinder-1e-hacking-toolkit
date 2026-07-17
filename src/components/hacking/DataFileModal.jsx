@@ -76,9 +76,9 @@ export default function DataFileModal({ node, onClose, onSave, canEdit }) {
             {node.name}
           </span>
           {!canEdit && (
-            <div className="flex items-center gap-1 text-muted-foreground">
+            <div className={cn('flex items-center gap-1', node.resolved ? 'text-accent' : 'text-muted-foreground')}>
               <Lock className="w-3 h-3" />
-              <span className="font-mono text-[10px]">READ ONLY</span>
+              <span className="font-mono text-[10px]">{node.resolved ? 'BREACHED' : 'READ ONLY'}</span>
             </div>
           )}
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">

@@ -457,7 +457,7 @@ export default function HackingBoard() {
       <DataFileModal
         key={fileNode.id}
         node={state.nodes.find((n) => n.id === fileNode.id) || fileNode}
-        canEdit={mode === 'create' || rootMode}
+        canEdit={mode === 'create'}
         onClose={() => setFileNode(null)}
         onSave={(nodeId, data) => state.updateNode(nodeId, data)} />
 
