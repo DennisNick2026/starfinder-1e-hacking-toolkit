@@ -12,6 +12,7 @@ export default function NodeCostSection({ node, basePrice, onUpdate }) {
   const effectiveCost = hasOverride ? node.costOverride : calculatedCost;
   const isVaries = costDef.type === 'varies';
   const isPercentOf = costDef.type === 'percent_of';
+  const isTierPercent = costDef.type === 'tier_percent';
 
   // Hide for free nodes (fixed 0) unless overridden
   if (costDef.type === 'fixed' && costDef.value === 0 && !hasOverride) return null;
@@ -27,6 +28,9 @@ export default function NodeCostSection({ node, basePrice, onUpdate }) {
       </div>
 
       <div className="space-y-2">
+        {isTierPercent && (
+          <p className="font-mono text-[10px] text-muted-foreground">{costDef.label}</p>
+        )}
         {isPercentOf && (
           <div>
             <Label className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground block mb-1">

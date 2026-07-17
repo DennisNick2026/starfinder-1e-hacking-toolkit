@@ -19,7 +19,7 @@ const CM_COLOR = {
   purple: 'border-chart-3/40 bg-chart-3/5 text-chart-3',
 };
 
-export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateCm, onRemoveCm, totalCountermeasures = 0, tier = 3 }) {
+export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateCm, onRemoveCm, totalCountermeasures = 0, tier = 3, getNodeDC, effectiveBaseDC }) {
   const [pendingCm, setPendingCm] = useState(null); // { nodeId, cmType } waiting for override confirm
 
   if (!node) return null;
@@ -30,7 +30,7 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
   // Calculate the "expected" DC for a CM based on node DC and CM type
   const getExpectedCmDC = (cm) => {
     if (!cm) return cm.dc;
-    const nodeHackDC = node.dcOverride !== undefined && node.dcOverride !== null ? node.dcOverride : node.dc ?? 25;
+    const nodeHackDC = getNodeDC ? getNodeDC(node, effectiveBaseDC) : (node.dcOverride ?? 25);
     if (cm.type === 'firewall') return nodeHackDC + 2;
     if (cm.type === 'fake_shell') return nodeHackDC + 5;
     if (cm.type === 'shock_grid') {
