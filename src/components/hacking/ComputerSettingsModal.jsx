@@ -14,6 +14,7 @@ export default function ComputerSettingsModal({
   setBaseDC,
   upgrades,
   setUpgrades,
+  nodes,
 }) {
   if (!isOpen) return null;
 
@@ -42,6 +43,7 @@ export default function ComputerSettingsModal({
           setBaseDC={setBaseDC}
           upgrades={upgrades}
           setUpgrades={setUpgrades}
+          nodes={nodes}
         />
       </div>
     </div>

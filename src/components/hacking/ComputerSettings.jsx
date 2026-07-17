@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Plus, Minus, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
-  UPGRADES, UPGRADE_CATEGORIES, TIER_DC, TIER_PRICE,
+  UPGRADES, UPGRADE_CATEGORIES, MODULE_UPGRADES, TIER_DC, TIER_PRICE,
   getUpgradeEffects, getComputerBulk, getComputerHardness, getComputerSave,
 } from '@/lib/upgrade-registry';
 
@@ -13,17 +13,27 @@ export default function ComputerSettings({
   tier, setTier,
   baseDC, setBaseDC,
   upgrades, setUpgrades,
+  nodes = [],
 }) {
   const basePrice = TIER_PRICE[tier] || TIER_PRICE[1];
   const effects = getUpgradeEffects(upgrades);
   const hasHardened = (upgrades || []).includes('hardened');
   const miniCount = effects.miniaturizationCount;
 
-  const totalPrice = basePrice
-    + (upgrades || []).reduce((sum, key) => {
-        const upg = UPGRADES.find(u => u.key === key);
-        return sum + (upg ? upg.calculatePrice(tier) : 0);
-      }, 0);
+  // Collect active module upgrades from nodes (e.g. Range I/II/III on control modules)
+  const activeModuleUpgrades = (nodes || [])
+    .filter(n => n.rangeUpgrade)
+    .map(n => MODULE_UPGRADES.find(u => u.key === n.rangeUpgrade))
+    .filter(Boolean);
+
+  const computerUpgradeCost = (upgrades || []).reduce((sum, key) => {
+    const upg = UPGRADES.find(u => u.key === key);
+    return sum + (upg ? upg.calculatePrice(tier) : 0);
+  }, 0);
+
+  const moduleUpgradeCost = activeModuleUpgrades.reduce((sum, upg) => sum + upg.calculatePrice(), 0);
+
+  const totalPrice = basePrice + computerUpgradeCost + moduleUpgradeCost;
 
   const bulkInfo = getComputerBulk(tier, miniCount);
   const hardness = getComputerHardness(tier, hasHardened);
@@ -190,8 +200,24 @@ export default function ComputerSettings({
       </div>
 
       {/* Total */}
-      <div className="border-t border-border pt-2">
-        <div className="flex justify-between font-mono text-xs">
+      <div className="border-t border-border pt-2 space-y-1">
+        <div className="flex justify-between font-mono text-[10px]">
+          <span className="text-muted-foreground">Base (Tier {tier})</span>
+          <span className="text-muted-foreground">{basePrice.toLocaleString()} cr</span>
+        </div>
+        {computerUpgradeCost > 0 && (
+          <div className="flex justify-between font-mono text-[10px]">
+            <span className="text-muted-foreground">Computer Upgrades</span>
+            <span className="text-muted-foreground">{computerUpgradeCost.toLocaleString()} cr</span>
+          </div>
+        )}
+        {moduleUpgradeCost > 0 && (
+          <div className="flex justify-between font-mono text-[10px]">
+            <span className="text-muted-foreground">Module Upgrades ({activeModuleUpgrades.length})</span>
+            <span className="text-muted-foreground">{moduleUpgradeCost.toLocaleString()} cr</span>
+          </div>
+        )}
+        <div className="flex justify-between font-mono text-xs pt-1">
           <span className="text-muted-foreground uppercase tracking-wider">Total Cost</span>
           <span className="text-primary font-bold">{totalPrice.toLocaleString()} cr</span>
         </div>

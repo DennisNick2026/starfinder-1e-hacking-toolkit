@@ -569,7 +569,8 @@ export default function HackingBoard() {
         baseDC={state.baseDC}
         setBaseDC={state.setBaseDC}
         upgrades={state.upgrades}
-        setUpgrades={state.setUpgrades} />
+        setUpgrades={state.setUpgrades}
+        nodes={state.nodes} />
       
     </div>);
 
