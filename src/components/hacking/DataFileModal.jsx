@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, FileText, Save, Lock } from 'lucide-react';
+import { X, FileText, Save, Lock, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { base44 } from '@/api/base44Client';
 
 const DATA_NODE_TYPES = ['secure_data_average', 'secure_data_large', 'secure_data_specific'];
 
@@ -12,6 +13,28 @@ export default function DataFileModal({ node, onClose, onSave, canEdit }) {
   const [content, setContent] = useState(node.file_content || '');
   const [mediaUrl, setMediaUrl] = useState(node.media_url || '');
   const [saved, setSaved] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  // Re-sync local state when switching to a different node
+  useEffect(() => {
+    setContent(node.file_content || '');
+    setMediaUrl(node.media_url || '');
+  }, [node.id]);
+
+  const handleUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setMediaUrl(file_url);
+    } catch (err) {
+      console.error('Upload failed:', err);
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
 
   const getMediaType = (url) => {
     if (!url) return null;
@@ -68,14 +91,24 @@ export default function DataFileModal({ node, onClose, onSave, canEdit }) {
           {/* Media URL input (edit mode) */}
           {canEdit && (
             <div>
-              <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">Image / Video URL</label>
-              <input
-                type="text"
-                className="w-full font-mono text-xs bg-muted border border-border rounded-md px-3 py-2"
-                placeholder="https://example.com/image.jpg or video.mp4"
-                value={mediaUrl}
-                onChange={e => setMediaUrl(e.target.value)}
-              />
+              <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">Image / Video</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  className="flex-1 font-mono text-xs bg-muted border border-border rounded-md px-3 py-2"
+                  placeholder="Paste URL or upload a file..."
+                  value={mediaUrl}
+                  onChange={e => setMediaUrl(e.target.value)}
+                />
+                <label className={cn(
+                  'flex items-center gap-1.5 px-3 py-2 font-mono text-xs border rounded-md cursor-pointer transition-colors whitespace-nowrap',
+                  uploading ? 'opacity-50 cursor-wait' : 'border-accent/40 text-accent hover:bg-accent/10'
+                )}>
+                  <Upload className="w-3.5 h-3.5" />
+                  {uploading ? 'Uploading...' : 'Upload'}
+                  <input type="file" accept="image/*,video/*" className="hidden" onChange={handleUpload} disabled={uploading} />
+                </label>
+              </div>
             </div>
           )}
 
