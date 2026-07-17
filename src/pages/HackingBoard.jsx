@@ -284,8 +284,11 @@ export default function HackingBoard() {
             <div className="flex items-center border border-primary/30 rounded overflow-hidden">
               <button
               className="flex items-center gap-1.5 px-5 py-2.5 font-mono text-sm tracking-widest transition-colors text-primary/50 hover:text-primary"
-              onClick={() => handleSwitchMode('create')}
-              disabled={sharedEncounter}>
+              onClick={(e) => {
+                if (sharedEncounter && !(e.ctrlKey || e.metaKey)) return;
+                if (e.ctrlKey || e.metaKey) setSharedEncounter(null);
+                handleSwitchMode('create');
+              }}>
               
                 <Pencil className="w-4 h-4" /> ADMIN
               </button>
