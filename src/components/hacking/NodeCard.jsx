@@ -300,7 +300,7 @@ export default function NodeCard({
       {/* Action buttons */}
       <div className="grid grid-cols-2 gap-px border-t border-border/50">
         {!connectingFrom && !node.noHack && (
-          node.type === 'directory' && node.requiresHack === false ? (
+          node.type === 'directory' && node.requiresHack === false && !firewallBlocked ? (
             <button
               className="col-span-2 py-3 text-xs font-mono font-bold text-primary hover:bg-primary/20 transition-colors flex items-center justify-center gap-2 bg-primary/10"
               onClick={(e) => { e.stopPropagation(); onToggleDirectoryLocked?.(node.id); }}
