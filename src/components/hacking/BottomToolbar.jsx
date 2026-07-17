@@ -28,7 +28,6 @@ const CATEGORIES = [
       { key: 'secure_data_large', label: 'Data (Large)', icon: Database },
       { key: 'secure_data_specific', label: 'Data (Specific)', icon: Database },
       { key: 'spell_chip', label: 'Spell Chip', icon: Sparkles },
-      { key: 'security_module', label: 'Security Module', icon: ShieldAlert },
     ],
   },
   {
@@ -58,6 +57,7 @@ const CATEGORIES = [
     label: 'UPGRADES',
     icon: Radio,
     items: [
+      { key: 'security_module', label: 'Security Module', icon: ShieldAlert },
       { key: 'range', label: 'Range', icon: Radio, isModuleUpgrade: true },
     ],
   },

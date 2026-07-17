@@ -9,7 +9,8 @@ import {
   DropdownMenuTrigger, DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import { COUNTERMEASURE_TEMPLATES } from '@/lib/hacking-state';
-import { MODULE_UPGRADES } from '@/lib/upgrade-registry';
+import { MODULE_UPGRADES, TIER_PRICE, getCountermeasureCost } from '@/lib/upgrade-registry';
+import NodeCostSection from './NodeCostSection';
 import { cn } from '@/lib/utils';
 
 const CM_ICONS = { ShieldAlert, Siren, UserX, Bug, Zap, Lock, Trash2 };
@@ -23,6 +24,7 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
 
   if (!node) return null;
 
+  const basePrice = TIER_PRICE[tier] || TIER_PRICE[1];
   const set = (field, value) => onUpdate(node.id, { [field]: value });
 
   // Calculate the "expected" DC for a CM based on node DC and CM type
@@ -260,6 +262,8 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
 
         </div>
 
+        <NodeCostSection node={node} basePrice={basePrice} onUpdate={onUpdate} />
+
         {/* Countermeasures section */}
         <div className="border-t border-border/50 pt-5">
           <div className="flex items-center justify-between mb-4">
@@ -421,6 +425,23 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
                         <p className="font-mono text-[8px] text-current/50 mt-1">DC {cm.dc}</p>
                       </div>
                     )}
+                    </div>
+                    {/* CM Cost */}
+                    <div className="flex items-center gap-2 pt-1 border-t border-current/10">
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-current opacity-60 shrink-0">Cost</span>
+                      <Input
+                        type="number"
+                        className="font-mono text-xs bg-background/20 border-current/20 h-6 flex-1 min-w-0"
+                        placeholder={String(getCountermeasureCost(cm, basePrice, 0))}
+                        value={cm.costOverride ?? ''}
+                        onChange={e => {
+                          const val = e.target.value === '' ? null : (parseInt(e.target.value) || 0);
+                          onUpdateCm(node.id, cm.id, { costOverride: val });
+                        }}
+                      />
+                      <span className="font-mono text-[10px] text-current/70 shrink-0">
+                        {(cm.costOverride != null ? cm.costOverride : getCountermeasureCost(cm, basePrice, 0)).toLocaleString()} cr
+                      </span>
                     </div>
                     </div>
               );

@@ -5,7 +5,7 @@ import { Plus, Minus, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   UPGRADES, UPGRADE_CATEGORIES, MODULE_UPGRADES, TIER_DC, TIER_PRICE,
-  getUpgradeEffects, getComputerBulk, getComputerHardness, getComputerSave,
+  getUpgradeEffects, getComputerBulk, getComputerHardness, getComputerSave, getTotalEncounterCosts,
 } from '@/lib/upgrade-registry';
 
 export default function ComputerSettings({
@@ -33,7 +33,9 @@ export default function ComputerSettings({
 
   const moduleUpgradeCost = activeModuleUpgrades.reduce((sum, upg) => sum + upg.calculatePrice(), 0);
 
-  const totalPrice = basePrice + computerUpgradeCost + moduleUpgradeCost;
+  const encounterCosts = getTotalEncounterCosts(nodes, basePrice);
+
+  const totalPrice = basePrice + computerUpgradeCost + moduleUpgradeCost + encounterCosts.total;
 
   const bulkInfo = getComputerBulk(tier, miniCount);
   const hardness = getComputerHardness(tier, hasHardened);
@@ -215,6 +217,18 @@ export default function ComputerSettings({
           <div className="flex justify-between font-mono text-[10px]">
             <span className="text-muted-foreground">Module Upgrades ({activeModuleUpgrades.length})</span>
             <span className="text-muted-foreground">{moduleUpgradeCost.toLocaleString()} cr</span>
+          </div>
+        )}
+        {encounterCosts.nodeCosts > 0 && (
+          <div className="flex justify-between font-mono text-[10px]">
+            <span className="text-muted-foreground">Nodes &amp; Modules</span>
+            <span className="text-muted-foreground">{encounterCosts.nodeCosts.toLocaleString()} cr</span>
+          </div>
+        )}
+        {encounterCosts.cmCosts > 0 && (
+          <div className="flex justify-between font-mono text-[10px]">
+            <span className="text-muted-foreground">Countermeasures</span>
+            <span className="text-muted-foreground">{encounterCosts.cmCosts.toLocaleString()} cr</span>
           </div>
         )}
         <div className="flex justify-between font-mono text-xs pt-1">

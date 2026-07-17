@@ -120,3 +120,75 @@ export function getUpgrade(key) {
 export function getModuleUpgrade(key) {
   return MODULE_UPGRADE_MAP[key];
 }
+
+// ─── Node / Module cost definitions (Starfinder pricing) ───
+export const NODE_COSTS = {
+  entry:               { type: 'fixed', value: 0 },
+  root_access:         { type: 'fixed', value: 0 },
+  access_point:        { type: 'fixed', value: 0 },
+  user_interface:      { type: 'fixed', value: 0 },
+  directory:           { type: 'fixed', value: 0 },
+  control_complex:     { type: 'percent_of', field: 'controlledDevicePrice', percent: 0.10, label: '10% of controlled device' },
+  control_general:     { type: 'fixed', value: 0 },
+  secure_data_average: { type: 'fixed', value: 10 },
+  secure_data_large:   { type: 'varies', label: 'Varies' },
+  secure_data_specific:{ type: 'fixed', value: 1 },
+  spell_chip:          { type: 'percent_of', field: 'spellGemPrice', percent: 1.10, label: '110% of spell gem' },
+  security_module:     { type: 'varies', label: 'Varies' },
+  root_access_node:    { type: 'fixed', value: 0 },
+  computer:            { type: 'varies', label: 'Varies' },
+};
+
+// ─── Countermeasure cost definitions ───
+export const COUNTERMEASURE_COSTS = {
+  alarm:    { type: 'fixed', value: 10 },
+  feedback: { type: 'fixed', value: 500 },
+  firewall: { type: 'percent_of_base', percent: 0.20, label: '20% of base price' },
+  lockout:  { type: 'fixed', value: 100 },
+  shock_grid:{ type: 'varies', label: 'Varies' },
+  wipe:     { type: 'fixed', value: 10 },
+};
+
+export function getNodeCost(node, basePrice) {
+  if (node.costOverride != null) return node.costOverride;
+  const def = NODE_COSTS[node.type];
+  if (!def) return 0;
+  if (def.type === 'fixed') return def.value;
+  if (def.type === 'percent_of') {
+    const val = node[def.field] || 0;
+    return val > 0 ? Math.round(val * def.percent) : 0;
+  }
+  return 0; // 'varies' — user must override
+}
+
+export function getCountermeasureCost(cm, basePrice, moduleCosts = 0) {
+  if (cm.costOverride != null) return cm.costOverride;
+  const def = COUNTERMEASURE_COSTS[cm.type];
+  if (!def) return 0;
+  if (def.type === 'fixed') return def.value;
+  if (def.type === 'percent_of_base') return Math.round((basePrice || 0) * def.percent);
+  return 0; // 'varies'
+}
+
+// Calculate all encounter costs (nodes + countermeasures) for the total
+export function getTotalEncounterCosts(nodes, basePrice) {
+  const moduleTypes = [
+    'control_complex', 'control_general',
+    'secure_data_average', 'secure_data_large', 'secure_data_specific', 'spell_chip',
+  ];
+  const moduleCosts = (nodes || [])
+    .filter(n => moduleTypes.includes(n.type))
+    .reduce((sum, n) => sum + getNodeCost(n, basePrice), 0);
+
+  let nodeCosts = 0;
+  let cmCosts = 0;
+
+  for (const node of (nodes || [])) {
+    nodeCosts += getNodeCost(node, basePrice);
+    for (const cm of (node.countermeasures || [])) {
+      cmCosts += getCountermeasureCost(cm, basePrice, moduleCosts);
+    }
+  }
+
+  return { nodeCosts, cmCosts, total: nodeCosts + cmCosts };
+}
