@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger, DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import { COUNTERMEASURE_TEMPLATES } from '@/lib/hacking-state';
+import { MODULE_UPGRADES } from '@/lib/upgrade-registry';
 import { cn } from '@/lib/utils';
 
 const CM_ICONS = { ShieldAlert, Siren, UserX, Bug, Zap, Lock, Trash2 };
@@ -216,6 +217,44 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
                 ))}
               </div>
               <p className="font-mono text-[10px] text-muted-foreground mt-2">DC: {13 + 4 * (node.computerTier || 3)}</p>
+            </div>
+          )}
+
+          {(node.type === 'control_complex' || node.type === 'control_general') && (
+            <div>
+              <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-2">Range Upgrade</Label>
+              <div className="grid grid-cols-4 gap-1.5 mt-2">
+                <button
+                  onClick={() => set('rangeUpgrade', null)}
+                  className={cn(
+                    'py-2 rounded border font-mono text-[11px] font-bold transition-colors',
+                    !node.rangeUpgrade
+                      ? 'bg-primary/20 border-primary text-primary'
+                      : 'border-border/60 text-muted-foreground hover:border-primary/50'
+                  )}
+                >
+                  Base
+                </button>
+                {MODULE_UPGRADES.map(upg => (
+                  <button
+                    key={upg.key}
+                    onClick={() => set('rangeUpgrade', upg.key)}
+                    className={cn(
+                      'py-2 rounded border font-mono text-[11px] font-bold transition-colors',
+                      node.rangeUpgrade === upg.key
+                        ? 'bg-primary/20 border-primary text-primary'
+                        : 'border-border/60 text-muted-foreground hover:border-primary/50'
+                    )}
+                  >
+                    {upg.label}
+                  </button>
+                ))}
+              </div>
+              <p className="font-mono text-[10px] text-muted-foreground mt-2">
+                {node.rangeUpgrade
+                  ? MODULE_UPGRADES.find(u => u.key === node.rangeUpgrade)?.description
+                  : 'No range upgrade — module must be operated locally.'}
+              </p>
             </div>
           )}
 

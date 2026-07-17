@@ -5,8 +5,10 @@ import {
   Sparkles, Lock, LogIn, ShieldCheck, FolderLock, FolderOpen, FileText, Cpu
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getModuleUpgrade } from '@/lib/upgrade-registry';
 
 const DATA_NODE_TYPES = ['secure_data_average', 'secure_data_large', 'secure_data_specific'];
+const CONTROL_NODE_TYPES = ['control_complex', 'control_general'];
 
 const ICONS = {
   Terminal, GitBranch, Database, SquareTerminal,
@@ -188,6 +190,18 @@ export default function NodeCard({
             {node.type === 'directory' ? '✓ UNLOCKED' : '✓ RESOLVED'}
           </span>
         )}
+        {/* Range upgrade badge for control modules */}
+        {CONTROL_NODE_TYPES.includes(node.type) && node.rangeUpgrade && (() => {
+          const upg = getModuleUpgrade(node.rangeUpgrade);
+          if (!upg) return null;
+          return (
+            <div className="flex items-center gap-1">
+              <Cpu className="w-2.5 h-2.5 text-chart-2" />
+              <span className="font-mono text-[10px] text-chart-2">{upg.effect.rangeLabel}</span>
+            </div>
+          );
+        })()}
+
         {/* Directory lock status — hidden in play mode when firewalled (would reveal node type) */}
         {node.type === 'directory' && (node.requiresHack === false ? node.locked : !node.resolved) && !firewallBlocked && (
           <div className="flex items-center gap-1">

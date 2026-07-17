@@ -329,10 +329,10 @@ export function useHackingState() {
     return unresolved.length > 0 ? Math.max(...unresolved.map(n => n.tier || 0)) : 0;
   }, []);
 
-  // Calculate effective base DC with security bonus + upgrade effects
+  // Calculate effective base DC with security bonus
   const securityBonus = getSecurityDCBonus(nodes);
   const upgradeEffects = getUpgradeEffects(upgrades);
-  const effectiveBaseDC = baseDC + securityBonus + upgradeEffects.dcBonus;
+  const effectiveBaseDC = baseDC + securityBonus;
 
   // Helper to calculate a node's DC based on effectiveBaseDC.
   // If the entry node has a DC of 10 (unsecured system), all other nodes are 10 too.

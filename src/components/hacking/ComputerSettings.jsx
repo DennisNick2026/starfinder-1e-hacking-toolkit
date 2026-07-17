@@ -3,7 +3,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, Minus, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { UPGRADES, UPGRADE_CATEGORIES, TIER_DC, TIER_PRICE } from '@/lib/upgrade-registry';
+import {
+  UPGRADES, UPGRADE_CATEGORIES, TIER_DC, TIER_PRICE,
+  getUpgradeEffects, getComputerBulk, getComputerHardness, getComputerSave,
+} from '@/lib/upgrade-registry';
 
 export default function ComputerSettings({
   computerName, setComputerName,
@@ -12,12 +15,19 @@ export default function ComputerSettings({
   upgrades, setUpgrades,
 }) {
   const basePrice = TIER_PRICE[tier] || TIER_PRICE[1];
+  const effects = getUpgradeEffects(upgrades);
+  const hasHardened = (upgrades || []).includes('hardened');
+  const miniCount = effects.miniaturizationCount;
 
   const totalPrice = basePrice
     + (upgrades || []).reduce((sum, key) => {
         const upg = UPGRADES.find(u => u.key === key);
         return sum + (upg ? upg.calculatePrice(tier) : 0);
       }, 0);
+
+  const bulkInfo = getComputerBulk(tier, miniCount);
+  const hardness = getComputerHardness(tier, hasHardened);
+  const saveBonus = getComputerSave(tier, hasHardened);
 
   const handleTierChange = (newTier) => {
     const t = Math.min(10, Math.max(1, newTier));
@@ -29,24 +39,29 @@ export default function ComputerSettings({
     const current = upgrades || [];
     const upg = UPGRADES.find(u => u.key === key);
 
-    if (current.includes(key)) {
-      setUpgrades(current.filter(k => k !== key));
-    } else {
-      // Range upgrades are mutually exclusive — selecting one removes others
-      let newList = current;
-      if (upg?.category === 'range') {
-        newList = current.filter(k => {
-          const u = UPGRADES.find(u => u.key === k);
-          return u?.category !== 'range';
-        });
+    if (upg.unique !== false) {
+      // Unique upgrade — toggle on/off
+      if (current.includes(key)) {
+        setUpgrades(current.filter(k => k !== key));
+      } else {
+        setUpgrades([...current, key]);
       }
-      setUpgrades([...newList, key]);
+    } else {
+      // Non-unique — add one instance (miniaturization capped at tier+1: can't go below tier -1)
+      const count = current.filter(k => k === key).length;
+      if (count >= tier + 1) return;
+      setUpgrades([...current, key]);
     }
   };
 
-  // Group upgrades by category for cleaner display
-  const grouped = UPGRADE_CATEGORIES;
-  const categoryOrder = Object.keys(grouped);
+  const removeUpgradeInstance = (key) => {
+    const current = upgrades || [];
+    const idx = current.indexOf(key);
+    if (idx === -1) return;
+    setUpgrades([...current.slice(0, idx), ...current.slice(idx + 1)]);
+  };
+
+  const categoryOrder = Object.keys(UPGRADE_CATEGORIES);
 
   return (
     <div className="space-y-4">
@@ -78,6 +93,32 @@ export default function ComputerSettings({
         </div>
       </div>
 
+      {/* Computer Stats */}
+      <div className="border border-border/50 rounded-lg p-3 space-y-1.5 bg-muted/20">
+        <p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-1">Computer Stats</p>
+        <div className="flex justify-between font-mono text-[10px]">
+          <span className="text-muted-foreground">Hardness</span>
+          <span className="text-foreground">
+            {hardness}
+            {hasHardened && <span className="text-chart-3 ml-1">(+10)</span>}
+          </span>
+        </div>
+        <div className="flex justify-between font-mono text-[10px]">
+          <span className="text-muted-foreground">Save Bonus</span>
+          <span className="text-foreground">
+            +{saveBonus}
+            {hasHardened && <span className="text-chart-3 ml-1">(+8 vs energy)</span>}
+          </span>
+        </div>
+        <div className="flex justify-between font-mono text-[10px]">
+          <span className="text-muted-foreground">Bulk</span>
+          <span className="text-foreground">
+            {typeof bulkInfo.value === 'number' ? `${bulkInfo.value} bulk` : bulkInfo.value}
+            {miniCount > 0 && <span className="text-muted-foreground ml-1">(eff. T{bulkInfo.effectiveTier})</span>}
+          </span>
+        </div>
+      </div>
+
       {/* Upgrades — grouped by category */}
       <div>
         <Label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Upgrades</Label>
@@ -88,35 +129,58 @@ export default function ComputerSettings({
             return (
               <div key={cat} className="space-y-1">
                 <p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground/60 pl-1">
-                  {grouped[cat]}
+                  {UPGRADE_CATEGORIES[cat]}
                 </p>
                 {catUpgrades.map(upg => {
-                  const active = (upgrades || []).includes(upg.key);
+                  const isUnique = upg.unique !== false;
+                  const active = isUnique
+                    ? (upgrades || []).includes(upg.key)
+                    : (upgrades || []).filter(k => k === upg.key).length > 0;
+                  const count = isUnique ? 0 : (upgrades || []).filter(k => k === upg.key).length;
+
                   return (
-                    <button
+                    <div
                       key={upg.key}
-                      onClick={() => toggleUpgrade(upg.key)}
                       className={cn(
-                        'w-full text-left px-2.5 py-1.5 rounded border font-mono text-xs transition-colors',
+                        'px-2.5 py-1.5 rounded border font-mono text-xs transition-colors',
                         active
                           ? 'border-accent bg-accent/10 text-accent'
                           : 'border-border text-muted-foreground hover:border-accent/40 hover:text-foreground'
                       )}
                     >
-                      <div className="flex justify-between items-center">
-                        <span className="flex items-center gap-1.5">
-                          {active && <Check className="w-3 h-3" />}
-                          {upg.label}
-                        </span>
-                        <span className="opacity-60">{upg.calculatePrice(tier).toLocaleString()} cr</span>
-                      </div>
-                      <p className={cn(
-                        'font-sans text-[10px] leading-snug mt-1',
-                        active ? 'text-accent/60' : 'text-muted-foreground/50'
-                      )}>
-                        {upg.description}
-                      </p>
-                    </button>
+                      <button
+                        className="w-full text-left"
+                        onClick={() => toggleUpgrade(upg.key)}
+                      >
+                        <div className="flex justify-between items-center">
+                          <span className="flex items-center gap-1.5">
+                            {isUnique && active && <Check className="w-3 h-3" />}
+                            {upg.label}
+                            {!isUnique && count > 0 && (
+                              <span className="text-[9px] bg-accent/20 px-1 rounded">×{count}</span>
+                            )}
+                          </span>
+                          <span className="opacity-60">{upg.calculatePrice(tier).toLocaleString()} cr</span>
+                        </div>
+                        <p className={cn(
+                          'font-sans text-[10px] leading-snug mt-1',
+                          active ? 'text-accent/60' : 'text-muted-foreground/50'
+                        )}>
+                          {upg.description}
+                        </p>
+                      </button>
+                      {/* Remove button for multi-buy upgrades */}
+                      {!isUnique && count > 0 && (
+                        <div className="flex justify-end mt-1">
+                          <button
+                            className="text-[9px] text-muted-foreground hover:text-destructive transition-colors"
+                            onClick={() => removeUpgradeInstance(upg.key)}
+                          >
+                            − Remove one
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
