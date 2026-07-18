@@ -137,7 +137,9 @@ export default function NodeCard({
   const allCms = (node.countermeasures || []);
   const allActiveCms = allCms.filter(cm => !cm.resolved);
   const hasUnresolvedFirewall = allActiveCms.some(cm => cm.type === 'firewall');
+  const firewallCm = allActiveCms.find(cm => cm.type === 'firewall');
   const firewallBlocked = mode === 'play' && hasUnresolvedFirewall;
+  const firewallDC = firewallCm ? (firewallCm.dcOverride != null ? firewallCm.dcOverride : nodeDC + 2) : null;
 
   const colors = firewallBlocked ? COLOR_MAP.red : (COLOR_MAP[node.color] || COLOR_MAP.cyan);
   const progressPercent = node.successes_required
@@ -172,7 +174,8 @@ export default function NodeCard({
         {firewallBlocked ? (
           <>
             <ShieldAlert className="w-4 h-4 shrink-0 text-destructive" />
-            <span className="font-mono text-xs font-semibold text-foreground flex-1">FIREWALL</span>
+            <span className="font-mono text-xs font-semibold text-foreground flex-1">{firewallCm?.label || 'FIREWALL'}</span>
+            <span className="font-mono text-[10px] text-destructive shrink-0">DC {firewallDC}</span>
           </>
         ) : (
           <>

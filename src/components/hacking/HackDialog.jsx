@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { getEffectiveCmDC } from '@/lib/hacking-state';
 const CM_COLOR = {
   red: 'text-destructive border-destructive/50 bg-destructive/10',
   purple: 'text-chart-3 border-chart-3/50 bg-chart-3/10',
@@ -97,7 +98,9 @@ export default function HackDialog({ node, onSubmit, onUnhack, onClose, mode = '
     ? (node.countermeasures || []).find(cm => cm.id === effectiveTarget)
     : null;
 
-  const rawTargetDC = activeTarget ? activeTarget.dc : nodeDC;
+  const rawTargetDC = activeTarget
+    ? (getNodeDC ? getEffectiveCmDC(activeTarget, node, getNodeDC, effectiveBaseDC) : activeTarget.dc)
+    : nodeDC;
   const targetDC = rawTargetDC;
   const targetLabel = activeTarget ? activeTarget.label : node.name;
   const rootApplies = rootMode && !hasUnresolvedFirewall;

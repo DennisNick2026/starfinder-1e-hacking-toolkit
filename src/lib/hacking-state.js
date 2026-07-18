@@ -265,6 +265,18 @@ function createNode(template, x, y, baseDC) {
   };
 }
 
+// Calculate a countermeasure's effective DC dynamically (not stored)
+export function getEffectiveCmDC(cm, node, getNodeDC, effectiveBaseDC) {
+  if (cm.dcOverride != null) return cm.dcOverride;
+  const nodeHackDC = getNodeDC(node, effectiveBaseDC);
+  if (cm.type === 'firewall') return nodeHackDC + 2;
+  if (cm.type === 'shock_grid') {
+    const tierDCs = [20, 22, 24, 27, 30];
+    return tierDCs[(cm.level || 1) - 1];
+  }
+  return nodeHackDC;
+}
+
 const ENTRY_NODE = {
   id: 'entry',
   type: 'entry',
@@ -566,7 +578,7 @@ export function useHackingState() {
             if (cm.id !== cmId) return cm;
             if (cm.resolved) return cm;
             const cmNodeHasFirewall = (n.countermeasures || []).some(c => c.type === 'firewall' && !c.resolved);
-            const effectiveDC = (rootMode && !cmNodeHasFirewall) ? 10 : cm.dc;
+            const effectiveDC = (rootMode && !cmNodeHasFirewall) ? 10 : getEffectiveCmDC(cm, n, getNodeDC, effectiveBaseDC);
             const success = total >= effectiveDC;
             if (!success) return cm;
             if (cm.successes_required !== undefined) {
