@@ -1,7 +1,7 @@
 import React, { useRef, useState, useCallback, useMemo, useEffect, useImperativeHandle } from 'react';
 import NodeCard from './NodeCard';
 import { cn } from '@/lib/utils';
-import { Maximize2, Home } from 'lucide-react';
+import { Maximize2, Home, Link } from 'lucide-react';
 
 const NODE_W = 256;
 const NODE_H = 200;
@@ -168,6 +168,8 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    // Always cancel connect mode when dropping on the canvas
+    if (connectingFrom) setConnectingFrom(null);
     const nodeType = e.dataTransfer.getData('nodeType');
     const cmType = e.dataTransfer.getData('cmType');
     const moduleUpgrade = e.dataTransfer.getData('moduleUpgrade');
@@ -467,6 +469,8 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
             onDrop={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              // Always cancel connect mode when dropping something
+              setConnectingFrom(null);
               const cmType = e.dataTransfer.getData('cmType');
               const moduleUpgrade = e.dataTransfer.getData('moduleUpgrade');
               if (cmType && onDropNode) {
@@ -517,6 +521,22 @@ const BoardCanvas = React.forwardRef(function BoardCanvas({
             <p className="font-mono text-sm text-muted-foreground/60">No nodes yet</p>
             <p className="font-mono text-xs text-muted-foreground/40">Drag nodes from the toolbar below</p>
           </div>
+        </div>
+      )}
+
+      {/* Connect mode banner */}
+      {connectingFrom && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-2 rounded-lg border border-chart-2/50 bg-chart-2/10 backdrop-blur-sm shadow-lg">
+          <Link className="w-4 h-4 text-chart-2 animate-pulse" />
+          <span className="font-mono text-xs text-chart-2 tracking-wider">
+            CONNECT MODE — Click a node to link, or click the canvas to cancel
+          </span>
+          <button
+            onClick={() => setConnectingFrom(null)}
+            className="font-mono text-xs text-chart-2/70 hover:text-chart-2 border border-chart-2/30 px-2 py-0.5 rounded hover:border-chart-2 transition-colors"
+          >
+            CANCEL
+          </button>
         </div>
       )}
 
