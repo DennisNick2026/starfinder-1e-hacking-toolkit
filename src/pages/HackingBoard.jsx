@@ -71,6 +71,8 @@ export default function HackingBoard() {
   const selectedNode = configuringNode || state.nodes.find((n) => n.id === state.selectedNodeId) || null;
 
   const handleDropNode = (templateKey, x, y, dropType) => {
+    // Clear any pending connection state — dropping a new item cancels connect mode
+    state.setConnectingFrom(null);
     // If second arg is undefined and third is a string, it's a CM drop on a node
     if (x === undefined && typeof y === 'string') {
       const nodeId = y;
