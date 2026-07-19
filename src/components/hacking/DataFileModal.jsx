@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { base44 } from '@/api/base44Client';
 
-const DATA_NODE_TYPES = ['secure_data_average', 'secure_data_large', 'secure_data_specific'];
+const DATA_NODE_TYPES = ['secure_data_average', 'secure_data_large', 'secure_data_specific', 'spell_chip'];
 
 export { DATA_NODE_TYPES };
 
