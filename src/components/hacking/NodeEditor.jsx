@@ -125,7 +125,7 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
             </div>
           )}
 
-          {(node.type === 'secure_data_average' || node.type === 'secure_data_large' || node.type === 'secure_data_specific' || node.type === 'spell_chip') && (
+          {(node.type === 'secure_data_average' || node.type === 'secure_data_large' || node.type === 'secure_data_specific') && (
             <>
               <div>
                 <Label className="font-mono text-xs font-bold uppercase tracking-wider text-foreground/80 block mb-2">Password (optional — bypasses root access)</Label>

@@ -185,9 +185,6 @@ const NODE_TEMPLATES = {
     successes_required: 1,
     successes_current: 0,
     resolved: false,
-    file_content: '',
-    password: '',
-    media_url: '',
     countermeasures: [],
   },
   vulnerability: {

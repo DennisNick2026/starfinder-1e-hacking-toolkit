@@ -7,7 +7,7 @@ import {
 import { cn } from '@/lib/utils';
 import { getModuleUpgrade } from '@/lib/upgrade-registry';
 
-const DATA_NODE_TYPES = ['secure_data_average', 'secure_data_large', 'secure_data_specific', 'spell_chip'];
+const DATA_NODE_TYPES = ['secure_data_average', 'secure_data_large', 'secure_data_specific'];
 const CONTROL_NODE_TYPES = ['control_complex', 'control_general'];
 
 const ICONS = {

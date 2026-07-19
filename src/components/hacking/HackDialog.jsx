@@ -8,7 +8,7 @@ const CM_COLOR = {
   purple: 'text-chart-3 border-chart-3/50 bg-chart-3/10',
 };
 
-const DATA_NODE_TYPES = ['secure_data_average', 'secure_data_large', 'secure_data_specific', 'spell_chip'];
+const DATA_NODE_TYPES = ['secure_data_average', 'secure_data_large', 'secure_data_specific'];
 
 // In play mode: fake_shell hidden until node is resolved (then player can roll to detect it);
 // alarms hidden until revealed; firewall blocks everything else
