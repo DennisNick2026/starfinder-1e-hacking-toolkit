@@ -27,6 +27,7 @@ export default function SaveEncounterDialog({ isOpen, onClose, shareCode, encoun
         upgrades: encounterData.upgrades || [],
         nodes: JSON.parse(JSON.stringify(encounterData.nodes || [])),
         connections: JSON.parse(JSON.stringify(encounterData.connections || [])),
+        sidebarCountermeasures: JSON.parse(JSON.stringify(encounterData.sidebarCountermeasures || [])),
         isPublic,
         shareCode,
       };
