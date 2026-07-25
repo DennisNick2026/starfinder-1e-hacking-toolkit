@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Siren, Zap, Lock, Trash2, ShieldAlert, ChevronDown, ChevronUp } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -22,6 +22,12 @@ export default function CountermeasureSidebar({
   const systemCms = countermeasures.filter(cm => cm.category === 'system');
   const entryNode = nodes.find(n => n.id === 'entry');
   const entryResolved = !!entryNode?.resolved;
+  const [accessCollapsed, setAccessCollapsed] = useState(entryResolved);
+
+  // Auto-collapse access CMs when entry node is resolved
+  useEffect(() => {
+    if (entryResolved) setAccessCollapsed(true);
+  }, [entryResolved]);
 
   let cmNumber = 0;
   const numberedAccessCms = accessCms.map(cm => ({ ...cm, number: ++cmNumber }));
@@ -164,15 +170,25 @@ export default function CountermeasureSidebar({
     >
       <div className="p-2.5 flex flex-col gap-2 overflow-y-auto">
         {/* Access Countermeasures */}
-        <div className="flex flex-col" onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'access')}>
-          <div className="px-1 py-1 border-b border-primary/30 mb-1.5">
-            <h3 className="font-mono text-xs font-bold text-primary uppercase tracking-widest">Access CMs</h3>
-          </div>
-          <div className="space-y-1.5">
-            {numberedAccessCms.length === 0 ? (
-              <p className="font-mono text-[10px] text-muted-foreground/40 italic text-center py-2">Drop CMs here</p>
-            ) : numberedAccessCms.map(renderCm)}
-          </div>
+        <div className="flex flex-col" onDragOver={!accessCollapsed ? handleDragOver : undefined} onDrop={!accessCollapsed ? (e) => handleDrop(e, 'access') : undefined}>
+          <button
+            onClick={() => setAccessCollapsed(v => !v)}
+            className="flex items-center justify-between w-full px-1 py-1 border-b border-primary/30 mb-1.5 group"
+          >
+            <h3 className="font-mono text-xs font-bold text-primary uppercase tracking-widest">
+              Access CMs
+              {entryResolved && <span className="ml-1.5 text-[9px] text-accent/70 normal-case">✓ Breached</span>}
+            </h3>
+            {accessCollapsed ? <ChevronDown className="w-3.5 h-3.5 text-primary/50 group-hover:text-primary transition-colors" /> :
+              <ChevronUp className="w-3.5 h-3.5 text-primary/50 group-hover:text-primary transition-colors" />}
+          </button>
+          {!accessCollapsed && (
+            <div className="space-y-1.5">
+              {numberedAccessCms.length === 0 ? (
+                <p className="font-mono text-[10px] text-muted-foreground/40 italic text-center py-2">Drop CMs here</p>
+              ) : numberedAccessCms.map(renderCm)}
+            </div>
+          )}
         </div>
 
         <div className="h-px bg-border/60" />
