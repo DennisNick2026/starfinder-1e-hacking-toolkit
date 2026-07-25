@@ -175,7 +175,7 @@ export function getCountermeasureCost(cm, basePrice, moduleCosts = 0) {
 }
 
 // Calculate all encounter costs (nodes + countermeasures) for the total
-export function getTotalEncounterCosts(nodes, basePrice) {
+export function getTotalEncounterCosts(nodes, basePrice, sidebarCountermeasures = []) {
   const moduleTypes = [
     'control_complex', 'control_general',
     'secure_data_average', 'secure_data_large', 'secure_data_specific', 'spell_chip',
@@ -192,6 +192,10 @@ export function getTotalEncounterCosts(nodes, basePrice) {
     for (const cm of (node.countermeasures || [])) {
       cmCosts += getCountermeasureCost(cm, basePrice, moduleCosts);
     }
+  }
+
+  for (const cm of (sidebarCountermeasures || [])) {
+    cmCosts += getCountermeasureCost(cm, basePrice, moduleCosts);
   }
 
   return { nodeCosts, cmCosts, total: nodeCosts + cmCosts };

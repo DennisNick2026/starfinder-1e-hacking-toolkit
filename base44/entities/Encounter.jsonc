@@ -46,6 +46,13 @@
       },
       "description": "Connections between nodes"
     },
+    "sidebarCountermeasures": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Sidebar countermeasures (access + system)"
+    },
     "isPublic": {
       "type": "boolean",
       "default": false,

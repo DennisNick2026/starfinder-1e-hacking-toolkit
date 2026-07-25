@@ -14,6 +14,7 @@ export default function ComputerSettings({
   baseDC, setBaseDC,
   upgrades, setUpgrades,
   nodes = [],
+  sidebarCountermeasures = [],
 }) {
   const basePrice = TIER_PRICE[tier] || TIER_PRICE[1];
   const effects = getUpgradeEffects(upgrades);
@@ -33,7 +34,7 @@ export default function ComputerSettings({
 
   const moduleUpgradeCost = activeModuleUpgrades.reduce((sum, upg) => sum + upg.calculatePrice(), 0);
 
-  const encounterCosts = getTotalEncounterCosts(nodes, basePrice);
+  const encounterCosts = getTotalEncounterCosts(nodes, basePrice, sidebarCountermeasures);
 
   const totalPrice = basePrice + computerUpgradeCost + moduleUpgradeCost + encounterCosts.total;
 

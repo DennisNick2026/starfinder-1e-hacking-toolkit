@@ -13,6 +13,8 @@ import LoadEncounterDialog from '@/components/hacking/LoadEncounterDialog';
 import ImportEncounterDialog from '@/components/hacking/ImportEncounterDialog';
 import ExportConfirmDialog from '@/components/hacking/ExportConfirmDialog';
 import CloudPasswordGate from '@/components/hacking/CloudPasswordGate';
+import CountermeasureSidebar from '@/components/hacking/CountermeasureSidebar';
+import SidebarCmHackDialog from '@/components/hacking/SidebarCmHackDialog';
 import { Cpu, ShieldCheck, Play, SkipForward, SkipBack, RotateCcw, Settings, Pencil, Trash2, Upload, Download, FileJson, Database } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
@@ -66,6 +68,7 @@ export default function HackingBoard() {
   const [sharedEncounter, setSharedEncounter] = useState(null);
   const [currentShareCode, setCurrentShareCode] = useState(() => Math.random().toString(36).substring(2, 8).toUpperCase());
   const [pendingCmDrop, setPendingCmDrop] = useState(null); // { cmType, nodeId }
+  const [hackingSidebarCm, setHackingSidebarCm] = useState(null);
 
   const configuringNode = state.nodes.find((n) => n.id === configuringNodeId) || null;
   const selectedNode = configuringNode || state.nodes.find((n) => n.id === state.selectedNodeId) || null;
@@ -132,6 +135,10 @@ export default function HackingBoard() {
     state.submitRoll(nodeId, total, cmId, rootMode);
   };
 
+  const handleSubmitSidebarCmRoll = (cmId, total, isRootMode) => {
+    state.submitSidebarCmRoll(cmId, total, isRootMode);
+  };
+
   const handleLoadEncounter = (encounter) => {
     state.loadEncounter(encounter);
     setSharedEncounter(encounter);
@@ -154,7 +161,8 @@ export default function HackingBoard() {
       baseDC: state.baseDC,
       upgrades: state.upgrades,
       nodes: state.nodes,
-      connections: state.connections
+      connections: state.connections,
+      sidebarCountermeasures: state.sidebarCountermeasures
     };
     const jsonString = JSON.stringify(encounterData, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
@@ -452,6 +460,18 @@ export default function HackingBoard() {
           <BottomToolbar mode={mode} rootMode={rootMode} activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
         </div>
 
+        <CountermeasureSidebar
+          countermeasures={state.sidebarCountermeasures}
+          nodes={state.nodes}
+          mode={mode}
+          rootMode={rootMode}
+          onAdd={state.addSidebarCountermeasure}
+          onUpdate={state.updateSidebarCountermeasure}
+          onRemove={state.removeSidebarCountermeasure}
+          onHack={setHackingSidebarCm}
+          getSidebarCmDC={state.getSidebarCmDC}
+        />
+
         {mode === 'create' && configuringNode &&
         <NodeEditor
           node={configuringNode}
@@ -475,6 +495,16 @@ export default function HackingBoard() {
         canEdit={mode === 'create'}
         onClose={() => setFileNode(null)}
         onSave={(nodeId, data) => state.updateNode(nodeId, data)} />
+
+      }
+
+      {hackingSidebarCm &&
+      <SidebarCmHackDialog
+        cm={state.sidebarCountermeasures.find(c => c.id === hackingSidebarCm.id) || hackingSidebarCm}
+        dc={state.getSidebarCmDC(state.sidebarCountermeasures.find(c => c.id === hackingSidebarCm.id) || hackingSidebarCm)}
+        onSubmit={handleSubmitSidebarCmRoll}
+        onClose={() => setHackingSidebarCm(null)}
+        rootMode={rootMode} />
 
       }
 
@@ -503,7 +533,8 @@ export default function HackingBoard() {
           baseDC: state.baseDC,
           upgrades: state.upgrades,
           nodes: state.nodes,
-          connections: state.connections
+          connections: state.connections,
+          sidebarCountermeasures: state.sidebarCountermeasures
         }} />
       
 
@@ -574,8 +605,10 @@ export default function HackingBoard() {
         setBaseDC={state.setBaseDC}
         upgrades={state.upgrades}
         setUpgrades={state.setUpgrades}
-        nodes={state.nodes} />
-      
-    </div>);
+        nodes={state.nodes}
+        sidebarCountermeasures={state.sidebarCountermeasures} />
+        
+
+        </div>);
 
 }

@@ -334,6 +334,7 @@ export function useHackingState() {
   const [connections, setConnections] = useState([
     { from: 'entry', to: 'root_access', id: 'conn_root' },
   ]);
+  const [sidebarCountermeasures, setSidebarCountermeasures] = useState([]);
 
   // Calculate security DC bonus from highest tier security module on board
   const getSecurityDCBonus = useCallback((nodesList) => {
@@ -454,6 +455,8 @@ export function useHackingState() {
 
   // Add a countermeasure to a node
   const addCountermeasure = useCallback((nodeId, cmType) => {
+    // Only firewalls attach to nodes; all other CMs live in the sidebar
+    if (cmType !== 'firewall') return;
     const template = COUNTERMEASURE_TEMPLATES[cmType];
     if (!template) return;
     
@@ -518,6 +521,53 @@ export function useHackingState() {
       return { ...n, countermeasures: (n.countermeasures || []).filter(cm => cm.id !== cmId) };
     }));
   }, []);
+
+  // ─── Sidebar countermeasures (access + system) ───
+  // DC: access CMs use entry node DC; system CMs use effective base DC
+  const getSidebarCmDC = useCallback((cm) => {
+    if (cm.dcOverride != null) return cm.dcOverride;
+    const entryNode = nodes.find(n => n.id === 'entry');
+    const entryDC = entryNode ? getNodeDC(entryNode, effectiveBaseDC) : effectiveBaseDC;
+    if (cm.category === 'access') return entryDC;
+    return effectiveBaseDC;
+  }, [nodes, getNodeDC, effectiveBaseDC]);
+
+  const addSidebarCountermeasure = useCallback((cmType, category, initialState = 'hidden') => {
+    const template = COUNTERMEASURE_TEMPLATES[cmType];
+    if (!template || cmType === 'firewall') return;
+    const cm = {
+      ...template,
+      id: `scm_${nextCmId++}`,
+      category,
+      state: initialState,
+      targetNodeId: null,
+    };
+    setSidebarCountermeasures(prev => [...prev, cm]);
+    addLogEntry(`Added ${template.label} to ${category} countermeasures`, 'system');
+    return cm.id;
+  }, [addLogEntry]);
+
+  const updateSidebarCountermeasure = useCallback((cmId, updates) => {
+    setSidebarCountermeasures(prev => prev.map(cm =>
+      cm.id === cmId ? { ...cm, ...updates } : cm
+    ));
+  }, []);
+
+  const removeSidebarCountermeasure = useCallback((cmId) => {
+    setSidebarCountermeasures(prev => prev.filter(cm => cm.id !== cmId));
+  }, []);
+
+  const submitSidebarCmRoll = useCallback((cmId, total, isRootMode = false) => {
+    setSidebarCountermeasures(prev => prev.map(cm => {
+      if (cm.id !== cmId) return cm;
+      const dc = getSidebarCmDC(cm);
+      const effectiveDC = isRootMode ? 10 : dc;
+      const margin = total - effectiveDC;
+      if (margin >= 0) return { ...cm, state: 'deactivated' };
+      if (margin < -4) return { ...cm, state: 'triggered' };
+      return cm; // fail by < 5 — stays as-is
+    }));
+  }, [getSidebarCmDC]);
 
   const unresolveCountermeasure = useCallback((nodeId, cmId) => {
     setNodes(prev => prev.map(n => {
@@ -651,11 +701,16 @@ export function useHackingState() {
       (c.from === 'entry' || c.from === 'root_access') &&
       (c.to === 'entry' || c.to === 'root_access')
     ));
+    setSidebarCountermeasures([]);
     addLogEntry('All nodes cleared', 'system');
   }, [addLogEntry]);
 
   const resetEncounter = useCallback(() => {
     setPhase(1);
+    setSidebarCountermeasures(prev => prev.map(cm => ({
+      ...cm,
+      state: 'hidden',
+    })));
     setNodes(prev => prev.map(n => ({
       ...n,
       successes_current: 0,
@@ -678,12 +733,14 @@ export function useHackingState() {
   // Whether root access has been granted (built-in or any placeable root access node)
   const rootAccessGranted = nodes.some(n => (n.isRootAccess || n.type === 'root_access_node') && n.resolved);
 
+  // Sidebar CM helpers are defined above (getSidebarCmDC, addSidebarCountermeasure, etc.)
+
   const selectedNode = nodes.find(n => n.id === selectedNodeId);
 
   // Count total countermeasures across all nodes (for tier limit)
   const totalCountermeasures = nodes.reduce((sum, n) =>
     sum + (n.countermeasures || []).filter(cm => !cm.resolved).length, 0
-  );
+  ) + sidebarCountermeasures.filter(cm => cm.state !== 'deactivated').length;
 
   const loadEncounter = useCallback((encounterData) => {
     setComputerName(encounterData.computerName);
@@ -692,6 +749,7 @@ export function useHackingState() {
     setUpgrades(encounterData.upgrades || []);
     setNodes(encounterData.nodes || []);
     setConnections(encounterData.connections || []);
+    setSidebarCountermeasures(encounterData.sidebarCountermeasures || []);
     setPhase(1);
     setLog([]);
   }, []);
@@ -713,6 +771,7 @@ export function useHackingState() {
     addNode, updateNode, removeNode, moveNode,
     addConnection, removeConnection,
     addCountermeasure, updateCountermeasure, removeCountermeasure, unresolveCountermeasure,
+    sidebarCountermeasures, addSidebarCountermeasure, updateSidebarCountermeasure, removeSidebarCountermeasure, submitSidebarCmRoll, getSidebarCmDC,
     submitRoll, advancePhase,
     resetEncounter, clearNodes, addLogEntry, unhackNode, loadEncounter, toggleDirectoryLocked, toggleRequiresHack,
     rootAccessGranted,

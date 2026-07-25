@@ -15,6 +15,7 @@ export default function ComputerSettingsModal({
   upgrades,
   setUpgrades,
   nodes,
+  sidebarCountermeasures,
 }) {
   if (!isOpen) return null;
 
@@ -44,6 +45,7 @@ export default function ComputerSettingsModal({
           upgrades={upgrades}
           setUpgrades={setUpgrades}
           nodes={nodes}
+          sidebarCountermeasures={sidebarCountermeasures}
         />
       </div>
     </div>

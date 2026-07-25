@@ -280,7 +280,7 @@ export default function NodeEditor({ node, onUpdate, onClose, onAddCm, onUpdateC
                 <DropdownMenuLabel className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
                   Add Countermeasure
                 </DropdownMenuLabel>
-                {Object.entries(COUNTERMEASURE_TEMPLATES).map(([key, tpl]) => {
+                {Object.entries(COUNTERMEASURE_TEMPLATES).filter(([key]) => key === 'firewall').map(([key, tpl]) => {
                   const Icon = CM_ICONS[tpl.icon];
                   return (
                     <DropdownMenuItem key={key} className="font-mono text-xs gap-2 cursor-pointer"

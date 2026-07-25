@@ -30,7 +30,11 @@ export default function BottomLog({ log, selectedNode, activeCategory, getNodeDC
                     if (item.isModuleUpgrade) {
                       e.dataTransfer.setData('moduleUpgrade', item.key);
                     } else if (isCm) {
-                      e.dataTransfer.setData('cmType', item.key);
+                      if (item.key === 'firewall') {
+                        e.dataTransfer.setData('cmType', item.key);
+                      } else {
+                        e.dataTransfer.setData('sidebarCm', item.key);
+                      }
                     } else {
                       e.dataTransfer.setData('nodeType', item.key);
                     }
