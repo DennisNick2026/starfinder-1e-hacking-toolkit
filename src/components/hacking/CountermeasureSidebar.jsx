@@ -157,14 +157,12 @@ export default function CountermeasureSidebar({
   };
 
   return (
-    <div
-      className="absolute left-3 top-3 z-20 w-64 max-h-[calc(100%-1.5rem)] bg-card/85 backdrop-blur-sm border-2 border-primary/40 shadow-2xl overflow-hidden"
-      style={{ transform: 'skewX(-4deg)' }}
+    <div className="absolute left-3 top-3 z-20 w-64 flex flex-col gap-2 max-h-[calc(100%-1.5rem)] overflow-y-auto bg-card/85 backdrop-blur-sm border-2 border-primary/40 shadow-2xl"
+      style={{
+        clipPath: 'polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%)',
+      }}
     >
-      <div
-        className="overflow-y-auto max-h-[calc(100%-1.5rem)] p-3 flex flex-col gap-2"
-        style={{ transform: 'skewX(4deg)' }}
-      >
+      <div className="p-2.5 flex flex-col gap-2">
         {/* Access Countermeasures */}
         <div className="flex flex-col" onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'access')}>
           <div className="px-1 py-1 border-b border-primary/30 mb-1.5">
