@@ -420,7 +420,7 @@ export default function HackingBoard() {
       </header>
 
       {/* Main area */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         <div className="flex-1 flex flex-col overflow-hidden">
           <BoardCanvas
             ref={boardCanvasRef}
@@ -468,6 +468,7 @@ export default function HackingBoard() {
           onAdd={state.addSidebarCountermeasure}
           onUpdate={state.updateSidebarCountermeasure}
           onRemove={state.removeSidebarCountermeasure}
+          onReorder={state.reorderSidebarCountermeasure}
           onHack={setHackingSidebarCm}
           getSidebarCmDC={state.getSidebarCmDC}
         />

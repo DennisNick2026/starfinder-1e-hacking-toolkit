@@ -569,6 +569,29 @@ export function useHackingState() {
     }));
   }, [getSidebarCmDC]);
 
+  const reorderSidebarCountermeasure = useCallback((cmId, direction) => {
+    setSidebarCountermeasures(prev => {
+      const idx = prev.findIndex(cm => cm.id === cmId);
+      if (idx === -1) return prev;
+      const cm = prev[idx];
+      // Find adjacent CM of the same category to swap with
+      let swapIdx = -1;
+      if (direction === 'up') {
+        for (let i = idx - 1; i >= 0; i--) {
+          if (prev[i].category === cm.category) { swapIdx = i; break; }
+        }
+      } else {
+        for (let i = idx + 1; i < prev.length; i++) {
+          if (prev[i].category === cm.category) { swapIdx = i; break; }
+        }
+      }
+      if (swapIdx === -1) return prev;
+      const newArr = [...prev];
+      [newArr[idx], newArr[swapIdx]] = [newArr[swapIdx], newArr[idx]];
+      return newArr;
+    });
+  }, []);
+
   const unresolveCountermeasure = useCallback((nodeId, cmId) => {
     setNodes(prev => prev.map(n => {
       if (n.id !== nodeId) return n;
@@ -771,7 +794,7 @@ export function useHackingState() {
     addNode, updateNode, removeNode, moveNode,
     addConnection, removeConnection,
     addCountermeasure, updateCountermeasure, removeCountermeasure, unresolveCountermeasure,
-    sidebarCountermeasures, addSidebarCountermeasure, updateSidebarCountermeasure, removeSidebarCountermeasure, submitSidebarCmRoll, getSidebarCmDC,
+    sidebarCountermeasures, addSidebarCountermeasure, updateSidebarCountermeasure, removeSidebarCountermeasure, reorderSidebarCountermeasure, submitSidebarCmRoll, getSidebarCmDC,
     submitRoll, advancePhase,
     resetEncounter, clearNodes, addLogEntry, unhackNode, loadEncounter, toggleDirectoryLocked, toggleRequiresHack,
     rootAccessGranted,
