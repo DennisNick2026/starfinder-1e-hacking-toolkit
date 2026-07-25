@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { getUpgradeEffects } from '@/lib/upgrade-registry';
+import { getUpgradeEffects, SHOCK_GRID_DATA } from '@/lib/upgrade-registry';
 
 // Countermeasure templates that can be embedded into modules
 export const COUNTERMEASURE_TEMPLATES = {
@@ -406,6 +406,12 @@ export function useHackingState() {
         addLogEntry(`Added Computer: "${numbered.name}"`, 'system');
         return [...prev, numbered];
       });
+    } else if (templateKey === 'security_module') {
+      setNodes(prev => {
+        const numbered = { ...node, name: 'Security Module I' };
+        addLogEntry(`Added Security Module: "${numbered.name}"`, 'system');
+        return [...prev, numbered];
+      });
     } else {
       setNodes(prev => {
         addLogEntry(`Added ${node.label}: "${node.name}"`, 'system');
@@ -526,6 +532,9 @@ export function useHackingState() {
   // DC: access CMs use entry node DC; system CMs use effective base DC
   const getSidebarCmDC = useCallback((cm) => {
     if (cm.dcOverride != null) return cm.dcOverride;
+    if (cm.type === 'shock_grid') {
+      return (SHOCK_GRID_DATA[cm.level || 1] || SHOCK_GRID_DATA[1]).dc;
+    }
     const entryNode = nodes.find(n => n.id === 'entry');
     const entryDC = entryNode ? getNodeDC(entryNode, effectiveBaseDC) : effectiveBaseDC;
     if (cm.category === 'access') return entryDC;

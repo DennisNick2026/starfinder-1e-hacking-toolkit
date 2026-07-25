@@ -223,6 +223,13 @@ export default function NodeCard({
             <span className="font-mono text-[10px] text-chart-3">ROOT REQUIRED</span>
           </div>
         )}
+        {/* Password bypass indicator for secure data nodes */}
+        {DATA_NODE_TYPES.includes(node.type) && !node.resolved && !firewallBlocked && mode === 'play' && node.password && !rootMode && (
+          <div className="flex items-center gap-1">
+            <Unlock className="w-2.5 h-2.5 text-chart-4" />
+            <span className="font-mono text-[10px] text-chart-4">PASSWORD BYPASS</span>
+          </div>
+        )}
 
         {/* Progress bar */}
         {node.successes_required > 0 && !node.resolved && (

@@ -139,13 +139,22 @@ export const NODE_COSTS = {
   computer:            { type: 'varies', label: 'Varies' },
 };
 
+// ─── Shock Grid rank data (Table 7-25) ───
+export const SHOCK_GRID_DATA = {
+  1: { dc: 20, damage: '8d6',  price: 500    },
+  2: { dc: 22, damage: '10d6', price: 2000   },
+  3: { dc: 24, damage: '12d6', price: 5000   },
+  4: { dc: 27, damage: '14d6', price: 20000  },
+  5: { dc: 30, damage: '16d6', price: 50000  },
+};
+
 // ─── Countermeasure cost definitions ───
 export const COUNTERMEASURE_COSTS = {
   alarm:    { type: 'fixed', value: 10 },
   feedback: { type: 'fixed', value: 500 },
   firewall: { type: 'percent_of_base', percent: 0.20, label: '20% of base price' },
   lockout:  { type: 'fixed', value: 100 },
-  shock_grid:{ type: 'varies', label: 'Varies' },
+  shock_grid:{ type: 'shock_grid_level', label: 'Varies by rank' },
   wipe:     { type: 'fixed', value: 10 },
 };
 
@@ -171,6 +180,9 @@ export function getCountermeasureCost(cm, basePrice, moduleCosts = 0) {
   if (!def) return 0;
   if (def.type === 'fixed') return def.value;
   if (def.type === 'percent_of_base') return Math.round((basePrice || 0) * def.percent);
+  if (def.type === 'shock_grid_level') {
+    return (SHOCK_GRID_DATA[cm.level || 1] || SHOCK_GRID_DATA[1]).price;
+  }
   return 0; // 'varies'
 }
 

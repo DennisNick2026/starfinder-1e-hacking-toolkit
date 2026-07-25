@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Siren, Zap, Lock, Trash2, ShieldAlert, ChevronDown, ChevronUp } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { SHOCK_GRID_DATA } from '@/lib/upgrade-registry';
 
 const CM_ICONS = { ShieldAlert, Siren, Zap, Lock, Trash2 };
 
@@ -134,6 +135,31 @@ export default function CountermeasureSidebar({
             ) : (
               targetNode && <span className="font-mono text-[10px] text-muted-foreground/70 truncate max-w-[90px]">→ {targetNode.name}</span>
             )}
+          </div>
+        )}
+
+        {/* Shock grid level selector */}
+        {cm.type === 'shock_grid' && !isHidden && mode === 'create' && (
+          <div className="pl-5 space-y-1">
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map(lvl => (
+                <button
+                  key={lvl}
+                  onClick={() => onUpdate(cm.id, { level: lvl })}
+                  className={cn(
+                    'flex-1 py-1 rounded border font-mono text-[10px] font-bold transition-colors',
+                    (cm.level || 1) === lvl
+                      ? 'bg-destructive/20 border-destructive/50 text-destructive'
+                      : 'border-border/40 text-muted-foreground/50 hover:text-muted-foreground hover:border-border'
+                  )}
+                >
+                  R{lvl}
+                </button>
+              ))}
+            </div>
+            <p className="font-mono text-[9px] text-muted-foreground/60">
+              DC {(SHOCK_GRID_DATA[cm.level || 1] || SHOCK_GRID_DATA[1]).dc} · {(SHOCK_GRID_DATA[cm.level || 1] || SHOCK_GRID_DATA[1]).damage} · {(SHOCK_GRID_DATA[cm.level || 1] || SHOCK_GRID_DATA[1]).price.toLocaleString()} cr
+            </p>
           </div>
         )}
 
