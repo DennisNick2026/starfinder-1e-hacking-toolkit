@@ -122,6 +122,11 @@ export default function HackingBoard() {
     setHackingNode(null);
     setShowSettings(false);
     if (newMode === 'play') setActiveCategory(null);
+    // Auto-toggle all sidebar CMs: hidden in play, aware in admin
+    const targetState = newMode === 'play' ? 'hidden' : 'aware';
+    state.sidebarCountermeasures.forEach(cm => {
+      state.updateSidebarCountermeasure(cm.id, { state: targetState });
+    });
   };
 
   // Auto-enable root mode when root access node is resolved
