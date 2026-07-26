@@ -8,7 +8,6 @@ import { base44 } from '@/api/base44Client';
 
 export default function SaveEncounterDialog({ isOpen, onClose, shareCode, encounterData }) {
   const [title, setTitle] = useState('');
-  const [isPublic, setIsPublic] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -28,7 +27,7 @@ export default function SaveEncounterDialog({ isOpen, onClose, shareCode, encoun
         nodes: JSON.parse(JSON.stringify(encounterData.nodes || [])),
         connections: JSON.parse(JSON.stringify(encounterData.connections || [])),
         sidebarCountermeasures: JSON.parse(JSON.stringify(encounterData.sidebarCountermeasures || [])),
-        isPublic,
+        isPublic: true,
         shareCode,
       };
       
@@ -94,18 +93,6 @@ export default function SaveEncounterDialog({ isOpen, onClose, shareCode, encoun
                   <Copy className="w-4 h-4" />
                 </Button>
               </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 bg-primary/10 border border-primary/30 rounded">
-              <input
-                type="checkbox"
-                checked={isPublic}
-                onChange={e => setIsPublic(e.target.checked)}
-                className="w-4 h-4 cursor-pointer"
-              />
-              <label className="font-mono text-xs cursor-pointer flex-1">
-                Allow others to access this encounter
-              </label>
             </div>
 
             <div className="flex gap-2">

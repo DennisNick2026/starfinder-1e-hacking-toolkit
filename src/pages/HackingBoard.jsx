@@ -32,7 +32,6 @@ export default function HackingBoard() {
   const [showSettings, setShowSettings] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [fileNode, setFileNode] = useState(null);
-  const [cloudUnlocked, setCloudUnlocked] = useState(false);
   const [cloudVerified, setCloudVerified] = useState(false);
   const [showPasswordGate, setShowPasswordGate] = useState(false);
   const [pendingCloudAction, setPendingCloudAction] = useState(null);
@@ -40,7 +39,7 @@ export default function HackingBoard() {
 
   useEffect(() => {
     base44.auth.me().then((user) => {
-      if (user?.role === 'admin') {setIsAdmin(true);setCloudVerified(true);setCloudUnlocked(true);}
+      if (user?.role === 'admin') {setIsAdmin(true);setCloudVerified(true);}
     }).catch(() => {});
   }, []);
 
@@ -194,14 +193,7 @@ export default function HackingBoard() {
 
         {/* Left: computer info */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink-0">
-          <Cpu
-            className="w-5 h-5 text-primary shrink-0 cursor-default select-none"
-            onClick={(e) => {
-              if (e.ctrlKey || e.metaKey) {
-                e.preventDefault();
-                setCloudUnlocked((v) => !v);
-              }
-            }} />
+          <Cpu className="w-5 h-5 text-primary shrink-0" />
           
           <span className="font-mono text-sm font-bold text-primary tracking-widest uppercase truncate max-w-[8rem] sm:max-w-none">
             {state.computerName}
@@ -233,9 +225,7 @@ export default function HackingBoard() {
         {/* Center: mode-dependent controls */}
         {mode === 'create' ?
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-wrap">
-            {cloudUnlocked &&
-          <>
-                <button
+            <button
               onClick={handleNewEncounter}
               className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
               
@@ -258,20 +248,23 @@ export default function HackingBoard() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </>
-          }
-            <button
-            onClick={() => setShowExportConfirm(true)}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
-            
-              <FileJson className="w-3.5 h-3.5" /> <span className="hidden xl:inline">SAVE TO FILE</span>
-            </button>
-            <button
-            onClick={() => setShowImportDialog(true)}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
-            
-              <FileJson className="w-3.5 h-3.5" /> <span className="hidden xl:inline">LOAD FROM FILE</span>
-            </button>
+            <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
+                      <FileJson className="w-3.5 h-3.5" /> FILE
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="font-mono">
+                    <DropdownMenuLabel className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Local File</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setShowExportConfirm(true)} className="gap-2 cursor-pointer">
+                      <Upload className="w-3.5 h-3.5" /> Save to File
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowImportDialog(true)} className="gap-2 cursor-pointer">
+                      <Download className="w-3.5 h-3.5" /> Load from File
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
             <div className="flex items-center border border-primary/30 rounded overflow-hidden">
               <button
