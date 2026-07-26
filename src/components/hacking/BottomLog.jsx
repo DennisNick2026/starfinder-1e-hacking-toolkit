@@ -13,7 +13,7 @@ export default function BottomLog({ log, selectedNode, activeCategory, getNodeDC
   const activeCat = CATEGORIES.find(c => c.key === activeCategory);
 
   return (
-    <div className="relative flex border-t border-primary/30 bg-background shrink-0" style={{ height: 120 }}>
+    <div className="relative flex border-t border-primary/30 bg-background shrink-0 h-24 sm:h-30">
       {/* Activity log OR node palette - left half */}
       <div className="flex-1 border-r border-primary/20 overflow-hidden px-3 py-2">
 

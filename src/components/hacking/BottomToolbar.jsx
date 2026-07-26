@@ -62,7 +62,7 @@ export default function BottomToolbar({ onDragStart, mode, rootMode = false, act
   if (mode === 'play' && !rootMode) return null;
 
   return (
-    <div className="shrink-0 border-t border-primary/30 bg-background flex" style={{ height: 160 }}>
+    <div className="shrink-0 border-t border-primary/30 bg-background flex h-32 sm:h-40">
       {CATEGORIES.map(cat => {
         const Icon = cat.icon;
         const isActive = activeCategory === cat.key;

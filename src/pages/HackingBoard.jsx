@@ -190,10 +190,10 @@ export default function HackingBoard() {
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Top bar */}
-      <header className="h-20 bg-background border-b border-primary/30 flex items-center px-5 gap-4 shrink-0">
+      <header className="min-h-[5rem] py-2 bg-background border-b border-primary/30 flex items-center px-3 sm:px-5 gap-3 sm:gap-4 shrink-0 flex-wrap">
 
         {/* Left: computer info */}
-        <div className="flex items-center gap-3 min-w-0 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink-0">
           <Cpu
             className="w-5 h-5 text-primary shrink-0 cursor-default select-none"
             onClick={(e) => {
@@ -203,13 +203,13 @@ export default function HackingBoard() {
               }
             }} />
           
-          <span className="font-mono text-sm font-bold text-primary tracking-widest uppercase truncate">
+          <span className="font-mono text-sm font-bold text-primary tracking-widest uppercase truncate max-w-[8rem] sm:max-w-none">
             {state.computerName}
           </span>
-          <span className="font-mono text-xs text-primary/60 border border-primary/30 px-2 py-1 rounded">
+          <span className="hidden sm:inline font-mono text-xs text-primary/60 border border-primary/30 px-2 py-1 rounded">
             TIER {state.tier}
           </span>
-          <span className="font-mono text-xs text-primary/60 border border-primary/30 px-2 py-1 rounded">
+          <span className="hidden sm:inline font-mono text-xs text-primary/60 border border-primary/30 px-2 py-1 rounded">
             DC {state.effectiveBaseDC}
           </span>
           {mode === 'create' &&
@@ -228,11 +228,11 @@ export default function HackingBoard() {
         </div>
 
         {/* Spacer — pushes center content to true center in play mode */}
-        <div className="flex-1" />
+        <div className="hidden lg:block flex-1" />
 
         {/* Center: mode-dependent controls */}
         {mode === 'create' ?
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-wrap">
             {cloudUnlocked &&
           <>
                 <button
@@ -262,30 +262,30 @@ export default function HackingBoard() {
           }
             <button
             onClick={() => setShowExportConfirm(true)}
-            className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
             
-              <FileJson className="w-3.5 h-3.5" /> SAVE TO FILE
+              <FileJson className="w-3.5 h-3.5" /> <span className="hidden xl:inline">SAVE TO FILE</span>
             </button>
             <button
             onClick={() => setShowImportDialog(true)}
-            className="flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 font-mono text-xs tracking-widest border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
             
-              <FileJson className="w-3.5 h-3.5" /> LOAD FROM FILE
+              <FileJson className="w-3.5 h-3.5" /> <span className="hidden xl:inline">LOAD FROM FILE</span>
             </button>
 
             <div className="flex items-center border border-primary/30 rounded overflow-hidden">
               <button
-              className="flex items-center gap-1.5 px-4 py-2 font-mono text-xs tracking-widest transition-colors bg-primary text-primary-foreground"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 font-mono text-xs tracking-widest transition-colors bg-primary text-primary-foreground"
               onClick={() => handleSwitchMode('create')}
               disabled={sharedEncounter}>
               
-                <Pencil className="w-3.5 h-3.5" /> ADMIN
+                <Pencil className="w-3.5 h-3.5" /> <span className="hidden md:inline">ADMIN</span>
               </button>
               <button
-              className="flex items-center gap-1.5 px-4 py-2 font-mono text-xs tracking-widest transition-colors border-l border-primary/30 text-primary/50 hover:text-primary"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 font-mono text-xs tracking-widest transition-colors border-l border-primary/30 text-primary/50 hover:text-primary"
               onClick={() => handleSwitchMode('play')}>
               
-                <Play className="w-3.5 h-3.5" /> PLAY
+                <Play className="w-3.5 h-3.5" /> <span className="hidden md:inline">PLAY</span>
               </button>
             </div>
 
@@ -293,7 +293,7 @@ export default function HackingBoard() {
           <button
             onClick={() => setRootModeOverride((v) => !v)}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-2 font-mono text-xs tracking-widest border rounded transition-colors',
+              'flex items-center gap-1.5 px-2.5 sm:px-3 py-2 font-mono text-xs tracking-widest border rounded transition-colors',
               rootModeOverride ?
               'border-chart-3 bg-chart-3/20 text-chart-3' :
               'border-primary/30 text-primary/50 hover:text-primary/80 hover:border-primary/50'
@@ -306,23 +306,23 @@ export default function HackingBoard() {
           </div> : (
 
         /* Play mode: fully centered controls */
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 flex-wrap">
             <div className="flex items-center border border-primary/30 rounded overflow-hidden">
               <button
-              className="flex items-center gap-1.5 px-5 py-2.5 font-mono text-sm tracking-widest transition-colors text-primary/50 hover:text-primary"
+              className="flex items-center gap-1.5 px-4 sm:px-5 py-2 sm:py-2.5 font-mono text-sm tracking-widest transition-colors text-primary/50 hover:text-primary"
               onClick={(e) => {
                 if (sharedEncounter && !(e.ctrlKey || e.metaKey)) return;
                 if (e.ctrlKey || e.metaKey) setSharedEncounter(null);
                 handleSwitchMode('create');
               }}>
               
-                <Pencil className="w-4 h-4" /> ADMIN
+                <Pencil className="w-4 h-4" /> <span className="hidden sm:inline">ADMIN</span>
               </button>
               <button
-              className="flex items-center gap-1.5 px-5 py-2.5 font-mono text-sm tracking-widest transition-colors border-l border-primary/30 bg-primary text-primary-foreground"
+              className="flex items-center gap-1.5 px-4 sm:px-5 py-2 sm:py-2.5 font-mono text-sm tracking-widest transition-colors border-l border-primary/30 bg-primary text-primary-foreground"
               onClick={() => handleSwitchMode('play')}>
               
-                <Play className="w-4 h-4" /> PLAY
+                <Play className="w-4 h-4" /> <span className="hidden sm:inline">PLAY</span>
               </button>
             </div>
 
@@ -330,7 +330,7 @@ export default function HackingBoard() {
           <button
             onClick={() => setRootModeOverride((v) => !v)}
             className={cn(
-              'flex items-center gap-1.5 px-4 py-2.5 font-mono text-sm tracking-widest border rounded transition-colors',
+              'flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 font-mono text-sm tracking-widest border rounded transition-colors',
               rootModeOverride ?
               'border-chart-3 bg-chart-3/20 text-chart-3' :
               'border-primary/30 text-primary/50 hover:text-primary/80 hover:border-primary/50'
@@ -341,37 +341,37 @@ export default function HackingBoard() {
               </button>
           }
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <span className="font-mono text-sm text-primary/50 tracking-widest">PHASE</span>
               <span className="font-mono text-xl text-primary font-bold w-9 text-center">{state.phase}</span>
               <button
               onClick={() => state.setPhase((p) => Math.max(1, p - 1))}
               disabled={state.phase <= 1}
-              className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded disabled:opacity-30 disabled:cursor-not-allowed">
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-sm font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded disabled:opacity-30 disabled:cursor-not-allowed">
               
-                <SkipBack className="w-4 h-4" /> PREV
+                <SkipBack className="w-4 h-4" /> <span className="hidden sm:inline">PREV</span>
               </button>
               <button
               onClick={state.advancePhase}
-              className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-sm font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
               
-                <SkipForward className="w-4 h-4" /> NEXT
+                <SkipForward className="w-4 h-4" /> <span className="hidden sm:inline">NEXT</span>
               </button>
               <button
               onClick={state.resetEncounter}
-              className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded">
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-sm font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded">
               
-                <RotateCcw className="w-4 h-4" /> RESET
+                <RotateCcw className="w-4 h-4" /> <span className="hidden sm:inline">RESET</span>
               </button>
               <button
               onClick={state.clearNodes}
-              className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded">
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-sm font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded">
               
-                <Trash2 className="w-4 h-4" /> CLEAR
+                <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline">CLEAR</span>
               </button>
               <button
               onClick={() => setShowSettings(true)}
-              className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono border border-primary/30 text-primary/50 hover:text-primary hover:border-primary rounded transition-colors"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-sm font-mono border border-primary/30 text-primary/50 hover:text-primary hover:border-primary rounded transition-colors"
               title="Computer settings">
               
                 <Settings className="w-5 h-5" />
@@ -381,41 +381,41 @@ export default function HackingBoard() {
         }
 
         {/* Spacer — balances left side so center is truly centered in play mode */}
-        <div className="flex-1" />
+        <div className="hidden lg:block flex-1" />
 
         {/* Right: phase controls (admin mode only) */}
         {mode === 'create' &&
-        <div className="flex items-center gap-2 shrink-0">
-            <span className="font-mono text-xs text-primary/50 tracking-widest">Action
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <span className="hidden md:inline font-mono text-xs text-primary/50 tracking-widest">Action
 </span>
             <span className="font-mono text-sm text-primary font-bold w-7 text-center">{state.phase}</span>
             <button onClick={() => state.setPhase((p) => Math.max(1, p - 1))}
           disabled={state.phase <= 1}
-          className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded disabled:opacity-30 disabled:cursor-not-allowed">
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 text-xs font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded disabled:opacity-30 disabled:cursor-not-allowed">
             
-              <SkipBack className="w-3.5 h-3.5" /> PREV
+              <SkipBack className="w-3.5 h-3.5" /> <span className="hidden lg:inline">PREV</span>
             </button>
             <button
             onClick={state.advancePhase}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 text-xs font-mono border border-primary/30 text-primary/70 hover:text-primary hover:border-primary transition-colors rounded">
             
-              <SkipForward className="w-3.5 h-3.5" /> NEXT
+              <SkipForward className="w-3.5 h-3.5" /> <span className="hidden lg:inline">NEXT</span>
             </button>
             <button
             onClick={state.resetEncounter}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded">
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 text-xs font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded">
             
-              <RotateCcw className="w-3.5 h-3.5" /> RESET
+              <RotateCcw className="w-3.5 h-3.5" /> <span className="hidden lg:inline">RESET</span>
             </button>
             <button
             onClick={state.clearNodes}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded">
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 text-xs font-mono border border-destructive/30 text-destructive/70 hover:text-destructive hover:border-destructive transition-colors rounded">
             
-              <Trash2 className="w-3.5 h-3.5" /> CLEAR
+              <Trash2 className="w-3.5 h-3.5" /> <span className="hidden lg:inline">CLEAR</span>
             </button>
             <button
             onClick={() => setShowSettings(true)}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-mono border border-primary/30 text-primary/50 hover:text-primary hover:border-primary rounded transition-colors"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 text-xs font-mono border border-primary/30 text-primary/50 hover:text-primary hover:border-primary rounded transition-colors"
             title="Computer settings">
             
               <Settings className="w-4 h-4" />
