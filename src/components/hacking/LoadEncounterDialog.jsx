@@ -6,7 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
 
 export default function LoadEncounterDialog({ isOpen, onClose, onLoad }) {
-  const [searchMode, setSearchMode] = useState('code'); // 'code' or 'name'
+  const [searchMode, setSearchMode] = useState('name'); // 'code' or 'name'
   const [searchCode, setSearchCode] = useState('');
   const [searchName, setSearchName] = useState('');
   const [loading, setLoading] = useState(false);
